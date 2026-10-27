@@ -1,0 +1,1550 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Career matching team test: private RDS MySQL, Sonnet Lambda, S3/CloudFront. Deploy manually after cost review.",
+  "Metadata": {
+    "AWSToolsMetrics": {
+      "AWSAgentToolkit": "aws-cloudformation@3"
+    }
+  },
+  "Parameters": {
+    "ArtifactBucket": {
+      "Type": "String"
+    },
+    "CodeKey": {
+      "Type": "String"
+    },
+    "SchemaKey": {
+      "Type": "String"
+    },
+    "DataKey": {
+      "Type": "String"
+    },
+    "SchemaHash": {
+      "Type": "String"
+    },
+    "DataHash": {
+      "Type": "String"
+    },
+    "DbEngineVersion": {
+      "Type": "String",
+      "AllowedPattern": "8\\.4\\.\\d+"
+    },
+    "BudgetEmail": {
+      "Type": "String"
+    },
+    "ModelId": {
+      "Type": "String",
+      "Default": "global.anthropic.claude-sonnet-4-6",
+      "AllowedValues": [
+        "global.anthropic.claude-sonnet-4-6"
+      ]
+    },
+    "ExpectedJobs": {
+      "Type": "Number",
+      "MinValue": 1
+    },
+    "MonthlyBudgetUsd": {
+      "Type": "Number",
+      "MinValue": 1,
+      "MaxValue": 10000
+    },
+    "EnableBootstrap": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    }
+  },
+  "Conditions": {
+    "WithBootstrap": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableBootstrap"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.82.0.0/16",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private database and Lambda network.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "SubnetA": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.82.1.0/24",
+        "MapPublicIpOnLaunch": false,
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Two AZs required by RDS subnet group; no public routes.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "SubnetB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.82.2.0/24",
+        "MapPublicIpOnLaunch": false,
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Two AZs required by RDS subnet group; no public routes.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Routes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Local routes plus S3 gateway; no NAT gateway.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "RouteA": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "SubnetA"
+        },
+        "RouteTableId": {
+          "Ref": "Routes"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private subnet routing.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "RouteB": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "SubnetB"
+        },
+        "RouteTableId": {
+          "Ref": "Routes"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private subnet routing.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "AppSecurity": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Lambda clients",
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Lambda clients",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "DbSecurity": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Private MySQL",
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private MySQL",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "EndpointSecurity": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Private service endpoints",
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private service endpoints",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "DbIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "DbSecurity"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": 3306,
+        "ToPort": 3306,
+        "SourceSecurityGroupId": {
+          "Ref": "AppSecurity"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only application functions reach MySQL.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "EndpointIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "EndpointSecurity"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": 443,
+        "ToPort": 443,
+        "SourceSecurityGroupId": {
+          "Ref": "AppSecurity"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "TLS to private AWS service endpoints.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "BedrockEndpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "VpcEndpointType": "Interface",
+        "PrivateDnsEnabled": true,
+        "ServiceName": {
+          "Fn::Sub": "com.amazonaws.${AWS::Region}.bedrock-runtime"
+        },
+        "SubnetIds": [
+          {
+            "Ref": "SubnetA"
+          },
+          {
+            "Ref": "SubnetB"
+          }
+        ],
+        "SecurityGroupIds": [
+          {
+            "Ref": "EndpointSecurity"
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private service access without NAT; interface ENIs incur hourly charges.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "SecretsEndpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "VpcEndpointType": "Interface",
+        "PrivateDnsEnabled": true,
+        "ServiceName": {
+          "Fn::Sub": "com.amazonaws.${AWS::Region}.secretsmanager"
+        },
+        "SubnetIds": [
+          {
+            "Ref": "SubnetA"
+          },
+          {
+            "Ref": "SubnetB"
+          }
+        ],
+        "SecurityGroupIds": [
+          {
+            "Ref": "EndpointSecurity"
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private service access without NAT; interface ENIs incur hourly charges.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "S3Endpoint": {
+      "Type": "AWS::EC2::VPCEndpoint",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "VpcEndpointType": "Gateway",
+        "ServiceName": {
+          "Fn::Sub": "com.amazonaws.${AWS::Region}.s3"
+        },
+        "RouteTableIds": [
+          {
+            "Ref": "Routes"
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Bootstrap reads its fixed S3 artifacts privately.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "DbSubnets": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Career private subnets",
+        "SubnetIds": [
+          {
+            "Ref": "SubnetA"
+          },
+          {
+            "Ref": "SubnetB"
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private RDS subnet group.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "DbParameters": {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties": {
+        "Description": "MySQL TLS required",
+        "Family": "mysql8.4",
+        "Parameters": {
+          "require_secure_transport": "1"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Require TLS server-side as well as client identity checks.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Database": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "Engine": "mysql",
+        "EngineVersion": {
+          "Ref": "DbEngineVersion"
+        },
+        "EngineLifecycleSupport": "open-source-rds-extended-support-disabled",
+        "DBInstanceClass": "db.t4g.micro",
+        "AllocatedStorage": "20",
+        "StorageType": "gp3",
+        "StorageEncrypted": true,
+        "MultiAZ": false,
+        "PubliclyAccessible": false,
+        "DBName": "career_matching",
+        "MasterUsername": "career_admin",
+        "ManageMasterUserPassword": true,
+        "DBSubnetGroupName": {
+          "Ref": "DbSubnets"
+        },
+        "DBParameterGroupName": {
+          "Ref": "DbParameters"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Ref": "DbSecurity"
+          }
+        ],
+        "BackupRetentionPeriod": 1,
+        "DeletionProtection": true,
+        "AutoMinorVersionUpgrade": true,
+        "CopyTagsToSnapshot": true
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Small Single-AZ team-test database; fixed ongoing cost; retain data on stack deletion.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "RuntimeSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Career team-test RuntimeSecret",
+        "GenerateSecretString": {
+          "PasswordLength": 48,
+          "ExcludePunctuation": true,
+          "SecretStringTemplate": "{\"username\": \"career_runtime\"}",
+          "GenerateStringKey": "password"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Generated secrets never copied from local .env.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "AuthSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Career team-test AuthSecret",
+        "GenerateSecretString": {
+          "PasswordLength": 48,
+          "ExcludePunctuation": true,
+          "SecretStringTemplate": "{}",
+          "GenerateStringKey": "token"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Generated secrets never copied from local .env.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "ApiRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+          }
+        ],
+        "Policies": [
+          {
+            "PolicyName": "AppAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": [
+                    {
+                      "Ref": "RuntimeSecret"
+                    },
+                    {
+                      "Ref": "AuthSecret"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ModelId}"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Function-specific data permissions; ENI permissions required by VPC Lambda.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "InspectRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+          }
+        ],
+        "Policies": [
+          {
+            "PolicyName": "AppAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": [
+                    {
+                      "Ref": "RuntimeSecret"
+                    },
+                    {
+                      "Ref": "AuthSecret"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Function-specific data permissions; ENI permissions required by VPC Lambda.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "BootstrapRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+          }
+        ],
+        "Policies": [
+          {
+            "PolicyName": "AppAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "Database",
+                        "MasterUserSecret.SecretArn"
+                      ]
+                    },
+                    {
+                      "Ref": "RuntimeSecret"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${ArtifactBucket}/${SchemaKey}"
+                    },
+                    {
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::${ArtifactBucket}/${DataKey}"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Function-specific data permissions; ENI permissions required by VPC Lambda.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "Condition": "WithBootstrap"
+    },
+    "ApiFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "python3.11",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "src.handlers.cloud.lambda_handler",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "CodeKey"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "ApiRole",
+            "Arn"
+          ]
+        },
+        "MemorySize": 512,
+        "Timeout": 28,
+        "ReservedConcurrentExecutions": 3,
+        "VpcConfig": {
+          "SubnetIds": [
+            {
+              "Ref": "SubnetA"
+            },
+            {
+              "Ref": "SubnetB"
+            }
+          ],
+          "SecurityGroupIds": [
+            {
+              "Ref": "AppSecurity"
+            }
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "MYSQL_HOST": {
+              "Fn::GetAtt": [
+                "Database",
+                "Endpoint.Address"
+              ]
+            },
+            "MYSQL_PORT": "3306",
+            "MYSQL_DATABASE": "career_matching",
+            "MYSQL_SECRET_ARN": {
+              "Ref": "RuntimeSecret"
+            },
+            "CHAT_SECRET_ARN": {
+              "Ref": "AuthSecret"
+            },
+            "MYSQL_SSL_CA": "/var/task/certs/rds-global.pem",
+            "CHAT_RETENTION_HOURS": "24",
+            "CHAT_INCLUDE_UNVERIFIED": "true",
+            "CHAT_RUNTIME_ENABLED": "true",
+            "ENABLE_LIVE_BEDROCK": "true",
+            "MODEL_ID": {
+              "Ref": "ModelId"
+            },
+            "BEDROCK_REGION": {
+              "Ref": "AWS::Region"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Packaged source only; no .env, local credentials or source snapshots.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "ApiFunctionLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${ApiFunction}"
+        },
+        "RetentionInDays": 7
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Short metadata-only logs; do not log request or secret bodies.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "InspectFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "python3.11",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "src.handlers.cloud.inspect_handler",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "CodeKey"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "InspectRole",
+            "Arn"
+          ]
+        },
+        "MemorySize": 512,
+        "Timeout": 25,
+        "ReservedConcurrentExecutions": 3,
+        "VpcConfig": {
+          "SubnetIds": [
+            {
+              "Ref": "SubnetA"
+            },
+            {
+              "Ref": "SubnetB"
+            }
+          ],
+          "SecurityGroupIds": [
+            {
+              "Ref": "AppSecurity"
+            }
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "MYSQL_HOST": {
+              "Fn::GetAtt": [
+                "Database",
+                "Endpoint.Address"
+              ]
+            },
+            "MYSQL_PORT": "3306",
+            "MYSQL_DATABASE": "career_matching",
+            "MYSQL_SECRET_ARN": {
+              "Ref": "RuntimeSecret"
+            },
+            "CHAT_SECRET_ARN": {
+              "Ref": "AuthSecret"
+            },
+            "MYSQL_SSL_CA": "/var/task/certs/rds-global.pem",
+            "CHAT_RETENTION_HOURS": "24",
+            "CHAT_INCLUDE_UNVERIFIED": "true",
+            "CHAT_RUNTIME_ENABLED": "true",
+            "ENABLE_LIVE_BEDROCK": "true",
+            "MODEL_ID": {
+              "Ref": "ModelId"
+            },
+            "BEDROCK_REGION": {
+              "Ref": "AWS::Region"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Packaged source only; no .env, local credentials or source snapshots.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "InspectFunctionLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${InspectFunction}"
+        },
+        "RetentionInDays": 7
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Short metadata-only logs; do not log request or secret bodies.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "BootstrapFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "python3.11",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "src.handlers.bootstrap.lambda_handler",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "CodeKey"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "BootstrapRole",
+            "Arn"
+          ]
+        },
+        "MemorySize": 512,
+        "Timeout": 300,
+        "ReservedConcurrentExecutions": 1,
+        "VpcConfig": {
+          "SubnetIds": [
+            {
+              "Ref": "SubnetA"
+            },
+            {
+              "Ref": "SubnetB"
+            }
+          ],
+          "SecurityGroupIds": [
+            {
+              "Ref": "AppSecurity"
+            }
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "MYSQL_HOST": {
+              "Fn::GetAtt": [
+                "Database",
+                "Endpoint.Address"
+              ]
+            },
+            "MYSQL_PORT": "3306",
+            "MYSQL_DATABASE": "career_matching",
+            "MYSQL_SECRET_ARN": {
+              "Ref": "RuntimeSecret"
+            },
+            "MYSQL_SSL_CA": "/var/task/certs/rds-global.pem",
+            "ADMIN_SECRET_ARN": {
+              "Fn::GetAtt": [
+                "Database",
+                "MasterUserSecret.SecretArn"
+              ]
+            },
+            "ARTIFACT_BUCKET": {
+              "Ref": "ArtifactBucket"
+            },
+            "SCHEMA_KEY": {
+              "Ref": "SchemaKey"
+            },
+            "DATA_KEY": {
+              "Ref": "DataKey"
+            },
+            "SCHEMA_SHA256": {
+              "Ref": "SchemaHash"
+            },
+            "DATA_SHA256": {
+              "Ref": "DataHash"
+            },
+            "EXPECTED_JOBS": {
+              "Ref": "ExpectedJobs"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Packaged source only; no .env, local credentials or source snapshots.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "Condition": "WithBootstrap"
+    },
+    "BootstrapFunctionLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${BootstrapFunction}"
+        },
+        "RetentionInDays": 7
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Short metadata-only logs; do not log request or secret bodies.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "Condition": "WithBootstrap"
+    },
+    "Api": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-api"
+        },
+        "ProtocolType": "HTTP"
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Same-origin CloudFront API; application-level team token authentication.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "Integration": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "Api"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "ApiFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 29000
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "28-second Lambda fits the HTTP API 30-second limit.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "ChatRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "Api"
+        },
+        "RouteKey": "POST /api/chat",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "Integration"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only explicit chat and health routes.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "HealthRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "Api"
+        },
+        "RouteKey": "GET /api/health",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "Integration"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only explicit chat and health routes.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "Stage": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "Api"
+        },
+        "StageName": "$default",
+        "AutoDeploy": true,
+        "DefaultRouteSettings": {
+          "ThrottlingBurstLimit": 5,
+          "ThrottlingRateLimit": 2
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Conservative team-test API throttling.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "InvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ApiFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only this account API can invoke the HTTP function.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "WebBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private static website artifacts; CloudFront OAC access only.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Oac": {
+      "Type": "AWS::CloudFront::OriginAccessControl",
+      "Properties": {
+        "OriginAccessControlConfig": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-web"
+          },
+          "OriginAccessControlOriginType": "s3",
+          "SigningBehavior": "always",
+          "SigningProtocol": "sigv4"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Signed HTTPS access to private S3 origin.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "SecurityHeaders": {
+      "Type": "AWS::CloudFront::ResponseHeadersPolicy",
+      "Properties": {
+        "ResponseHeadersPolicyConfig": {
+          "Name": {
+            "Fn::Sub": "${AWS::StackName}-security"
+          },
+          "SecurityHeadersConfig": {
+            "ContentTypeOptions": {
+              "Override": true
+            },
+            "FrameOptions": {
+              "FrameOption": "DENY",
+              "Override": true
+            },
+            "ReferrerPolicy": {
+              "ReferrerPolicy": "strict-origin-when-cross-origin",
+              "Override": true
+            },
+            "StrictTransportSecurity": {
+              "AccessControlMaxAgeSec": 31536000,
+              "Override": true
+            },
+            "ContentSecurityPolicy": {
+              "ContentSecurityPolicy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'",
+              "Override": true
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Browser security headers; no third-party script dependency.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "Distribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Enabled": true,
+          "DefaultRootObject": "index.html",
+          "HttpVersion": "http2",
+          "PriceClass": "PriceClass_200",
+          "ViewerCertificate": {
+            "CloudFrontDefaultCertificate": true
+          },
+          "Origins": [
+            {
+              "Id": "web",
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "WebBucket",
+                  "RegionalDomainName"
+                ]
+              },
+              "S3OriginConfig": {
+                "OriginAccessIdentity": ""
+              },
+              "OriginAccessControlId": {
+                "Ref": "Oac"
+              }
+            },
+            {
+              "Id": "api",
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "Api",
+                          "ApiEndpoint"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "CustomOriginConfig": {
+                "OriginProtocolPolicy": "https-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              }
+            }
+          ],
+          "DefaultCacheBehavior": {
+            "TargetOriginId": "web",
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "AllowedMethods": [
+              "GET",
+              "HEAD"
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD"
+            ],
+            "Compress": true,
+            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "ResponseHeadersPolicyId": {
+              "Ref": "SecurityHeaders"
+            }
+          },
+          "CacheBehaviors": [
+            {
+              "PathPattern": "/api/*",
+              "TargetOriginId": "api",
+              "ViewerProtocolPolicy": "https-only",
+              "AllowedMethods": [
+                "GET",
+                "HEAD",
+                "OPTIONS",
+                "PUT",
+                "PATCH",
+                "POST",
+                "DELETE"
+              ],
+              "CachedMethods": [
+                "GET",
+                "HEAD"
+              ],
+              "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+              "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+              "ResponseHeadersPolicyId": {
+                "Ref": "SecurityHeaders"
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Static assets cached; API authorization/client headers forwarded and API responses never cached.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "WebPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "WebBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+              },
+              "Action": "s3:GetObject",
+              "Resource": {
+                "Fn::Sub": "${WebBucket.Arn}/*"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+                  }
+                }
+              }
+            },
+            {
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "WebBucket",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${WebBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only this distribution reads website files; reject non-TLS S3 requests.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "Budget": {
+      "Type": "AWS::Budgets::Budget",
+      "Properties": {
+        "Budget": {
+          "BudgetName": {
+            "Fn::Sub": "${AWS::StackName}-monthly"
+          },
+          "BudgetType": "COST",
+          "TimeUnit": "MONTHLY",
+          "BudgetLimit": {
+            "Amount": {
+              "Ref": "MonthlyBudgetUsd"
+            },
+            "Unit": "USD"
+          }
+        },
+        "NotificationsWithSubscribers": [
+          {
+            "Notification": {
+              "NotificationType": "ACTUAL",
+              "ComparisonOperator": "GREATER_THAN",
+              "Threshold": 80,
+              "ThresholdType": "PERCENTAGE"
+            },
+            "Subscribers": [
+              {
+                "SubscriptionType": "EMAIL",
+                "Address": {
+                  "Ref": "BudgetEmail"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Account-wide spend alert, not a hard spending stop.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    },
+    "Dashboard": {
+      "Type": "AWS::CloudWatch::Dashboard",
+      "Properties": {
+        "DashboardName": {
+          "Fn::Sub": "${AWS::StackName}-usage"
+        },
+        "DashboardBody": {
+          "Fn::Sub": "{\"widgets\": [{\"type\": \"metric\", \"x\": 0, \"y\": 0, \"width\": 24, \"height\": 6, \"properties\": {\"title\": \"Bedrock invocation and token usage (account/region view)\", \"region\": \"${AWS::Region}\", \"period\": 300, \"stat\": \"Sum\", \"metrics\": [[\"AWS/Bedrock\", \"Invocations\"], [\"AWS/Bedrock\", \"InputTokenCount\"], [\"AWS/Bedrock\", \"OutputTokenCount\"], [\"AWS/Bedrock\", \"InvocationServerErrors\"]]}}]}"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Provider aggregate metrics; exact application usage also stored in model_invocations.",
+          "must": [
+            "No embedded credentials; team test deployment."
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "WebsiteUrl": {
+      "Value": {
+        "Fn::Sub": "https://${Distribution.DomainName}"
+      }
+    },
+    "WebBucket": {
+      "Value": {
+        "Ref": "WebBucket"
+      }
+    },
+    "DistributionId": {
+      "Value": {
+        "Ref": "Distribution"
+      }
+    },
+    "DbEndpoint": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "Endpoint.Address"
+        ]
+      }
+    },
+    "DbIdentifier": {
+      "Value": {
+        "Ref": "Database"
+      }
+    },
+    "ApiFunction": {
+      "Value": {
+        "Ref": "ApiFunction"
+      }
+    },
+    "InspectFunction": {
+      "Value": {
+        "Ref": "InspectFunction"
+      }
+    },
+    "AuthSecretArn": {
+      "Value": {
+        "Ref": "AuthSecret"
+      }
+    },
+    "RuntimeSecretArn": {
+      "Value": {
+        "Ref": "RuntimeSecret"
+      }
+    },
+    "DashboardName": {
+      "Value": {
+        "Ref": "Dashboard"
+      }
+    },
+    "BootstrapFunction": {
+      "Condition": "WithBootstrap",
+      "Value": {
+        "Ref": "BootstrapFunction"
+      }
+    }
+  }
+}

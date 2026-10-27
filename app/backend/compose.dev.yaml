@@ -1,0 +1,23 @@
+name: career-matching-dev
+services:
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3308}:3306"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Run prepare_local_mysql.py first}
+      MYSQL_USER: ${MYSQL_USER:?Run prepare_local_mysql.py first}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Run prepare_local_mysql.py first}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ADMIN_PASSWORD:?Run prepare_local_mysql.py first}
+    volumes:
+      - career_mysql_data:/var/lib/mysql
+      - ../../workspace/database/mysql/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      - ./local-data/jumpit_all_v3/jobs.data.sql:/docker-entrypoint-initdb.d/002_jobs.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=127.0.0.1", "--silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    restart: unless-stopped
+volumes:
+  career_mysql_data:

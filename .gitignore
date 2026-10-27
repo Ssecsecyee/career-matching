@@ -1,0 +1,66 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+dist/
+.aws-sam/
+app/backend/local-data/
+workspace/
+archive/
+retired/
+*.log
+
+infra/.build/
+
+# Local credentials and private keys
+.aws/
+**/.aws/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Python environments and tooling caches
+venv/
+env/
+.conda/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local databases, exports, and backups
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+*.bak
+backups/
+exports/
+
+# Generated artifacts and local deployment state
+build/
+coverage/
+*.tsbuildinfo
+.aws-sam/
+.cdk.out/
+cdk.out/
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Local machine/editor files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.swp

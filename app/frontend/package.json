@@ -1,0 +1,10 @@
+{
+  "name": "career-matching-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {"dev": "vite --host 127.0.0.1", "build": "vite build", "preview": "vite preview --host 127.0.0.1", "test": "node --test src/api.test.js"},
+  "dependencies": {"react": "^19.0.0", "react-dom": "^19.0.0"},
+  "devDependencies": {"vite": "^7.0.0"},
+  "engines": {"node": ">=20.19.0"}
+}

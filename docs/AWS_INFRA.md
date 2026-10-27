@@ -1,0 +1,46 @@
+# AWS 구성 계획
+
+수정일: 2026-10-28. 배포·과금 리소스 생성은 아직 수행하지 않았다.
+
+| 구성 | 목표 | 결정 상태 |
+|---|---|---|
+| 프론트 | React 정적 빌드 / 비공개 S3 / CloudFront | 방향 확정 |
+| API | API Gateway / Lambda | 방향 확정 |
+| 모델 | Amazon Bedrock Sonnet 4.6 / 서울 리전 호출 | 로컬 호출 확인, AWS 배포 후 재검증 |
+| 기준 DB | 비공개 RDS MySQL 8.4 / db.t4g.micro / Single-AZ | 배포 템플릿 작성, 실제 생성 전 비용 확인 |
+| 원본 | S3 | 버전·보존 기간 미정 |
+| 수집 예약 | EventBridge Scheduler | 주기 미정 |
+| 수집 실행 | 짧은 작업은 Lambda, 긴 작업·브라우저 필요 시 별도 실행 환경 검토 | 실측 후 결정 |
+| 변경 전파 | Outbox 전달 작업, 필요 시 SQS / DLQ | DB 결정 후 구체화 |
+| 검색 | Elasticsearch | 후속, 배포 위치·운영 방식 미정 |
+| 로그 | CloudWatch | 개인정보 최소화 |
+
+## 이전
+
+기존 로컬 데이터를 스냅샷으로 내보내 최초 적재하고 ID별 upsert로 검증한다. 건수·원본 ID·내용 해시를 대조한 뒤 변경분 수집으로 전환한다. 로컬 DB와 AWS DB 양쪽을 영구적인 쓰기 기준으로 두지 않는다.
+
+## 네트워크와 권한
+
+브라우저는 API만 호출한다. DB와 검색엔진 인증정보를 노출하지 않는다. Bedrock은 서버 실행 역할을 사용한다. 수집·적재·조회·색인 권한을 분리한다. DB와 Elasticsearch의 배치가 정해진 뒤 VPC, 보안 그룹, 외부 출처 접근 경로, 엔드포인트 또는 NAT 필요 여부를 결정한다. 기존 OpenAI 호출을 전제로 한 NAT 필수 설명은 적용하지 않는다.
+
+## 비용
+
+Bedrock 토큰, DB 고정·변동 비용, 검색엔진 고정비, 수집 실행, 네트워크 전송, S3, API, Lambda, 로그를 함께 산정한다. OpenSearch로 자동 대체하지 않는다. 예산 승인 전 유료 리소스를 생성하지 않는다.
+
+## 참고
+
+https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html
+
+## 대화·근거·캐시 저장 보완 (2026-10-28)
+
+운영 대화·판단 근거·모델 호출 기록·초기 응답 캐시는 기준 DB의 별도 테이블로 관리한다. Lambda 로컬 저장소는 영구 기록으로 사용하지 않는다. CloudWatch는 운영 로그, S3 장기 보관은 보존 정책 확정 후 사용한다. 별도 Redis 도입은 초기 필수가 아니다.
+
+
+## 2026-10-28 실행용 배포 준비
+
+infra/README.md에 CMD 실행 순서와 인수인계를 정리했다. template.json은 generate_template.py로 생성하고 deploy.py로 빌드·변경 세트 검토·적용·초기 적재·웹 게시·DB/토큰 집계를 수행한다. CloudFront OAC/비공개 S3, HTTP API/Python Lambda, 비공개 RDS MySQL, Secrets Manager, 두 AZ의 Bedrock/Secrets Manager 인터페이스 엔드포인트, S3 게이트웨이로 구성하며 NAT는 만들지 않는다. 호출 한도 12회·낮은 동시성·API 처리율 제한을 유지한다. 엔드포인트 ENI 4개와 RDS 등의 상시 요금이 있으며 크레딧 충분 여부와 월 비용은 아직 검증하지 않았다. 알림 금액·이메일을 지정하고 실제 생성 전에 변경 세트를 검토해야 한다. 배포/계정 권한/CloudFormation 스키마 검증/cfn-guard 보안 검사/실제 AWS 동작은 미확인이다. 로컬 검증은 AWS 호출을 수행하지 않았다.
+
+
+## 현재 백엔드 실행 경로 보완
+
+웹 호스팅 완료 후 저비용 백엔드 연결을 준비했다. 현재 우선안은 서울 t4g.small 단일 서버의 MySQL+Python 작업 코드와 Lambda/HTTP API/SQS/임시 DynamoDB 작업 상태이며 RDS/유료 VPC 엔드포인트는 사용하지 않는다. Elasticsearch는 아직 미포함이다. 기존 전체 배포 대신 infra/BACKEND.md의 backend.py를 따른다. 단일 서버/수동 운영의 한계가 있으며 월 6만 원은 목표이지 비용 상한 보장이 아니다. 실제 서버·DB·Bedrock 연결은 사용자 실행 후 검증해야 한다.
