@@ -48,3 +48,7 @@ Bedrock이 만든 SQL·DSL을 직접 실행하지 않는다. 검색 계획은 �
 ## 2026-10-28 로컬 대화 기억 구현
 
 실제 로컬 API는 search/select/answer/remember를 지원한다. remember는 session_id/request_id/message(최대 2,000자)를 받으며 이전 조건 확인을 무효화한다. 동일 세션 search는 기억을 유지한다. 질문 응답에 progress(answered,total), memory(facts,statement_count,scope,basis)를 추가했다. 최종 응답에 unconfirmed_count를 제공한다. unknown은 미확인으로 남긴 채 다음 항목으로 진행한다.
+
+
+## 체크리스트 및 일반 대화 업데이트
+새 웹은 공고 선택에 `grouped: true`를 보내고 `answer_batch`로 조건별 명시적 답변을 저장합니다. 일반 대화와 검색은 Sonnet 라우터에서 구분합니다. 기존 모델 호출 상한은 유지하며 상세 배포·제한사항은 [코드 업데이트 안내](../infra/UPDATE.md)를 참고합니다.

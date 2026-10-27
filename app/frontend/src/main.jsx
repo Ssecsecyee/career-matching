@@ -6,15 +6,16 @@ import './style.css';
 const names = { met: '충족해요', unmet: '미충족이에요', unknown: '아직 모르겠어요' };
 const isQuestion = data => ['checking_required', 'checking_preferred'].includes(data?.stage);
 
-function Reply({ data, active, busy, onSelect, onAnswer }) {
+function Reply({ data, active, busy, onSelect, onAnswer, onBatch }) {
   return <>
-    {data.message && <p className="muted">{data.message}</p>}
+    {data.message && <p className="muted assistant-text">{data.message}</p>}
     {data.stage === 'choose_job' && <><p>조건에 맞는 공고가 총 {data.total}건 있습니다. 먼저 살펴볼 공고를 골라 주세요.</p><div className="job-list">{data.candidate_jobs.map(job => <article className="job" key={job.source_id}>
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
       <div className="job-bottom"><a href={safeSourceUrl(job.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a><button disabled={!active || busy} onClick={() => onSelect(job)}>이 공고 확인하기 →</button></div>
     </article>)}</div></>}
-    {isQuestion(data) && <><span className="pill">{data.requirement_type === 'required' ? '자격요건 확인' : '우대조건 확인'}</span><p>{data.question}</p>{data.progress && <p className="fine">{data.progress.answered + 1} / {data.progress.total}번째 조건</p>}
+    {isQuestion(data) && data.grouped && <BatchQuestions data={data} active={active} busy={busy} onBatch={onBatch} />}
+    {isQuestion(data) && !data.grouped && <><span className="pill">{data.requirement_type === 'required' ? '자격요건 확인' : '우대조건 확인'}</span><p>{data.question}</p>{data.progress && <p className="fine">{data.progress.answered + 1} / {data.progress.total}번째 조건</p>}
       <details className="source"><summary>조건 원문 확인하기</summary><pre>{data.quote}</pre><a href={safeSourceUrl(data.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a></details>
       {active && <><p className="fine">아래에서 답을 고르세요. 보충 설명은 입력창에 먼저 적을 수 있습니다.</p><div className="choices">{Object.entries(names).map(([value, label]) => <button key={value} disabled={busy} onClick={() => onAnswer(value)}>{label}</button>)}</div></>}
       <p className="fine">원문 목록 항목별로 확인하며, 합격 여부를 판정하지 않습니다.</p></>}
@@ -24,6 +25,21 @@ function Reply({ data, active, busy, onSelect, onAnswer }) {
     {data.stage === 'no_results' && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
     {data.cached && <span className="fine">저장된 응답</span>}
   </>;
+}
+
+function BatchQuestions({ data, active, busy, onBatch }) {
+  const [answers, setAnswers] = useState({});
+  const [details, setDetails] = useState({});
+  return <section><span className="pill">{data.requirement_type === 'required' ? '자격요건 확인' : '우대조건 확인'}</span>
+    <p>조건을 한 번에 확인합니다. 모르는 항목은 미확인으로 남습니다. 원문 조건은 생략하지 않습니다.</p>
+    {data.questions.map(item => <div className="check" key={item.question_id}><pre>{item.quote}</pre>
+      <div className="choices">{Object.entries(names).map(([value, label]) => <button key={value} aria-pressed={(answers[item.question_id] || 'unknown') === value} disabled={!active || busy} onClick={() => setAnswers(old => ({...old, [item.question_id]:value}))}>{(answers[item.question_id] || 'unknown') === value ? '✓ ' : ''}{label}</button>)}</div>
+      <input aria-label="조건 보충 설명" placeholder="보충 설명 (선택)" maxLength={300} disabled={!active || busy} value={details[item.question_id] || ''} onChange={e => setDetails(old => ({...old,[item.question_id]:e.target.value}))} />
+    </div>)}
+    <a href={safeSourceUrl(data.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a>
+    {active && <button disabled={busy} onClick={() => onBatch(data.questions.map(q => ({question_id:q.question_id, assessment:answers[q.question_id] || 'unknown', detail:details[q.question_id] || ''})))}>이 답변으로 저장하고 계속하기 →</button>}
+    <p className="fine">답변을 선택하지 않은 항목은 미확인으로 저장됩니다. 합격 여부를 판정하지 않습니다.</p>
+  </section>;
 }
 
 function App() {
@@ -38,6 +54,7 @@ function App() {
   const [draft, setDraft] = useState('');
   const [memoryMode, setMemoryMode] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState(null);
   const inFlight = useRef(false);
   const [error, setError] = useState(null);
   const [pending, setPending] = useState(null);
@@ -50,7 +67,7 @@ function App() {
 
   async function send(payload, text) {
     if (inFlight.current) return;
-    inFlight.current = true; setBusy(true); setError(null); setPending(null);
+    inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
       const response = await postChat({ payload, accessCode: code, ownerToken: owner.current });
@@ -79,18 +96,21 @@ function App() {
       const text = draft.trim(); setDraft(''); setMemoryMode(false);
       send(requestPayload('remember', { message: text }, session), text); return;
     }
-    if (isQuestion(result)) { setError('입력한 설명과 함께 아래 답변 버튼을 선택해 주세요.'); return; }
+    if (isQuestion(result) && !result.grouped) { setError('입력한 설명과 함께 아래 답변 버튼을 선택해 주세요.'); return; }
     const text = draft.trim(); setDraft('');
     send(requestPayload('search', { message: text, profile: {} }, session), text);
   }
   function select(job) {
-    send(requestPayload('select', { source_id: job.source_id }, session), `${job.company_name} · ${job.title} 공고를 확인할게요.`);
+    send(requestPayload('select', { source_id: job.source_id, grouped: true }, session), `${job.company_name} · ${job.title} 공고를 확인할게요.`);
   }
   function answer(value) {
     const detail = draft.trim(); setDraft('');
     send(requestPayload('answer', { question_id: result.question_id, assessment: value, detail }, session), `${names[value]}${detail ? '\n' + detail : ''}`);
   }
-  const question = isQuestion(result);
+  function answerBatch(answers) {
+    send(requestPayload('answer_batch', { answers }, session), '조건별 답변을 저장할게요.');
+  }
+  const question = isQuestion(result) && !result.grouped;
   const noteOnly = question && !memoryMode;
   return <div className="app">
     <aside className="sidebar"><a className="brand" href="/">ROUNDUP<span>CAREER</span></a><button disabled={busy} onClick={reset}>＋ 새 대화</button><div className="sidebar-bottom">내 조건에 맞는 다음 기회<p>공고 검색 · 지원 조건 확인</p></div></aside>
@@ -98,8 +118,8 @@ function App() {
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">공유받은 테스트 접속 코드를 입력해 주세요.</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
         <main className="conversation" aria-label="대화 내용" aria-live="polite">
           {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />공고를 찾은 뒤 지원 조건을 함께 확인할게요.</p></section>}
-          {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={index === messages.length - 1 && !pending} busy={busy} onSelect={select} onAnswer={answer} />}</div></article>)}
-          {busy && <div className="thinking" role="status">✳ 공고와 조건을 확인하고 있어요<span>…</span></div>}
+          {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onSelect={select} onAnswer={answer} onBatch={answerBatch} />}</div></article>)}
+          {busy && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />
         </main>

@@ -37,7 +37,7 @@ class TransientErrorTests(unittest.TestCase):
         store.begin.return_value = {"state": {}, "session_id": session_id, "request_id": request_id}
         store.begin_invocation.return_value = "fake-invocation"
         planner.model_id, planner.region = "fake-model", "fake-region"
-        planner.plan.side_effect = ServiceError("ServiceUnavailableException")
+        planner.route.side_effect = ServiceError("ServiceUnavailableException")
         token = "x" * 40
         event = {"headers": {"Authorization": "Bearer " + token, "X-Client-Token": "a" * 64},
                  "body": json.dumps({"action": "search", "request_id": request_id, "message": "MySQL"})}

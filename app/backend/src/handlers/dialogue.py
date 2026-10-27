@@ -27,8 +27,8 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id"},
-              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}}
+    fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped"},
+              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
         raise ValueError("Unsupported request fields")
@@ -52,8 +52,18 @@ def validate_payload(value):
         if not isinstance(value.get("message"), str) or not 1 <= len(value["message"].strip()) <= 2000:
             raise ValueError("Memory statement required")
     elif action == "select":
+        if "grouped" in value and type(value["grouped"]) is not bool:
+            raise ValueError("Invalid grouped choice")
         if not isinstance(value.get("source_id"), str) or not re.fullmatch(r"\d{1,128}", value["source_id"]):
             raise ValueError("Invalid source ID")
+    elif action == "answer_batch":
+        answers = value.get("answers")
+        if not isinstance(answers, list) or not 1 <= len(answers) <= 40:
+            raise ValueError("Invalid answer batch")
+        for item in answers:
+            if not isinstance(item, dict) or set(item) != {"question_id", "assessment", "detail"}:
+                raise ValueError("Invalid answer item")
+            validate_payload(dict(item, action="answer", request_id=value["request_id"], session_id=value["session_id"]))
     else:
         if value.get("assessment") not in {"met", "unmet", "unknown"}:
             raise ValueError("Invalid assessment")
@@ -101,8 +111,8 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             return response(200, dict(ticket["cached"], cached=True))
 
         def invoke(purpose, function, *args):
-            adapter = planner if purpose == "search_plan" else questioner
-            version = "search-v1" if purpose == "search_plan" else "question-memory-v2"
+            adapter = planner if purpose in {"search_plan", "conversation"} else questioner
+            version = "conversation-evidence-v2" if purpose == "conversation" else ("search-v1" if purpose == "search_plan" else "question-memory-v2")
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             try:
                 result, usage = function(*args)

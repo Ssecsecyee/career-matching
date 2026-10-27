@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
-from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory
+from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
 
 
 class FlowError(Exception):
@@ -45,7 +45,22 @@ class DialogueFlow:
                 plan = SearchPlan.parse(payload['search_plan'])
             else:
                 # Search uses the user's current query; past skills must not become unwanted filters.
-                plan = invoke('search_plan', self.planner.plan, text)
+                if hasattr(self.planner, 'route'):
+                    routed = invoke('conversation', self.planner.route, text, consultation_context(state))
+                    if routed['intent'] == 'chat':
+                        reply = routed['reply']
+                        record(state, reply, 'assistant')
+                        state.setdefault('stage', 'conversation')
+                        result = {'stage':'conversation','memory':public_memory(state)}
+                        if state.get('stage') in {'checking_required', 'checking_preferred'}:
+                            result = self.batch_response(state) if state.get('grouped') else self.question_response(state)
+                        elif state.get('stage') in {'completed', 'gap_guidance'}:
+                            result = {'stage':'conversation','memory':public_memory(state)}
+                        result['message'] = reply
+                        return state, result, evidence
+                    plan = SearchPlan.parse(routed['plan'])
+                else:
+                    plan = invoke('search_plan', self.planner.plan, text)
             total, jobs = self.jobs.search(plan)
             cards = [{key: row.get(key) for key in
                       ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
@@ -72,6 +87,7 @@ class DialogueFlow:
             except ValueError as exc:
                 raise FlowError('too_many_source_conditions', 413) from exc
             state['checks'] = []
+            state['grouped'] = payload.get('grouped', False)
             record(state, f"선택한 공고: {job['company_name']} / {job['title']}", 'selection')
             result = self.next_question(state, invoke, evidence)
             return state, result, evidence
@@ -91,6 +107,27 @@ class DialogueFlow:
                 result = self.search_response(state)
                 result['message'] = '말씀하신 내용을 기억했습니다. 공고를 선택하면 질문에 반영합니다.'
             return state, result, evidence
+
+        if action == 'answer_batch':
+            if not state.get('grouped') or state.get('stage') not in {'checking_required', 'checking_preferred'}:
+                raise FlowError('no_pending_question', 409)
+            self.validate_selected(state)
+            pending = self.batch_conditions(state)
+            answers = payload['answers']
+            identities = [a['question_id'] for a in answers]
+            if len(set(identities)) != len(identities) or set(identities) != {c['id'] for c in pending}:
+                raise FlowError('question_changed', 409)
+            by_id = {a['question_id']: a for a in answers}
+            for condition in pending:
+                item = by_id[condition['id']]
+                check = self.make_check(condition, item['assessment'], item.get('detail', ''))
+                state['checks'].append(check)
+                evidence.append({'job':state['selected'], 'check':check, 'section':condition['section']})
+                record(state, f"조건: {condition['quote']}\n답변: {check['assessment']}", 'answer')
+                record(state, check['detail'], 'answer_detail')
+                if check['assessment'] != 'unknown':
+                    memory(state)['confirmed'][condition['key']] = dict(check, source_id=state['selected']['source_id'], source_version=state['selected']['source_version'])
+            return state, self.next_question(state, invoke, evidence), evidence
 
         if action == 'answer':
             if not state.get('selected') or state.get('stage') not in {'checking_required', 'checking_preferred'}:
@@ -144,7 +181,29 @@ class DialogueFlow:
                 'detail': detail, 'quote': condition['quote'], 'explanation': explanation,
                 'reused': reused}
 
+    @staticmethod
+    def batch_conditions(state):
+        answered = {c.get('condition_id') for c in state.get('checks', [])}
+        remaining = [c for c in state.get('conditions', []) if c['id'] not in answered]
+        if not remaining:
+            return []
+        return [c for c in remaining if c['type'] == remaining[0]['type']]
+
+    def batch_response(self, state):
+        pending = self.batch_conditions(state)
+        return {'stage':state['stage'], 'grouped':True,
+                'questions':[{'question_id':c['id'], 'quote':c['quote']} for c in pending],
+                'question':'각 원문 조건에 답해 주세요. 판단하기 어려운 조건은 미확인으로 남겨도 됩니다.',
+                'requirement_type':pending[0]['type'], 'source_url':state['selected']['source_url'],
+                'progress':{'answered':len(state['checks']), 'total':len(state['conditions'])},
+                'memory':public_memory(state), 'generation':'source_checklist'}
+
     def next_question(self, state, invoke, evidence):
+        if state.get('grouped'):
+            pending = self.batch_conditions(state)
+            if pending:
+                state['stage'] = 'checking_required' if pending[0]['type'] == 'required' else 'checking_preferred'
+                return self.batch_response(state)
         answered = {c.get('condition_id') for c in state['checks']}
         for condition in state['conditions']:
             if condition['id'] in answered:

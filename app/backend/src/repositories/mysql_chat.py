@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4, uuid5, NAMESPACE_URL
 
 from src.services.dialogue import FlowError
+from src.services.memory import memory, restore_user_statements
 
 
 def packed(value):
@@ -61,6 +62,10 @@ class MySQLChatStore:
                     raise FlowError("session_busy_retry_later", 409)
                 if row["model_call_count"] >= self.max_calls:
                     raise FlowError("session_model_budget_exceeded", 429)
+                if not memory(state).get('user_history_version'):
+                    cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))
+                    rows = cur.fetchall()
+                    restore_user_statements(state, [(item['sequence_no'], unpacked(item['structured_content'])) for item in reversed(rows)])
                 state["_lease"] = {"request": request_id, "until": time.time() + 90}
                 cur.execute("UPDATE chat_sessions SET requirement_answers=%s WHERE session_id=%s", (packed(state), session_id))
             connection.commit()
