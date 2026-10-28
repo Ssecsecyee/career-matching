@@ -53,3 +53,29 @@ test('finished model throttling response is returned rather than mistaken for AP
   assert.equal(result.status,429);
   assert.equal(result.body.error_code,'ThrottlingException');
 });
+
+test('live draft is delivered before completion and duplicate versions are ignored', async () => {
+  const id = 'c'.repeat(64), progress = [], events = [];
+  const responses = [
+    {status:202, body:{job_id:id}},
+    {status:202, body:{job_id:id, partial_text:'안녕', partial_version:1}},
+    {status:202, body:{job_id:id, partial_text:'안녕', partial_version:1}},
+    {status:202, body:{job_id:id, partial_text:'안녕하세요', partial_version:2}},
+    {status:200, body:{stage:'conversation', message:'안녕하세요!'}}
+  ];
+  const result = await postChat({payload:{},accessCode:'test',ownerToken:'test',pause:async()=>{},onProgress:value=>{progress.push(value.text);events.push('draft');},fetcher:async()=>{
+    const response=responses.shift(); if(response.status===200)events.push('final');
+    return {status:response.status,ok:true,json:async()=>response.body};
+  }});
+  assert.deepEqual(progress,['안녕','안녕하세요']);
+  assert.equal(events[0],'draft');assert.equal(events.at(-1),'final');
+  assert.equal(result.body.message,'안녕하세요!');
+});
+
+test('partial drafts do not mask a final model error', async () => {
+  const id='d'.repeat(64), responses=[{status:202,body:{job_id:id,partial_text:'임시 답변',partial_version:1}},{status:502,body:{error_code:'ModelOutputFormatError'}}];
+  const result=await postChat({payload:{},accessCode:'test',ownerToken:'test',pause:async()=>{},onProgress:()=>{},fetcher:async()=>{
+    const response=responses.shift();return {status:response.status,ok:response.status<400,json:async()=>response.body};
+  }});
+  assert.equal(result.ok,false);assert.equal(result.body.error_code,'ModelOutputFormatError');
+});

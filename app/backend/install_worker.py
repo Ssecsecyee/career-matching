@@ -48,7 +48,8 @@ def main():
                 for statement in sql_statements(data.decode('utf-8-sig')): cur.execute(statement)
             cur.execute("CREATE USER IF NOT EXISTS 'career_runtime'@'%%' IDENTIFIED BY %s",(db['password'],))
             cur.execute("ALTER USER 'career_runtime'@'%%' IDENTIFIED BY %s",(db['password'],))
-            cur.execute("GRANT SELECT ON career_matching.job_postings TO 'career_runtime'@'%'")
+            for table in ("job_postings", "training_offerings"):
+                cur.execute("GRANT SELECT ON career_matching."+table+" TO 'career_runtime'@'%'")
             for table in ['chat_sessions','chat_messages','recommendation_evidence','model_invocations','response_cache']:
                 cur.execute('GRANT SELECT,INSERT,UPDATE,DELETE ON career_matching.'+table+" TO 'career_runtime'@'%'")
             cur.execute('SELECT COUNT(*) FROM job_postings')

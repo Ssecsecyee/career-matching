@@ -38,3 +38,11 @@ python export_mysql_data.py --input "C:\AWS_project\career_matching\app\backend\
 파일은 새 경로에만 생성한다. 같은 출처·ID는 중복 생성하지 않으며 오래된 스냅샷으로 최신 DB 값을 덮지 않도록 조건부 갱신한다. 문자열은 UTF-8 hex literal로 저장해 따옴표·역슬래시·원문 SQL 문구를 데이터로 취급한다. 시각은 UTC로 기록한다.
 
 실제 적재는 대상 DB에 schema.sql을 먼저 적용하고 생성된 jobs.data.sql을 실행하는 별도 단계다. root/관리자 비밀번호를 명령행이나 문서에 넣지 않는다. 최초 적재 보조용이며 DB 갱신과 Outbox를 연결하는 운영 동기화 코드는 아직 아니다. 추가 테스트 4개는 작성만 했으며 실행하지 않았다.
+
+
+## 증분 적재 추가
+운영 증분 갱신은 신규 `incremental_jumpit.py`를 사용한다. 기존 SQL 내보내기는 최초 적재 보조용이다. 설정·권한·안전한 미리보기는 [INCREMENTAL.md](INCREMENTAL.md), 수집 결과 규격은 [수집 담당 프롬프트](../../docs/JUMPIT_INCREMENTAL_COLLECTOR_PROMPT.md)를 참고한다. 실제 운영 적용·S3 업로드·예약 수집은 아직 수행하지 않았다.
+
+
+## 고용24 API 승인 후 전환
+[소량 추출부터 AWS 정기 배치까지의 계획](GOYONG24_PIPELINE.md)을 따른다. 현재 점핏용 incremental_jumpit.py를 고용24에 그대로 적용하지 않으며 출처 어댑터와 공통 적재 계층을 분리한다. 고용24 운영 수집·정기 실행은 아직 미구현이다.

@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { clientToken, postChat, requestPayload, safeSourceUrl } from './api.js';
 import './style.css';
+import { TypingText } from './TypingText.jsx';
 
 const names = { met: '충족해요', unmet: '미충족이에요', unknown: '아직 모르겠어요' };
 const isQuestion = data => ['checking_required', 'checking_preferred'].includes(data?.stage);
 
 function Reply({ data, active, busy, onSelect, onAnswer, onBatch }) {
   return <>
-    {data.message && <p className="muted assistant-text">{data.message}</p>}
+    {data.message && <TypingText text={data.message} animate={active && !data.cached} streaming={data.stage === 'streaming'} />}
     {data.stage === 'choose_job' && <><p>조건에 맞는 공고가 총 {data.total}건 있습니다. 먼저 살펴볼 공고를 골라 주세요.</p><div className="job-list">{data.candidate_jobs.map(job => <article className="job" key={job.source_id}>
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
@@ -21,7 +22,20 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch }) {
       <p className="fine">원문 목록 항목별로 확인하며, 합격 여부를 판정하지 않습니다.</p></>}
     {['completed', 'gap_guidance'].includes(data.stage) && <><p>{data.stage === 'completed' ? '지원 조건 확인을 마쳤습니다.' : '보완이 필요한 조건을 확인했습니다.'} 답변하신 내용을 정리해 드릴게요.</p>{data.unconfirmed_count > 0 && <p className="muted">아직 확인하지 못한 조건이 {data.unconfirmed_count}개 있습니다.</p>}
       {data.checks.map((check, i) => <div className="check" key={i}><strong>{check.type === 'required' ? '자격요건' : '우대조건'} · {names[check.assessment]}</strong><pre>{check.quote}</pre><p>{check.explanation}</p>{check.detail && <p>남긴 설명: {check.detail}</p>}</div>)}
-      <p className="fine">사용자가 확인한 답변에 따른 결과입니다. 교육 추천과 자유로운 학습 상담은 아직 연결되지 않았습니다.</p></>}
+      <p className="fine">사용자가 확인한 답변에 따른 결과입니다. 교육은 학습 참고 자료와 신청 후보를 구분하며, 모집 여부와 지원 자격은 원문에서 다시 확인해 주세요.</p></>}
+    {data.learning_search && <section className="source"><h3>학습 루트 참고 교육</h3>
+      {data.learning_search.status === 'no_match' && <p>관련 교육이 현재 DB에 없습니다. 학습 방향은 대화로 이어갈 수 있어요.</p>}
+      {data.learning_search.status === 'need_topic' && <p>배우고 싶은 기술이나 분야를 알려주세요.</p>}
+      {(data.learning_opportunities || []).map(course => <article className="check" key={`${course.source}:${course.source_id}`}>
+        <span className="pill">{course.recommendation_eligible ? '신청 후보 · 원문 재확인 필요' : '학습 참고용 · 모집 미확인/과거 회차'}</span>
+        <h3>{course.title}</h3><p>{course.provider_name} · {course.delivery_mode === 'online' ? '온라인' : course.delivery_mode === 'offline' ? '오프라인' : '혼합/미확인'}</p>
+        <p>연결된 주제: {(course.matched_topics || []).join(' · ')}</p><p>{course.curriculum}</p>
+        <p className="fine">페이지 표시 자부담: {course.tuition == null ? '미확인' : `${Number(course.tuition).toLocaleString()} ${course.currency || ''}`} · 최종 비용과 수강 자격은 기관 확인 필요</p>
+        {course.dates?.starts_at?.raw && <p className="fine">저장된 교육 일정: {course.dates.starts_at.raw} ~ {course.dates.ends_at?.raw || '미확인'}</p>}
+        {course.warning && <p className="fine">{course.warning}</p>}
+        <a href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a>
+      </article>)}
+    </section>}
     {data.stage === 'no_results' && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
     {data.cached && <span className="fine">저장된 응답</span>}
   </>;
@@ -70,10 +84,16 @@ function App() {
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
-      const response = await postChat({ payload, accessCode: code, ownerToken: owner.current });
+      const response = await postChat({ payload, accessCode: code, ownerToken: owner.current, onProgress: ({ text: partial }) => {
+        setMessages(old => {
+          const draft = { role: 'assistant', data: { stage: 'streaming', message: partial }, id: payload.request_id, partial: true };
+          return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? draft : m) : [...old, draft];
+        });
+      } });
       const data = response.body;
       if (data.session_id) setSession(data.session_id);
       if (!response.ok) {
+        setMessages(old => old.filter(m => m.id !== payload.request_id));
         const hints = { unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
         setError(hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`);
         if (data.retryable) setPending({ payload: { ...payload, request_id: crypto.randomUUID(), ...(data.session_id ? { session_id: data.session_id } : {}) }, retryAt: Date.now() + 10000 });
@@ -82,8 +102,12 @@ function App() {
         return;
       }
       setResult(data);
-      setMessages(old => [...old, { role: 'assistant', data, id: crypto.randomUUID() }]);
+      setMessages(old => {
+        const finished = { role: 'assistant', data, id: payload.request_id };
+        return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? finished : m) : [...old, finished];
+      });
     } catch {
+      setMessages(old => old.filter(m => m.id !== payload.request_id));
       setError('연결이 끊겼습니다. 같은 요청의 처리 결과를 다시 확인할 수 있습니다.');
       setPending({ payload, retryAt: 0 });
     } finally { inFlight.current = false; setBusy(false); }
@@ -119,7 +143,7 @@ function App() {
         <main className="conversation" aria-label="대화 내용" aria-live="polite">
           {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />공고를 찾은 뒤 지원 조건을 함께 확인할게요.</p></section>}
           {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onSelect={select} onAnswer={answer} onBatch={answerBatch} />}</div></article>)}
-          {busy && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
+          {busy && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />
         </main>

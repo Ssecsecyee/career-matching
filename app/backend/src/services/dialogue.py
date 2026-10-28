@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
+from src.services.learning import retrieve as retrieve_learning, attach as attach_learning
 from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
 
 
@@ -25,9 +26,10 @@ def ensure_selectable(job, include_unverified):
 
 
 class DialogueFlow:
-    def __init__(self, jobs, planner, questioner, *, include_unverified=False):
+    def __init__(self, jobs, planner, questioner, *, include_unverified=False, training=None):
         self.jobs, self.planner, self.questioner = jobs, planner, questioner
         self.include_unverified = include_unverified
+        self.training = training
 
     def advance(self, state, payload, invoke):
         action = payload['action']
@@ -46,7 +48,18 @@ class DialogueFlow:
             else:
                 # Search uses the user's current query; past skills must not become unwanted filters.
                 if hasattr(self.planner, 'route'):
-                    routed = invoke('conversation', self.planner.route, text, consultation_context(state))
+                    history = consultation_context(state)
+                    learning = retrieve_learning(state, text, self.training)
+                    if learning is not None:
+                        state['learning_context'] = learning
+                        history['training_retrieval'] = learning
+                        history['conversation_focus'] = {'kind':'training','source_ids':[c.get('source_id') for c in learning['courses']],
+                            'basis':'displayed_education_list' if learning.get('reference_resolution') else 'education_lookup'}
+                    else:
+                        state.pop('learning_context', None)
+                    routed = invoke('conversation', self.planner.route, text, history)
+                    if learning is not None and routed['intent'] != 'chat':
+                        routed = {'intent':'chat','reply':'교육 조회 결과를 확인해 주세요. 미확인 과정은 학습 참고용으로만 안내합니다.'}
                     if routed['intent'] == 'chat':
                         reply = routed['reply']
                         record(state, reply, 'assistant')
@@ -57,10 +70,14 @@ class DialogueFlow:
                         elif state.get('stage') in {'completed', 'gap_guidance'}:
                             result = {'stage':'conversation','memory':public_memory(state)}
                         result['message'] = reply
+                        attach_learning(result, learning)
+                        if learning is not None and any(not c['recommendation_eligible'] for c in learning['courses']):
+                            result['message'] = '아래 교육은 과거 회차 또는 모집 미확인 자료로, 학습 내용 참고용입니다.\n\n' + reply
                         return state, result, evidence
                     plan = SearchPlan.parse(routed['plan'])
                 else:
                     plan = invoke('search_plan', self.planner.plan, text)
+            state.pop('learning_context', None)
             total, jobs = self.jobs.search(plan)
             cards = [{key: row.get(key) for key in
                       ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
@@ -222,11 +239,16 @@ class DialogueFlow:
             state.update(stage='checking_required' if condition['type'] == 'required' else 'checking_preferred', question=question)
             return self.question_response(state)
         state['stage'] = 'gap_guidance' if any(c['type'] == 'required' and c['assessment'] == 'unmet' for c in state['checks']) else 'completed'
-        return {'stage': state['stage'], 'checks': state['checks'], 'memory': public_memory(state),
+        result = {'stage': state['stage'], 'checks': state['checks'], 'memory': public_memory(state),
                 'unconfirmed_count': sum(c['assessment'] == 'unknown' for c in state['checks']),
                 'message': '원문 조건 확인을 마쳤습니다. 미확인 조건은 충족으로 판단하지 않습니다. 합격 판단은 아닙니다.',
-                'learning_opportunities': [], 'limitations': ['교육 데이터는 아직 연결하지 않았습니다.',
+                'learning_opportunities': [], 'limitations': [
                   '원문 목록 항목 기준이며 AND·OR 관계를 임의로 나누지 않습니다.', '조건 충족 여부는 사용자 진술에 근거합니다.']}
+        if self.training is not None and any(c['assessment'] == 'unmet' for c in state['checks']):
+            learning = retrieve_learning(state, '부족한 역량 학습', self.training)
+            attach_learning(result, learning)
+            state['learning_context'] = learning
+        return result
 
     def search_response(self, state):
         return {'stage': state.get('stage', 'no_results'), 'candidate_jobs': state.get('candidate_jobs', []),

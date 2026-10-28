@@ -5,6 +5,7 @@ from pathlib import Path
 import time
 
 from src.handlers.dialogue import handle_request
+from src.services.progress import ProgressPublisher
 from src.handlers.queued import JobStore, aws_client
 from src.repositories.aws_secrets import read_secret
 from src.repositories.mysql_connection import connect_mysql
@@ -31,8 +32,9 @@ def process(message, store, *, handler=handle_request):
     if not row or row['expires_at']<=int(time.time()) or row['state']=='done': return
     # One worker is deployed. SQS can redeliver; MySQL request leases and replay cache remain authoritative.
     payload=json.loads(row['payload_json'])
+    progress={'on_progress':ProgressPublisher(store,value['job_id'])} if hasattr(store,'progress') and handler is handle_request else {}
     result=handler({'headers':{'Authorization':'Bearer '+os.environ['CHAT_API_TOKEN'],
-                              'X-Client-Token':row['client_token']},'body':json.dumps(payload,ensure_ascii=False)})
+                              'X-Client-Token':row['client_token']},'body':json.dumps(payload,ensure_ascii=False)},**progress)
     if result['statusCode']==409 and json.loads(result['body']).get('status')=='session_busy_retry_later':
         raise RuntimeError('Existing request is still leased')
     store.complete(value['job_id'],result)

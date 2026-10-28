@@ -6,3 +6,5 @@
 .check input { width: 100%; box-sizing: border-box; margin-top: 10px; padding: 10px; }
 
 .assistant-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.typing-cursor{opacity:.65;animation:typing-blink 1s step-end infinite}@keyframes typing-blink{50%{opacity:0}}@media(prefers-reduced-motion:reduce){.typing-cursor{animation:none}}

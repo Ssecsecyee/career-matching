@@ -37,9 +37,22 @@ class JobStore:
         except self.client.exceptions.ConditionalCheckFailedException:
             return False
 
+    def progress(self,job_id,text,version):
+        if not isinstance(text,str) or not 1<=len(text)<=5000 or type(version) is not int or version<1:
+            raise ValueError('Invalid draft snapshot')
+        try:
+            self.client.update_item(TableName=self.table,Key={'job_id':{'S':job_id}},
+                UpdateExpression='SET partial_text=:text, partial_version=:version',
+                ConditionExpression='attribute_exists(job_id) AND #s <> :done AND expires_at > :now',
+                ExpressionAttributeNames={'#s':'state'},ExpressionAttributeValues={
+                    ':text':{'S':text},':version':{'N':str(version)},':done':{'S':'done'},':now':{'N':str(int(time.time()))}})
+        except self.client.exceptions.ConditionalCheckFailedException:
+            return False
+        return True
+
     def complete(self, job_id, result):
         self.client.update_item(TableName=self.table,Key={'job_id':{'S':job_id}},
-            UpdateExpression='SET #s=:done, response_json=:response REMOVE payload_json, client_token',
+            UpdateExpression='SET #s=:done, response_json=:response REMOVE payload_json, client_token, partial_text, partial_version',
             ExpressionAttributeNames={'#s':'state'},ExpressionAttributeValues={':done':{'S':'done'},':response':{'S':json.dumps(result,ensure_ascii=False)}})
 
 
@@ -99,7 +112,10 @@ def job_response(row,owner):
     if not row or not hmac.compare_digest(row.get('owner',''),owner): return response(404,{'status':'job_not_found'})
     if row['expires_at']<=int(time.time()): return response(410,{'status':'job_expired'})
     if row['state']=='done': return json.loads(row['response_json'])
-    return response(202,{'status':'processing','job_id':row['job_id'],'poll_after_ms':1500})
+    value={'status':'processing','job_id':row['job_id'],'poll_after_ms':1500}
+    if isinstance(row.get('partial_text'),str) and 0<len(row['partial_text'])<=5000:
+        value.update(partial_text=row['partial_text'],partial_version=row.get('partial_version',0),draft=True)
+    return response(202,value)
 
 
 def lambda_handler(event,context):

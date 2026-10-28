@@ -38,7 +38,7 @@ class MySQLJobRepository:
                       "(deadline_type='always_open' OR deadline_at IS NULL OR deadline_at>UTC_TIMESTAMP(6))"]
         parameters = ["jumpit", "active"] + (["unknown"] if self.include_unverified else [])
         if plan.keyword:
-            conditions.append("CONCAT_WS(' ',title,company_name,responsibilities,qualifications,preferred_requirements) LIKE %s ESCAPE '='")
+            conditions.append("LOWER(CONCAT_WS(' ',title,company_name,responsibilities,qualifications,preferred_requirements,CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci)) LIKE LOWER(%s) ESCAPE '='")
             parameters.append(literal_like(plan.keyword))
         if plan.region:
             conditions.append("CONCAT_WS(' ',CAST(addresses AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci,location_text) LIKE %s ESCAPE '='")

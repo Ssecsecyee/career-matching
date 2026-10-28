@@ -1,0 +1,122 @@
+[
+  {
+    "source": "fixture",
+    "source_id": "demo-course-1:cohort-1",
+    "source_url": "https://example.invalid/training/1",
+    "course_key": "demo-course-1",
+    "cohort_name": "가상 1기",
+    "title": "가상 프론트엔드 실습 과정",
+    "provider_name": "가상 교육기관 (실제 기관 아님)",
+    "curriculum": "[가상 테스트 데이터] 기초 복습 → 실습 → 프로젝트",
+    "eligibility": "JavaScript 기초를 학습한 사람",
+    "learning_topics": [
+      "JavaScript",
+      "React",
+      "Git"
+    ],
+    "tech_stacks": [
+      "JavaScript",
+      "React",
+      "Git"
+    ],
+    "normalized_domains": [
+      "software"
+    ],
+    "delivery_mode": "online",
+    "dates": {
+      "starts_at": {
+        "raw": "2026-12-01",
+        "precision": "date_only"
+      },
+      "ends_at": {
+        "raw": "2027-02-28",
+        "precision": "date_only"
+      }
+    },
+    "tuition": null,
+    "currency": null,
+    "cost_description": "가상 데이터이며 실제 비용 미제공",
+    "recruitment_status": "unknown",
+    "fetched_at": "2026-10-28T00:00:00Z"
+  },
+  {
+    "source": "fixture",
+    "source_id": "demo-course-2:cohort-1",
+    "source_url": "https://example.invalid/training/2",
+    "course_key": "demo-course-2",
+    "cohort_name": "가상 1기",
+    "title": "가상 AI 모델링 기초 과정",
+    "provider_name": "가상 교육기관 (실제 기관 아님)",
+    "curriculum": "[가상 테스트 데이터] 기초 복습 → 실습 → 프로젝트",
+    "eligibility": "Python 기초 문법 학습 경험",
+    "learning_topics": [
+      "Python",
+      "pandas",
+      "PyTorch"
+    ],
+    "tech_stacks": [
+      "Python",
+      "pandas",
+      "PyTorch"
+    ],
+    "normalized_domains": [
+      "ai"
+    ],
+    "delivery_mode": "online",
+    "dates": {
+      "starts_at": {
+        "raw": "2026-12-01",
+        "precision": "date_only"
+      },
+      "ends_at": {
+        "raw": "2027-02-28",
+        "precision": "date_only"
+      }
+    },
+    "tuition": null,
+    "currency": null,
+    "cost_description": "가상 데이터이며 실제 비용 미제공",
+    "recruitment_status": "unknown",
+    "fetched_at": "2026-10-28T00:00:00Z"
+  },
+  {
+    "source": "fixture",
+    "source_id": "demo-course-3:cohort-1",
+    "source_url": "https://example.invalid/training/3",
+    "course_key": "demo-course-3",
+    "cohort_name": "가상 1기",
+    "title": "가상 데이터 파이프라인 과정",
+    "provider_name": "가상 교육기관 (실제 기관 아님)",
+    "curriculum": "[가상 테스트 데이터] 기초 복습 → 실습 → 프로젝트",
+    "eligibility": "Python과 SQL 기초 학습 경험",
+    "learning_topics": [
+      "SQL",
+      "Python",
+      "Docker"
+    ],
+    "tech_stacks": [
+      "SQL",
+      "Python",
+      "Docker"
+    ],
+    "normalized_domains": [
+      "software"
+    ],
+    "delivery_mode": "online",
+    "dates": {
+      "starts_at": {
+        "raw": "2026-12-01",
+        "precision": "date_only"
+      },
+      "ends_at": {
+        "raw": "2027-02-28",
+        "precision": "date_only"
+      }
+    },
+    "tuition": null,
+    "currency": null,
+    "cost_description": "가상 데이터이며 실제 비용 미제공",
+    "recruitment_status": "unknown",
+    "fetched_at": "2026-10-28T00:00:00Z"
+  }
+]

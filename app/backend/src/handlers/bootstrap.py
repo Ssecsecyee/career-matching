@@ -54,7 +54,7 @@ def lambda_handler(event, context):
                 for statement in sql_statements(text): cur.execute(statement)
             cur.execute("CREATE USER IF NOT EXISTS 'career_runtime'@'%%' IDENTIFIED BY %s REQUIRE SSL",(runtime['password'],))
             cur.execute("ALTER USER 'career_runtime'@'%%' IDENTIFIED BY %s REQUIRE SSL",(runtime['password'],))
-            for table in ('job_postings',):
+            for table in ('job_postings','training_offerings'):
                 cur.execute('GRANT SELECT ON career_matching.'+table+" TO 'career_runtime'@'%'")
             for table in ('chat_sessions','chat_messages','recommendation_evidence','model_invocations','response_cache'):
                 cur.execute('GRANT SELECT,INSERT,UPDATE,DELETE ON career_matching.'+table+" TO 'career_runtime'@'%'")

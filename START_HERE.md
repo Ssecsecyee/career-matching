@@ -38,3 +38,7 @@ archive는 변경 전 문서와 복구용 스냅샷이다. retired는 현재 작
 ## 현재 백엔드 실행 경로 보완
 
 웹 호스팅 완료 후 저비용 백엔드 연결을 준비했다. 현재 우선안은 서울 t4g.small 단일 서버의 MySQL+Python 작업 코드와 Lambda/HTTP API/SQS/임시 DynamoDB 작업 상태이며 RDS/유료 VPC 엔드포인트는 사용하지 않는다. Elasticsearch는 아직 미포함이다. 기존 전체 배포 대신 infra/BACKEND.md의 backend.py를 따른다. 단일 서버/수동 운영의 한계가 있으며 월 6만 원은 목표이지 비용 상한 보장이 아니다. 실제 서버·DB·Bedrock 연결은 사용자 실행 후 검증해야 한다.
+
+
+## 최신 데이터 파이프라인 계획 (2026-10-28)
+AWS 웹·EC2 MySQL·대화 처리는 배포 검증을 마쳤다. 위의 미배포/RDS 초안은 과거 기록이다. 다음 데이터 소스는 고용24 승인 후 소량 추출·격리 검증·AWS 수동 연계·정기 자동화 순서로 진행한다. [상세 계획](app/ingestion/GOYONG24_PIPELINE.md)과 docs 각 문서 상단의 최신 상태를 우선한다.

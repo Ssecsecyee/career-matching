@@ -12,6 +12,7 @@ from src.bedrock.client import BedrockPlanner
 from src.bedrock.questioner import BedrockQuestioner
 from src.repositories.mysql_connection import connect_mysql
 from src.repositories.mysql_jobs import MySQLJobRepository
+from src.repositories.mysql_training import MySQLTrainingRepository
 from src.repositories.mysql_chat import MySQLChatStore
 from src.services.dialogue import DialogueFlow, FlowError
 from src.services.dependency_errors import dependency_error, error_code
@@ -74,7 +75,7 @@ def validate_payload(value):
     return value
 
 
-def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None):
+def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None):
     headers = {key.lower(): value for key, value in event.get("headers", {}).items()}
     expected = os.getenv("CHAT_API_TOKEN", "")
     if len(expected) < 32:
@@ -98,7 +99,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         retention = int(os.environ["CHAT_RETENTION_HOURS"])
         jobs = jobs or MySQLJobRepository(connect_mysql, include_unverified=include_unverified)
         store = store or MySQLChatStore(connect_mysql, retention_hours=retention)
-        planner = planner or BedrockPlanner(model, region)
+        planner = planner or (BedrockPlanner(model, region, on_partial=on_progress) if on_progress is not None else BedrockPlanner(model, region))
         questioner = questioner or BedrockQuestioner(model, region)
     except (ValueError, TypeError, AttributeError):
         return response(400, {"status": "invalid_request_or_settings"})
@@ -112,7 +113,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
 
         def invoke(purpose, function, *args):
             adapter = planner if purpose in {"search_plan", "conversation"} else questioner
-            version = "conversation-evidence-v2" if purpose == "conversation" else ("search-v1" if purpose == "search_plan" else "question-memory-v2")
+            version = "conversation-training-v4" if purpose == "conversation" else ("search-v1" if purpose == "search_plan" else "question-memory-v2")
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             try:
                 result, usage = function(*args)
@@ -122,7 +123,8 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             store.finish_invocation(ticket, identity, usage=usage)
             return result
 
-        flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified)
+        flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
+                            training=training if training is not None else MySQLTrainingRepository(connect_mysql))
         state, result, evidence = flow.advance(ticket["state"], payload, invoke)
         result["snapshot_warning"] = include_unverified
         return response(200, store.finish(ticket, payload, state, result, evidence))

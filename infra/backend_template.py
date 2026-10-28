@@ -44,7 +44,7 @@ def backend_template():
         allow(['dynamodb:GetItem','dynamodb:UpdateItem'],att('Jobs','Arn')),
         allow(['sqs:ReceiveMessage','sqs:DeleteMessage','sqs:ChangeMessageVisibility'],att('WorkQueue','Arn')),
         allow(['s3:GetObject'],[sub('arn:${AWS::Partition}:s3:::${ArtifactBucket}/${WorkerKey}')]),
-        allow(['bedrock:InvokeModel'],[sub('arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.anthropic.claude-sonnet-4-6'),
+        allow(['bedrock:InvokeModel','bedrock:InvokeModelWithResponseStream'],[sub('arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/global.anthropic.claude-sonnet-4-6'),
             sub('arn:${AWS::Partition}:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6')])])
     add('Profile','AWS::IAM::InstanceProfile',{'Roles':[ref('WorkerRole')]},'Host role for SSM and Bedrock; containers do not need IMDS.')
     config={'AWS_REGION':'${AWS::Region}','CHAT_SECRET_ARN':'${AuthSecret}','MYSQL_SECRET_ARN':'${DbSecret}',
