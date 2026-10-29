@@ -1,6 +1,7 @@
 """Separate education index, current facts and eligibility checked in MySQL."""
 import os
 import re
+from src.repositories.search_failover import SearchFailover, SearchUnavailable
 from src.repositories.job_search_factory import LocalElasticTransport
 from src.repositories.mysql_training import MySQLTrainingRepository, card
 
@@ -39,7 +40,9 @@ class ElasticsearchTrainingRepository:
 
     def search(self, topics):
         result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics))
-        if result.get('timed_out') or result.get('_shards', {}).get('failed', 0):
+        if result.get('timed_out'):
+            raise SearchUnavailable('elasticsearch_query_timeout')
+        if result.get('_shards', {}).get('failed', 0):
             raise RuntimeError('incomplete_training_search')
         hits = result['hits']
         if hits['total'].get('relation') != 'eq' or hits['total']['value'] > 1000 or len(hits['hits']) != hits['total']['value']:
@@ -82,6 +85,7 @@ def create_training_repository(connection_factory):
         return MySQLTrainingRepository(connection_factory)
     if selector != 'elasticsearch':
         raise ValueError('invalid_training_search_backend')
-    return ElasticsearchTrainingRepository(connection_factory,
+    primary = ElasticsearchTrainingRepository(connection_factory,
         LocalElasticTransport(os.getenv('ELASTICSEARCH_URL', 'http://127.0.0.1:19200')),
         index=os.getenv('ELASTICSEARCH_TRAINING_INDEX', 'career-training-local-read'))
+    return SearchFailover(primary, MySQLTrainingRepository(connection_factory), entity='training')

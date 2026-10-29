@@ -2,6 +2,9 @@
 import json
 import os
 import re
+import ssl
+from urllib.error import HTTPError, URLError
+from src.repositories.search_failover import SearchFailover, SearchUnavailable
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
@@ -20,9 +23,24 @@ class LocalElasticTransport:
 
     def __call__(self, method, path, body=None):
         data = None if body is None else json.dumps(body).encode('utf-8')
-        with urlopen(Request(self.endpoint + path, data, {'Content-Type': 'application/json'},
-                             method=method), timeout=10) as result:
-            payload = result.read(8 * 1024 * 1024 + 1)
+        try:
+            with urlopen(Request(self.endpoint + path, data, {'Content-Type': 'application/json'},
+                                 method=method), timeout=10) as result:
+                payload = result.read(8 * 1024 * 1024 + 1)
+        except HTTPError as exc:
+            if exc.code in (502,503,504):
+                raise SearchUnavailable('elasticsearch_unavailable') from None
+            raise
+        except URLError as exc:
+            if isinstance(exc.reason, ssl.SSLError):
+                raise
+            if isinstance(exc.reason, (ConnectionError, TimeoutError, OSError)):
+                raise SearchUnavailable('elasticsearch_connection_failed') from None
+            raise
+        except ssl.SSLError:
+            raise
+        except (ConnectionError, TimeoutError):
+            raise SearchUnavailable('elasticsearch_connection_failed') from None
         if len(payload) > 8 * 1024 * 1024:
             raise RuntimeError('search_response_too_large')
         return json.loads(payload)
@@ -48,7 +66,9 @@ class VerifiedElasticJobs:
         query['_source'] = ['source', 'source_id', 'source_version']
         query['timeout'] = '5s'
         result = self.request('POST', '/' + self.index + '/_search', query)
-        if result.get('timed_out') or result.get('_shards', {}).get('failed', 0):
+        if result.get('timed_out'):
+            raise SearchUnavailable('elasticsearch_query_timeout')
+        if result.get('_shards', {}).get('failed', 0):
             raise RuntimeError('incomplete_search')
         hits = result['hits']
         if hits['total'].get('relation') != 'eq' or hits['total']['value'] > 1000:
@@ -78,6 +98,7 @@ def create_job_repository(connection_factory, *, include_unverified=False):
         return database
     if backend != 'elasticsearch':
         raise ValueError('invalid_job_search_backend')
-    return VerifiedElasticJobs(LocalElasticTransport(os.getenv('ELASTICSEARCH_URL', 'http://127.0.0.1:19200')),
+    primary = VerifiedElasticJobs(LocalElasticTransport(os.getenv('ELASTICSEARCH_URL', 'http://127.0.0.1:19200')),
                                database, index=os.getenv('ELASTICSEARCH_INDEX', 'career-jobs-local-read'),
                                include_unverified=include_unverified)
+    return SearchFailover(primary, database, entity='job')

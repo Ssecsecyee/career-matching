@@ -125,3 +125,8 @@ AWS 백엔드 코드 릴리스 `20261028T053143Z`와 웹 교육 참고 카드 �
 
 ## 생성 중 답변 전달 배포 보완 (2026-10-28)
 실제 Bedrock ConverseStream과 소유자별 중간 텍스트 폴링/타이핑 표시를 배포했습니다. 기존 비동기 작업 구조를 유지하며 브라우저 SSE는 아닙니다. 상세 범위·권한·검증·제한은 docs/STREAMING_RESPONSES.md를 참조합니다.
+
+
+## 2026-10-29 검색 미응답 복귀
+
+Elasticsearch 연결 실패·시간 초과·502/503/504 시 채용·교육 검색을 MySQL로 자동 복귀한다. 정상 0건·설정/인증 오류는 구분한다. 채용 검색 응답의 search_backend/search_degraded와 교육 카드 retrieval_basis로 경로를 기록한다. 상세는 SEARCH_FAILOVER.md를 따른다. AWS 배포 완료를 뜻하지 않는다.

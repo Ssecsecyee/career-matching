@@ -85,6 +85,8 @@ class DialogueFlow:
                     plan = invoke('search_plan', self.planner.plan, text)
             state.pop('learning_context', None)
             total, jobs = self.jobs.search(plan)
+            state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
+            state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
             cards = [{key: row.get(key) for key in
                       ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
                        'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
@@ -259,6 +261,7 @@ class DialogueFlow:
     def search_response(self, state):
         return {'stage': state.get('stage', 'no_results'), 'candidate_jobs': state.get('candidate_jobs', []),
                 'total': state.get('total', 0), 'memory': public_memory(state),
+                'search_backend':state.get('search_backend','mysql'), 'search_degraded':state.get('search_degraded',False),
                 'snapshot_warning': self.include_unverified}
 
     @staticmethod
