@@ -1,5 +1,13 @@
 # 아키텍처
 
+## 2026-10-29 Elasticsearch 도입 합의와 구현 상태
+
+이 절은 아래 과거 초안의 검색엔진 관련 설명보다 우선한다. **로컬 Nori·동의어 실행과 실제 스냅샷 783건 색인·검색 어댑터 검증을 완료했으며 운영 Elasticsearch는 미도입이다.** 직접 설치 방식으로 진행하며 OpenSearch·Elastic Cloud로 자동 대체하지 않는다. 로컬 Docker에서 분석기·색인·백엔드·동기화를 검증한 뒤 AWS에 배포한다. S3는 원본·백업 저장소이며 검색엔진 설치 위치가 아니다.
+
+현재 배포 경로는 사용자 → CloudFront/API Gateway → Lambda → 대화 SQS → EC2 작업자 → MySQL/Bedrock이다. 검색 도입 후 EC2 작업자가 구조화된 계획을 검증하고 Elasticsearch DSL로 변환한다. Lambda나 MySQL을 새로 대체하지 않는다. Elasticsearch에서 source+ID·버전·점수를 받고 MySQL에서 최신 상태·상세를 확인한다. 원본 데이터와 대화 기록의 기준 저장소는 MySQL이다.
+
+데이터 경로는 검증된 수집 결과 → MySQL+Outbox → 색인 소비자 → Elasticsearch다. 기존 수집용 큐와 대화용 큐는 구분한다. 검색엔진 전용 EC2 추가와 기존 EC2 확장 중 선택은 메모리·지연·비용 측정 후 결정한다.
+
 ## 2026-10-28 최신 상태와 고용24 전환 계획
 
 이 절의 실행 현황과 전환 방향을 아래의 과거 초안보다 우선한다. 현재 AWS 웹·대화 서버·EC2 MySQL 연결을 검증했으며 RDS와 Elasticsearch는 사용하지 않는다. 점핏 추가 표본 10건은 백업 후 운영 반영해 총 793건이며, 기존 783건의 버전·해시는 유지했다. 신규 10건의 모집 상태는 unknown이다. **고용24 승인 후 소량 표본 검증을 거쳐 AWS 정기 배치 자동화로 전환**한다. 상세 단계와 통과 기준은 [고용24 파이프라인 계획](../app/ingestion/GOYONG24_PIPELINE.md)을 따른다.

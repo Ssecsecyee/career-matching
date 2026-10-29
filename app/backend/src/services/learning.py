@@ -3,6 +3,8 @@ import re
 from copy import deepcopy
 
 ALIASES={
+ 'UI/UX':['ui/ux','ui ux','uiux','ui 디자인','ux 디자인','ui/ux 디자인','사용자 경험 디자인'],
+ 'Figma':['figma','피그마'],
  'React':['react','리액트','리엑트'], 'Git':['git','깃'], 'JavaScript':['javascript','자바스크립트'],
  'TypeScript':['typescript','타입스크립트'], 'Python':['python','파이썬'],
  'RAG':['rag','검색 증강'], 'LLM':['llm','대규모 언어 모델'],
@@ -29,9 +31,10 @@ def retrieve(state,message,repository):
     job_search=bool(re.search(r'(공고|채용|일자리|구인|구직).{0,16}(찾|검색|있|보여)',message))
     job_reference=bool(re.search(r'(공고|채용|일자리|구인|구직|회사|기업)',message)) and not requested(message)
     if job_search or job_reference:return None
-    followup=bool(previous) and (bool(re.search(r'(?:이|그)\s*중',message)) or any(word in message for word in (
+    pending_topic=bool(previous) and previous.get('status')=='need_topic' and 0<len(message.strip())<=80 and message.strip() not in {'안녕','안녕하세요','고마워','감사합니다'}
+    followup=pending_topic or (bool(previous) and (bool(re.search(r'(?:이|그)\s*중',message)) or any(word in message for word in (
         '이 과정','저 과정','첫 번째','두 번째','온라인','오프라인','수강료','비용','교육 기간',
-        '추천','비교','어떤','어느','뭘','뭐가','제일','가장','더 나은')))
+        '추천','비교','어떤','어느','뭘','뭐가','제일','가장','더 나은'))))
     if repository is None or not (requested(message) or followup):return None
     explicit=topics_in(message)
     if followup and previous.get('courses') and (not explicit or set(explicit).issubset(previous.get('topics',[]))):

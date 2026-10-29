@@ -59,6 +59,28 @@ class MySQLJobRepository:
         finally:
             connection.close()
 
+    def search_details(self, source_ids):
+        """Read current selectable rows in bounded batches, no DB writes."""
+        if len(source_ids)>1000 or any(not isinstance(i,str) or not i.isdigit() or len(i)>128 for i in source_ids):
+            raise ValueError('invalid_candidate_ids')
+        if not source_ids:return {}
+        connection=self.connection_factory()
+        rows={}
+        try:
+            with connection.cursor() as cursor:
+                for start in range(0,len(source_ids),100):
+                    identities=source_ids[start:start+100]
+                    statuses=['active','unknown'] if self.include_unverified else ['active']
+                    sql=('SELECT '+','.join(DETAIL_FIELDS)+' FROM job_postings WHERE source=%s AND source_id IN ('+
+                         ','.join(['%s']*len(identities))+') AND recruitment_status IN ('+','.join(['%s']*len(statuses))+') '+
+                         "AND (deadline_type='always_open' OR deadline_at IS NULL OR deadline_at>UTC_TIMESTAMP(6))")
+                    cursor.execute(sql,['jumpit']+identities+statuses)
+                    for row in cursor.fetchall():
+                        row=decode_row(row)
+                        rows[row['source_id']]=row
+            return rows
+        finally:connection.close()
+
     def get(self, source_id):
         if not isinstance(source_id, str) or not source_id.isdigit() or len(source_id) > 128:
             raise ValueError("Invalid source ID")

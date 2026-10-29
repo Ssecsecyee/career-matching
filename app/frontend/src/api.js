@@ -11,7 +11,7 @@ export function requestPayload(action, values, sessionId, requestId = crypto.ran
   return { ...values, action, request_id: requestId, ...(sessionId ? { session_id: sessionId } : {}) };
 }
 
-export async function postChat({ payload, accessCode, ownerToken, fetcher = fetch, pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 80, onProgress = () => {} }) {
+export async function postChat({ payload, accessCode, ownerToken, fetcher = fetch, pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 240, onProgress = () => {} }) {
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${accessCode}`, 'X-Client-Token': ownerToken };
   let result = await fetcher('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload) });
   let body = await result.json();
@@ -26,7 +26,9 @@ export async function postChat({ payload, accessCode, ownerToken, fetcher = fetc
   }
   progress(body);
   for (let attempt = 0; attempt < maxPolls; attempt++) {
-    await pause(1500);
+    const hint = Number(body.poll_after_ms);
+    const delay = result.status === 429 ? 1500 : Number.isFinite(hint) && hint > 0 ? Math.max(500, Math.min(1500, hint)) : 500;
+    await pause(delay);
     result = await fetcher(url, { method: 'GET', headers, cache: 'no-store' });
     body = await result.json();
     if (result.status === 202) progress(body);

@@ -11,8 +11,8 @@ from src.config import load_local_settings
 from src.bedrock.client import BedrockPlanner
 from src.bedrock.questioner import BedrockQuestioner
 from src.repositories.mysql_connection import connect_mysql
-from src.repositories.mysql_jobs import MySQLJobRepository
-from src.repositories.mysql_training import MySQLTrainingRepository
+from src.repositories.job_search_factory import create_job_repository
+from src.repositories.elasticsearch_training import create_training_repository
 from src.repositories.mysql_chat import MySQLChatStore
 from src.services.dialogue import DialogueFlow, FlowError
 from src.services.dependency_errors import dependency_error, error_code
@@ -97,7 +97,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         region = os.getenv("BEDROCK_REGION") or os.getenv("AWS_REGION")
         model = os.getenv("MODEL_ID") or os.getenv("BEDROCK_MODEL_ID")
         retention = int(os.environ["CHAT_RETENTION_HOURS"])
-        jobs = jobs or MySQLJobRepository(connect_mysql, include_unverified=include_unverified)
+        jobs = jobs or create_job_repository(connect_mysql, include_unverified=include_unverified)
         store = store or MySQLChatStore(connect_mysql, retention_hours=retention)
         planner = planner or (BedrockPlanner(model, region, on_partial=on_progress) if on_progress is not None else BedrockPlanner(model, region))
         questioner = questioner or BedrockQuestioner(model, region)
@@ -124,7 +124,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             return result
 
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
-                            training=training if training is not None else MySQLTrainingRepository(connect_mysql))
+                            training=training if training is not None else create_training_repository(connect_mysql))
         state, result, evidence = flow.advance(ticket["state"], payload, invoke)
         result["snapshot_warning"] = include_unverified
         return response(200, store.finish(ticket, payload, state, result, evidence))

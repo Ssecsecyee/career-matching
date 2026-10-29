@@ -15,7 +15,17 @@ def apply_page_metadata(row):
     combined=[]
     for section in sections:
         if not isinstance(section,dict):raise ValueError('invalid_page_section')
-        if section.get('status')!='확인됨':continue
+        if section.get('status')!='확인됨':
+            # Alternate collector contract: observation is bound to a dt/dd
+            # section dictionary rather than duplicated section-level status.
+            heading=section.get('original_heading')
+            text=section.get('original_text')
+            observed=page.get('sections',{})
+            if (section.get('status') is not None or not isinstance(observed,dict)
+                or not isinstance(heading,str) or not isinstance(text,str)
+                or observed.get(heading)!=text
+                or section.get('pointer')!='dt='+heading+'/dd'):
+                continue
         if section.get('source_url')!=row['source_url']:raise ValueError('section_source_url_mismatch')
         heading,text=section.get('original_heading'),section.get('original_text')
         if not isinstance(heading,str) or not isinstance(text,str):raise ValueError('invalid_original_section_text')
@@ -38,7 +48,15 @@ def apply_page_metadata(row):
     if not isinstance(dates,dict):raise ValueError('invalid_page_dates')
     deadline=dates.get('deadline',{})
     if not isinstance(deadline,dict):raise ValueError('invalid_page_deadline')
-    if deadline.get('precision')=='date_only' and deadline.get('status')=='확인됨':
+    deadline_confirmed=deadline.get('status')=='확인됨'
+    if deadline.get('status') is None:
+        evidence=page.get('field_status',{}).get('deadline_display',{})
+        deadline_confirmed=(isinstance(evidence,dict) and evidence.get('status')=='확인됨'
+            and evidence.get('source_url')==row['source_url']
+            and evidence.get('pointer')=='dt=마감일/dd'
+            and page.get('sections',{}).get('마감일')==deadline.get('raw')
+            and page.get('deadline_display_raw')==deadline.get('raw'))
+    if deadline.get('precision')=='date_only' and deadline_confirmed:
         raw=deadline.get('raw')
         if not isinstance(raw,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',raw):raise ValueError('invalid_date_only_deadline')
         day=date.fromisoformat(raw).isoformat()

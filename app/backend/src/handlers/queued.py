@@ -112,7 +112,7 @@ def job_response(row,owner):
     if not row or not hmac.compare_digest(row.get('owner',''),owner): return response(404,{'status':'job_not_found'})
     if row['expires_at']<=int(time.time()): return response(410,{'status':'job_expired'})
     if row['state']=='done': return json.loads(row['response_json'])
-    value={'status':'processing','job_id':row['job_id'],'poll_after_ms':1500}
+    value={'status':'processing','job_id':row['job_id'],'poll_after_ms':500}
     if isinstance(row.get('partial_text'),str) and 0<len(row['partial_text'])<=5000:
         value.update(partial_text=row['partial_text'],partial_version=row.get('partial_version',0),draft=True)
     return response(202,value)

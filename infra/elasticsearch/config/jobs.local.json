@@ -1,0 +1,93 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "tokenizer": {
+        "ko_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "discard"
+        }
+      },
+      "filter": {
+        "tech_synonyms": {
+          "type": "synonym_graph",
+          "lenient": false,
+          "synonyms": [
+            "react, 리액트, 리엑트, react.js",
+            "postgresql, postgres",
+            "python, 파이썬"
+          ]
+        }
+      },
+      "analyzer": {
+        "ko_text": {
+          "type": "custom",
+          "tokenizer": "ko_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "tech_exact": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "tech_query": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase",
+            "tech_synonyms"
+          ]
+        }
+      },
+      "normalizer": {
+        "lowercase_keyword": {
+          "type": "custom",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "source": {
+        "type": "keyword"
+      },
+      "source_id": {
+        "type": "keyword"
+      },
+      "source_version": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "ko_text"
+      },
+      "qualifications": {
+        "type": "text",
+        "analyzer": "ko_text"
+      },
+      "skills": {
+        "type": "text",
+        "analyzer": "tech_exact",
+        "search_analyzer": "tech_query",
+        "fields": {
+          "raw": {
+            "type": "keyword",
+            "normalizer": "lowercase_keyword"
+          }
+        }
+      },
+      "recruitment_status": {
+        "type": "keyword"
+      }
+    }
+  }
+}

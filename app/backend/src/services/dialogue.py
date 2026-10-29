@@ -59,7 +59,13 @@ class DialogueFlow:
                         state.pop('learning_context', None)
                     routed = invoke('conversation', self.planner.route, text, history)
                     if learning is not None and routed['intent'] != 'chat':
-                        routed = {'intent':'chat','reply':'교육 조회 결과를 확인해 주세요. 미확인 과정은 학습 참고용으로만 안내합니다.'}
+                        if learning['status']=='no_match':
+                            reply='저장된 교육 자료에서 해당 분야의 과정을 찾지 못했습니다. 현재 신청 가능한 과정이 없다는 뜻은 아니며, 모집 여부는 확인하지 못했습니다.'
+                        elif learning['status']=='need_topic':
+                            reply='어떤 분야의 교육을 찾으시나요? 관심 있는 기술이나 직무를 알려주세요. 현재 모집 여부는 별도 확인이 필요합니다.'
+                        else:
+                            reply='교육 조회 결과를 확인해 주세요. 미확인 과정은 학습 참고용으로만 안내합니다.'
+                        routed = {'intent':'chat','reply':reply}
                     if routed['intent'] == 'chat':
                         reply = routed['reply']
                         record(state, reply, 'assistant')

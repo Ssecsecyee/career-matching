@@ -10,7 +10,7 @@ class ProgressPublisher:
         if self.disabled or not isinstance(text,str) or not text or len(text)>5000:return
         if not text.startswith(self.last) or text==self.last:return
         now=self.clock()
-        if now-self.last_time<0.8:return
+        if now-self.last_time<0.35:return
         try:
             self.version+=1
             self.store.progress(self.job_id,text,self.version)

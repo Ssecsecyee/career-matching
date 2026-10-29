@@ -8,3 +8,5 @@
 .assistant-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .typing-cursor{opacity:.65;animation:typing-blink 1s step-end infinite}@keyframes typing-blink{50%{opacity:0}}@media(prefers-reduced-motion:reduce){.typing-cursor{animation:none}}
+
+.assistant-text{font-size:15px;line-height:1.85;color:#2b352d}.typing-status{display:flex;align-items:center;gap:14px;color:#587151;font-size:11px;margin-bottom:5px}.typing-status .quiet{padding:2px 8px;font-size:11px}.typing-cursor{color:#356e4b;opacity:1}

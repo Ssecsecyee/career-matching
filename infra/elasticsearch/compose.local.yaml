@@ -1,0 +1,25 @@
+name: career-search-local
+services:
+  elasticsearch:
+    build: .
+    image: career-elasticsearch-nori:9.5.5
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: basic
+      xpack.ml.enabled: "false"
+      node.store.allow_mmap: "false"
+      plugin.mandatory: analysis-nori
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:19200:9200"
+    mem_limit: 2g
+    volumes:
+      - search_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  search_data:

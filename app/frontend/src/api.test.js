@@ -79,3 +79,20 @@ test('partial drafts do not mask a final model error', async () => {
   }});
   assert.equal(result.ok,false);assert.equal(result.body.error_code,'ModelOutputFormatError');
 });
+
+
+test('live polling uses half-second hints and backs off API throttling', async () => {
+  const id='e'.repeat(64), pauses=[];
+  const replies=[{status:202,body:{job_id:id,poll_after_ms:500}},{status:429,body:{}},{status:202,body:{job_id:id,poll_after_ms:500}},{status:200,body:{stage:'conversation'}}];
+  await postChat({payload:{},accessCode:'test',ownerToken:'test',pause:async ms=>pauses.push(ms),fetcher:async()=>{
+    const reply=replies.shift();return {status:reply.status,ok:reply.status<400,json:async()=>reply.body};
+  }});
+  assert.deepEqual(pauses,[500,1500,500]);
+});
+
+test('short reply animation stays readable without an unbounded catch-up rate', async () => {
+  const { typingSpeed } = await import('./typingSpeed.js');
+  const revealedInHalfSecond=Math.floor(typingSpeed(100)*0.5);
+  assert.ok(revealedInHalfSecond > 0 && revealedInHalfSecond < 30);
+  assert.ok(typingSpeed(4000) <= 90);
+});

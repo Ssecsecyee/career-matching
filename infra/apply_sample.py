@@ -18,7 +18,15 @@ STATE=ROOT/'infra/.build/sample-apply-state.json'
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['submit','result'])
+    parser.add_argument('--batch', type=Path, help='Explicit reviewed ten-record batch directory')
     args=parser.parse_args()
+    global STATE
+    if args.batch:
+        batch_path = args.batch.resolve()
+        allowed = (ROOT/'workspace/incoming/jumpit').resolve()
+        if batch_path.parent != allowed or not batch_path.is_dir():
+            raise ValueError('Batch must be a direct child of workspace/incoming/jumpit')
+        STATE = ROOT/'infra/.build'/('sample-apply-'+batch_path.name+'-state.json')
     state=json.loads((ROOT/'infra/.build/backend-state.json').read_text(encoding='utf-8'))
     session=boto3.Session(profile_name=state['profile'],region_name=state['region'])
     config=Config(connect_timeout=5,read_timeout=40,retries={'mode':'standard','total_max_attempts':2})
@@ -38,7 +46,7 @@ def main():
     outputs={item['OutputKey']:item['OutputValue'] for item in stack['Outputs']}
     sys.path.insert(0,str(ROOT/'app/ingestion'))
     from incremental_jumpit import prepare
-    batch=ROOT/'workspace/incoming/jumpit/jumpit_20261028_094454_quality01'
+    batch=batch_path if args.batch else ROOT/'workspace/incoming/jumpit/jumpit_20261028_094454_quality01'
     rows,_=prepare(batch)
     if len(rows)!=10:raise ValueError('Expected exactly ten sample records')
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
