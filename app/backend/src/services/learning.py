@@ -25,17 +25,18 @@ def topics_in(text):
 def requested(message):
     return any(word in message.casefold() for word in ('학습','공부','교육','부트캠프','부트텐트','강의','수강','내일배움','국비','로드맵','배우','배워','배울','훈련 과정'))
 
-def retrieve(state,message,repository):
+def retrieve(state,message,repository,*,target=None):
     previous=state.get('learning_context')
     # A new explicit job request takes precedence over the previous education list.
     job_search=bool(re.search(r'(공고|채용|일자리|구인|구직).{0,16}(찾|검색|있|보여)',message))
     job_reference=bool(re.search(r'(공고|채용|일자리|구인|구직|회사|기업)',message)) and not requested(message)
-    if job_search or job_reference:return None
+    if target=='jobs' or (target!='training' and (job_search or job_reference)):return None
     pending_topic=bool(previous) and previous.get('status')=='need_topic' and 0<len(message.strip())<=80 and message.strip() not in {'안녕','안녕하세요','고마워','감사합니다'}
     followup=pending_topic or (bool(previous) and (bool(re.search(r'(?:이|그)\s*중',message)) or any(word in message for word in (
         '이 과정','저 과정','첫 번째','두 번째','온라인','오프라인','수강료','비용','교육 기간',
         '추천','비교','어떤','어느','뭘','뭐가','제일','가장','더 나은'))))
-    if repository is None or not (requested(message) or followup):return None
+    if target=='training' and previous:followup=True
+    if repository is None or not (requested(message) or followup or target=='training'):return None
     explicit=topics_in(message)
     if followup and previous.get('courses') and (not explicit or set(explicit).issubset(previous.get('topics',[]))):
         # Compare the exact displayed snapshot, retaining order and source versions.

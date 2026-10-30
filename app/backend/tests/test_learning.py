@@ -78,4 +78,4 @@ class LearningTests(unittest.TestCase):
         data=client.converse.call_args.kwargs
         self.assertIn('recommendation_eligible=false',data['system'][0]['text'])
         self.assertEqual(data['inferenceConfig']['maxTokens'],1024)
-        self.assertEqual(usage['prompt_version'],'conversation-training-v4')
+        self.assertEqual(usage['prompt_version'],'conversation-preferences-v5')

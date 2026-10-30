@@ -2,6 +2,8 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
+from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
+from src.services.condition_display import display_condition
 from src.services.learning import retrieve as retrieve_learning, attach as attach_learning
 from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
 
@@ -30,11 +32,37 @@ class DialogueFlow:
         action = payload['action']
         evidence = []
         memory(state)
+        if action == 'remember' and assessment_request(payload.get('message','')) is False:
+            preferences(state)['ask_assessment'] = False
+            record(state, payload['message'], 'statement')
+            return state, self.paused_response(state), evidence
         if action == 'search':
             # Same-session searches retain user memory; a new session starts empty.
             state['profile'].update({k: v for k, v in payload.get('profile', {}).items() if k != 'memory'})
             text = payload.get('message', '')
             record(state, text, 'search')
+            target = search_target(state, text)
+            consent = assessment_request(text)
+            if consent is not None:
+                preferences(state)['ask_assessment'] = consent
+                if not consent:
+                    state['stage'] = 'conversation'
+                    if target not in {'jobs', 'training'}:
+                        return state, self.paused_response(state), evidence
+                elif state.get('selected'):
+                    self.validate_selected(state)
+                    selected = state['selected']
+                    if not state.get('conditions'):
+                        state['conditions'] = sum((split_conditions(selected.get(section) or '', kind, selected['source_id'], selected['source_version']) for kind, section in (('required','qualifications'),('preferred','preferred_requirements'))), [])
+                    return state, self.next_question(state, invoke, evidence), evidence
+                else:
+                    return state, {'stage':'conversation','message':'역량 확인 질문을 다시 허용했습니다. 공고를 선택하면 확인할 수 있습니다.','memory':public_memory(state)}, evidence
+            if target == 'clarify':
+                state['stage'] = 'conversation'
+                return state, {'stage':'conversation','message':'채용공고와 교육 과정 중 어떤 것을 먼저 찾아드릴까요?','memory':public_memory(state)}, evidence
+            if target:
+                state['conversation_target'] = target
+
             statement = payload.get('profile', {}).get('user_statement')
             if isinstance(statement, str):
                 record(state, statement)
@@ -44,7 +72,9 @@ class DialogueFlow:
                 # Search uses the user's current query; past skills must not become unwanted filters.
                 if hasattr(self.planner, 'route'):
                     history = consultation_context(state)
-                    learning = retrieve_learning(state, text, self.training)
+                    learning = retrieve_learning(state, text, self.training, target=target)
+                    if target == 'training' and learning is None:
+                        learning = {'status':'unavailable','topics':[],'courses':[],'basis':'training_repository_not_configured','limitations':['교육 조회 연결을 사용할 수 없습니다.']}
                     if learning is not None:
                         state['learning_context'] = learning
                         history['training_retrieval'] = learning
@@ -54,7 +84,9 @@ class DialogueFlow:
                         state.pop('learning_context', None)
                     routed = invoke('conversation', self.planner.route, text, history)
                     if learning is not None and routed['intent'] != 'chat':
-                        if learning['status']=='no_match':
+                        if learning['status']=='unavailable':
+                            reply='교육 검색 연결을 사용할 수 없습니다. 채용공고로 바꾸어 검색하지 않고 교육 요청으로 유지하겠습니다.'
+                        elif learning['status']=='no_match':
                             reply='저장된 교육 자료에서 해당 분야의 과정을 찾지 못했습니다. 현재 신청 가능한 과정이 없다는 뜻은 아니며, 모집 여부는 확인하지 못했습니다.'
                         elif learning['status']=='need_topic':
                             reply='어떤 분야의 교육을 찾으시나요? 관심 있는 기술이나 직무를 알려주세요. 현재 모집 여부는 별도 확인이 필요합니다.'
@@ -62,10 +94,12 @@ class DialogueFlow:
                             reply='교육 조회 결과를 확인해 주세요. 미확인 과정은 학습 참고용으로만 안내합니다.'
                         routed = {'intent':'chat','reply':reply}
                     if routed['intent'] == 'chat':
-                        reply = routed['reply']
+                        reply = respect_preferences(routed['reply'], state)
                         record(state, reply, 'assistant')
                         state.setdefault('stage', 'conversation')
                         result = {'stage':'conversation','memory':public_memory(state)}
+                        if learning is not None or not preferences(state)['ask_assessment']:
+                            state['stage'] = 'conversation'
                         if state.get('stage') in {'checking_required', 'checking_preferred'}:
                             result = self.batch_response(state) if state.get('grouped') else self.question_response(state)
                         elif state.get('stage') in {'completed', 'gap_guidance'}:
@@ -94,6 +128,13 @@ class DialogueFlow:
                 raise FlowError('job_not_in_session_candidates', 409)
             job = self.jobs.get(payload['source_id'])
             ensure_selectable(job, self.include_unverified)
+            if not preferences(state)['ask_assessment']:
+                state['selected'] = {key:job.get(key) for key in ('job_id','source_id','source_url','source_version','title','company_name','recruitment_status','qualifications','preferred_requirements')}
+                state.update(stage='conversation', checks=[], conditions=[], grouped=payload.get('grouped',False))
+                result = self.paused_response(state)
+                result['message'] = f"{job['company_name']} · {job['title']} 공고입니다. 역량 확인 질문은 생략하고 원문 조건만 안내합니다."
+                result['job_overview'] = {key:job.get(key) for key in ('title','company_name','source_url','qualifications','preferred_requirements')}
+                return state, result, evidence
             if not job.get('qualifications'):
                 raise FlowError('qualification_source_missing', 409)
             if any(len(job.get(field) or '') > 18000 for field in ('qualifications', 'preferred_requirements')):
@@ -122,11 +163,14 @@ class DialogueFlow:
                 self.ensure_conditions(state)
                 state['checks'] = []
                 result = self.next_question(state, invoke, evidence)
-                result['message'] = '경험을 수정했습니다. 이전 조건 답변은 다시 확인합니다.'
+                result['message'] = ('경험을 수정했습니다. 이전 조건 답변은 다시 확인합니다.' if preferences(state)['ask_assessment'] else '경험을 수정했습니다. 역량 확인 질문 중단은 유지합니다.')
             else:
                 result = self.search_response(state)
                 result['message'] = '말씀하신 내용을 기억했습니다. 공고를 선택하면 질문에 반영합니다.'
             return state, result, evidence
+
+        if action in {'answer', 'answer_batch'} and not preferences(state)['ask_assessment']:
+            return state, self.paused_response(state), evidence
 
         if action == 'answer_batch':
             if not state.get('grouped') or state.get('stage') not in {'checking_required', 'checking_preferred'}:
@@ -199,7 +243,7 @@ class DialogueFlow:
                        'unknown': '사용자가 판단하기 어렵다고 답변하여 미확인으로 남겼습니다.'}[status]
         return {'condition_id': condition['id'], 'type': condition['type'], 'assessment': status,
                 'detail': detail, 'quote': condition['quote'], 'explanation': explanation,
-                'reused': reused}
+                'reused': reused, **display_condition(condition['quote'])}
 
     @staticmethod
     def batch_conditions(state):
@@ -207,18 +251,25 @@ class DialogueFlow:
         remaining = [c for c in state.get('conditions', []) if c['id'] not in answered]
         if not remaining:
             return []
-        return [c for c in remaining if c['type'] == remaining[0]['type']]
+        return [c for c in remaining if c['type'] == remaining[0]['type']][:5]
 
     def batch_response(self, state):
         pending = self.batch_conditions(state)
         return {'stage':state['stage'], 'grouped':True,
-                'questions':[{'question_id':c['id'], 'quote':c['quote']} for c in pending],
+                'questions':[dict(question_id=c['id'], quote=c['quote'], **display_condition(c['quote'])) for c in pending],
                 'question':'각 원문 조건에 답해 주세요. 판단하기 어려운 조건은 미확인으로 남겨도 됩니다.',
                 'requirement_type':pending[0]['type'], 'source_url':state['selected']['source_url'],
                 'progress':{'answered':len(state['checks']), 'total':len(state['conditions'])},
                 'memory':public_memory(state), 'generation':'source_checklist'}
 
+    @staticmethod
+    def paused_response(state):
+        state['stage'] = 'conversation'
+        return {'stage':'conversation','assessment_paused':True,'message':'역량 확인 질문을 중단했습니다. 다시 허용하기 전까지 묻지 않고, 이미 알려주신 내용으로 안내하겠습니다.','memory':public_memory(state)}
+
     def next_question(self, state, invoke, evidence):
+        if not preferences(state)['ask_assessment']:
+            return self.paused_response(state)
         if state.get('grouped'):
             pending = self.batch_conditions(state)
             if pending:

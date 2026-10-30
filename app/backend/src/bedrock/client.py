@@ -66,6 +66,8 @@ class BedrockPlanner:
         if len(json.dumps(history, ensure_ascii=False)) > 60000:
             raise ValueError('Conversation context exceeds budget')
         partial = self.on_partial
+        if history.get('assistant_preferences',{}).get('ask_assessment') is False:
+            partial = None
         learning = history.get('training_retrieval') or {}
         if partial is not None and any(not c.get('recommendation_eligible') for c in learning.get('courses',[])):
             original_partial = partial
@@ -76,6 +78,8 @@ class BedrockPlanner:
             system=[{'text': '한국어 커리어 도우미입니다. 인사, 일상, 음식 추천, 힘들다는 말에는 따뜻하고 자연스럽게 직접 답하세요. '
                 '명시적으로 공고를 찾거나 검색 조건을 바꾸는 요청일 때만 search로 분류하세요. 애매하면 chat으로 답하고 필요한 조건을 물으세요. '
                 '지금까지 대화 정리, 부족한 점 설명, 학습 계획 요청은 새로운 공고 검색이 아니라 chat입니다. '
+                'history.assistant_preferences.ask_assessment=false이면 역량·기술·경력·자격 질문이나 체크리스트를 요청하지 마세요. 사용자가 다시 허용할 때까지 기존 정보만 활용하세요. '
+                'history.conversation_target=training이면 교육 후속 질문을 채용 검색으로 바꾸지 마세요. '
                 'history.user_statements는 이전 사용자 원문이며 이미 확인한 기술·경력을 근거 없이 다시 묻지 마세요. '
                 'selected_job과 condition_answers 전체 및 assessment_summary를 먼저 확인하세요. 마지막 우대조건만으로 요약하지 마세요. '
                 '필수조건 미충족, 필수 미확인, 우대 미충족을 구분하고 필수조건부터 설명하세요. '
@@ -106,7 +110,7 @@ class BedrockPlanner:
                 'React 공고 요청은 keyword 빈 문자열과 skills [React]로 표현하고, React 프론트엔드 개발 같은 복합 키워드를 만들지 마세요.'}],
             messages=[{'role':'user','content':[{'text':json.dumps({'message':message,'history':history},ensure_ascii=False)}]}],
             inferenceConfig={'maxTokens':1024}), partial, model_id=self.model_id, region=self.region)
-        usage=usage_metadata(response,model_id=self.model_id,region=self.region,prompt_version='conversation-training-v4',started=started)
+        usage=usage_metadata(response,model_id=self.model_id,region=self.region,prompt_version='conversation-preferences-v5',started=started)
         if response.get('stopReason')!='end_turn':raise ModelOutputFormatError(usage)
         value=parse_object(''.join(b.get('text','') for b in response['output']['message']['content']),usage)
         if value.get('intent')=='chat' and set(value)=={'intent','reply'} and isinstance(value['reply'],str) and 1<=len(value['reply'])<=4000:

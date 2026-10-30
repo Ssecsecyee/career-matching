@@ -78,7 +78,7 @@ def converse_response(client,arguments,on_partial,*,model_id,region):
         return result
     except Exception as exc:
         # Preserve usage if metadata was received before a late stream failure.
-        exc.usage=usage_metadata(result,model_id=model_id,region=region,prompt_version='conversation-training-v4',started=started)
+        exc.usage=usage_metadata(result,model_id=model_id,region=region,prompt_version='conversation-preferences-v5',started=started)
         raise
     finally:
         if hasattr(stream,'close'):stream.close()

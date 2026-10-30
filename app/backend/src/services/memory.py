@@ -57,13 +57,21 @@ def split_conditions(text, kind, source_id, version):
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     bullets = any(re.match(r'^(?:[-*•●▪·]|\d+[.)])\s*', line) for line in lines)
     groups = []
+    heading = None
+    fresh_heading = False
     for line in lines:
+        label = re.sub(r'^(?:[-*•●▪·]|\d+[.)])\s*', '', line).rstrip(':：').strip()
+        if label in {'학력','경력','자격요건','자격조건','필수조건','우대사항','우대조건'}:
+            heading, fresh_heading = line, True
+            continue
         marked = bool(re.match(r'^(?:[-*•●▪·]|\d+[.)])\s*', line))
         continuation = bool(re.match(r'^(?:또는|혹은|및 |그리고|AND\b|OR\b|\(|※)', line, re.I))
-        if groups and (continuation or (bullets and not marked)):
+        if groups and not fresh_heading and (continuation or (bullets and not marked)):
             groups[-1] += '\n' + line
         else:
-            groups.append(line)
+            groups.append((heading + '\n' if heading else '') + line)
+        fresh_heading = False
+    if not groups and lines:groups = [text]
     if len(groups) > 40:
         # Do not silently discard conditions or overrun a session's input budget.
         raise ValueError('Too many source conditions')
@@ -115,6 +123,8 @@ def consultation_context(state):
     counts = {kind:{status:sum(c['type']==kind and c['assessment']==status for c in checks)
                     for status in ('met','unmet','unknown')} for kind in ('required','preferred')}
     result = context(state)
+    result['assistant_preferences'] = state.get('profile',{}).get('assistant_preferences', {'ask_assessment':True})
+    result['conversation_target'] = state.get('conversation_target')
     # These are user statements, not model-generated facts or inferred eligibility.
     result['user_statements'] = value.get('user_statements', [s for s in value['statements']
         if s['kind'] in {'search','statement','correction','answer_detail'}])[-40:]

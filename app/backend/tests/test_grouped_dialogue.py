@@ -21,11 +21,14 @@ class GroupedTests(unittest.TestCase):
 
     def test_twenty_conditions_complete_without_model_calls(self):
         state,result,_=self.start()
-        self.assertEqual(len(result['questions']),20)
-        for expected in ('checking_preferred','gap_guidance'):
+        self.assertEqual(len(result['questions']),5)
+        stages=[]
+        while result['stage'] in {'checking_required','checking_preferred'}:
+            self.assertLessEqual(len(result['questions']),5)
             answers=[{'question_id':q['question_id'],'assessment':'unmet','detail':''} for q in result['questions']]
             state,result,evidence=self.flow.advance(state,{'action':'answer_batch','answers':answers},lambda *args:self.fail('No model calls'))
-            self.assertEqual(result['stage'],expected)
+            stages.append(result['stage'])
+        self.assertEqual(stages,['checking_required']*3+['checking_preferred','gap_guidance'])
         self.assertEqual(len(state['checks']),21)
 
     def test_stale_duplicate_or_missing_answers_rejected(self):
