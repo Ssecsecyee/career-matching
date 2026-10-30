@@ -1,3 +1,7 @@
+## 2026-10-30 후속 연결 완료
+
+운영 채용·교육 검색과 자동 Outbox 소비를 연결했다. 최신 실행·점검·제한은 [SEARCH_SYNC.md](../../docs/SEARCH_SYNC.md)를 따른다. 아래는 이전 배포 단계의 기록이다.
+
 ## 2026-10-30 실행 완료
 
 기존 EC2를 t4g.medium(4GiB)으로 확장하고 Nori 포함 Elasticsearch에 채용 942건·교육 7건 색인을 완료했다. 엔진 green, 작업자 active, DB 건수 유지. 운영 챗봇 검색 전환과 Outbox 자동 소비는 아직 적용하지 않았다. 상세 결과는 [DEPLOYMENT_20261030.md](DEPLOYMENT_20261030.md)를 참조한다. 아래 10월 29일 내용은 준비 당시 기록이다.

@@ -1,5 +1,9 @@
 # 로컬 공고 색인
 
+## 2026-10-30 운영 자동 동기화
+
+`sync_outbox.py --config 보호된설정경로`가 별도 최소 권한 DB 계정으로 변경을 처리한다. AWS에서는 systemd 타이머가 실행한다. 로컬 회귀는 `python app/ingestion/search_index/verify_sync_local.py`로 격리 DB·색인에 수행한다. 운영 연결과 제한은 [SEARCH_SYNC.md](../../../docs/SEARCH_SYNC.md)를 따른다. 기존 전체 색인 도구는 로컬 용도이며 운영 별칭 교체 전에 소비 중지·변경 경계 보존이 필요하다.
+
 실제 공고 스냅샷을 로컬 Elasticsearch에 적재하고 검색 어댑터로 조회한다. 운영 bootstrap에는 연결하지 않았으며 AWS/DB/Bedrock 호출은 없다.
 
 프로젝트 최상단 CMD:

@@ -1,5 +1,7 @@
 # 2026-10-30 AWS Elasticsearch 배포 결과
 
+후속 16:38 배포로 운영 검색 전환과 자동 Outbox 소비까지 완료했다. 최신 상태는 [SEARCH_SYNC.md](../../docs/SEARCH_SYNC.md)를 따른다. 아래는 최초 확장·수동 색인 단계의 기록이다.
+
 ## 완료
 
 - 기존 EC2 i-0102ab037d03cbb34를 t4g.small에서 t4g.medium(4GiB)으로 변경. 같은 인스턴스와 EBS 볼륨 유지.

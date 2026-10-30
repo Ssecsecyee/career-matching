@@ -1,13 +1,14 @@
 """Read-only DB-API adapter for the prepared job_postings schema."""
 import json
+from src.services.deadlines import VISIBLE_SQL
 
 
-JSON_FIELDS = {"tech_stacks", "addresses", "original_categories", "field_status"}
+JSON_FIELDS = {"tech_stacks", "addresses", "original_categories", "field_status", "additional_sections"}
 SUMMARY_FIELDS = ("job_id", "source", "source_id", "source_url", "title", "company_name",
                   "tech_stacks", "addresses", "recruitment_status", "source_version", "last_seen_at")
 DETAIL_FIELDS = SUMMARY_FIELDS + ("responsibilities", "qualifications", "preferred_requirements",
                                   "benefits", "hiring_process", "application_notes", "service_info",
-                                  "original_categories", "field_status", "deadline_at", "deadline_type")
+                                  "original_categories", "field_status", "deadline_at", "deadline_type", "additional_sections")
 
 
 def literal_like(value):
@@ -35,7 +36,7 @@ class MySQLJobRepository:
 
     def search(self, plan):
         conditions = ["source=%s", "recruitment_status IN (%s" + (",%s" if self.include_unverified else "") + ")",
-                      "(deadline_type='always_open' OR deadline_at IS NULL OR deadline_at>UTC_TIMESTAMP(6))"]
+                      VISIBLE_SQL]
         parameters = ["jumpit", "active"] + (["unknown"] if self.include_unverified else [])
         if plan.keyword:
             conditions.append("LOWER(CONCAT_WS(' ',title,company_name,responsibilities,qualifications,preferred_requirements,CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci)) LIKE LOWER(%s) ESCAPE '='")
@@ -73,7 +74,7 @@ class MySQLJobRepository:
                     statuses=['active','unknown'] if self.include_unverified else ['active']
                     sql=('SELECT '+','.join(DETAIL_FIELDS)+' FROM job_postings WHERE source=%s AND source_id IN ('+
                          ','.join(['%s']*len(identities))+') AND recruitment_status IN ('+','.join(['%s']*len(statuses))+') '+
-                         "AND (deadline_type='always_open' OR deadline_at IS NULL OR deadline_at>UTC_TIMESTAMP(6))")
+                         "AND " + VISIBLE_SQL)
                     cursor.execute(sql,['jumpit']+identities+statuses)
                     for row in cursor.fetchall():
                         row=decode_row(row)

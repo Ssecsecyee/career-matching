@@ -15,14 +15,9 @@ class FlowError(Exception):
 def ensure_selectable(job, include_unverified):
     if not job or job.get('recruitment_status') not in ({'active', 'unknown'} if include_unverified else {'active'}):
         raise FlowError('job_not_available', 409)
-    deadline = job.get('deadline_at')
-    if deadline and job.get('deadline_type') != 'always_open':
-        if isinstance(deadline, str):
-            deadline = datetime.fromisoformat(deadline.replace('Z', '+00:00'))
-        if deadline.tzinfo is None:
-            deadline = deadline.replace(tzinfo=timezone.utc)
-        if deadline <= datetime.now(timezone.utc):
-            raise FlowError('job_deadline_passed', 409)
+    from src.services.deadlines import expired
+    if expired(job):
+        raise FlowError('job_deadline_passed', 409)
 
 
 class DialogueFlow:
