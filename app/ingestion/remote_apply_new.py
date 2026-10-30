@@ -1,5 +1,5 @@
 """SSM-admin entry point: back up DB and insert a validated, new-only sample.
-Only invoke for an explicitly reviewed manifest containing exactly ten records.
+Only invoke for an explicitly reviewed manifest with a declared count of 1..100.
 """
 from datetime import datetime, timezone
 import gzip
@@ -22,7 +22,8 @@ def main():
     report_path=Path(__file__).resolve().parent/'apply-result.json'
     try:
         rows,_=prepare(Path(sys.argv[1]))
-        if len(rows)!=10:raise ValueError('expected_exactly_ten_jobs')
+        expected=int(sys.argv[2]) if len(sys.argv)>2 else 10
+        if not 1<=expected<=100 or len(rows)!=expected:raise ValueError('unexpected_batch_count')
         if any(row['source']!='jumpit' for row in rows):raise ValueError('unexpected_source')
         if shutil.disk_usage(base).free<256*1024*1024:raise ValueError('insufficient_backup_disk_space')
         stage='backup'
@@ -57,7 +58,7 @@ def main():
             before={item['job_id']:(item['source_version'],item['content_hash']) for item in cur.fetchall()}
             cur.execute('SELECT COUNT(*) AS n FROM search_outbox');outbox_before=cur.fetchone()['n']
         preview=ingest(rows,root,apply=False,require_new=True)
-        if preview['counts']!={'inserted':10}:raise ValueError('unexpected_preview')
+        if preview['counts']!={'inserted':expected}:raise ValueError('unexpected_preview')
         stage='temporary_writer'
         account='ingest_batch_'+secrets.token_hex(6)
         password=secrets.token_hex(32)
@@ -77,15 +78,15 @@ def main():
             cur.execute('SELECT job_id,source_version,content_hash FROM job_postings ORDER BY job_id')
             after={item['job_id']:(item['source_version'],item['content_hash']) for item in cur.fetchall()}
             if not all(after.get(key)==value for key,value in before.items()):raise RuntimeError('existing_job_integrity_check_failed')
-            if len(after)!=len(before)+10:raise RuntimeError('job_count_verification_failed')
+            if len(after)!=len(before)+expected:raise RuntimeError('job_count_verification_failed')
             cur.execute('SELECT source_id,job_id,source_version,recruitment_status,application_notes,additional_sections FROM job_postings WHERE source=%s AND source_id IN ('+','.join(['%s']*len(identities))+')',['jumpit']+identities)
             inserted=cur.fetchall()
-            if len(inserted)!=10:raise RuntimeError('inserted_id_verification_failed')
+            if len(inserted)!=expected:raise RuntimeError('inserted_id_verification_failed')
             cur.execute('SELECT COUNT(*) AS n FROM search_outbox');outbox_after=cur.fetchone()['n']
             job_ids=[item['job_id'] for item in inserted]
             cur.execute("SELECT COUNT(*) AS n FROM search_outbox WHERE entity_type='job' AND entity_id IN ("+','.join(['%s']*len(job_ids))+')',job_ids)
-            if cur.fetchone()['n']!=10:raise RuntimeError('outbox_verification_failed')
-        report.update(status='success',jobs_before=len(before),jobs_after=len(after),inserted=10,
+            if cur.fetchone()['n']!=expected:raise RuntimeError('outbox_verification_failed')
+        report.update(status='success',jobs_before=len(before),jobs_after=len(after),inserted=expected,
             source_ids=identities,existing_jobs_unchanged=True,outbox_added=outbox_after-outbox_before,
             combined_notes=sum(bool(item['application_notes']) for item in inserted),
             unknown_statuses=sum(item['recruitment_status']=='unknown' for item in inserted),

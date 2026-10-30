@@ -72,3 +72,8 @@ python incremental_jumpit.py --batch "C:\AWS_project\career_matching\workspace\i
 ## 2026-10-28 운영 표본 반영 완료
 
 사용자의 신규 10건 반영 요청에 따라 quality01 배치를 AWS MySQL에 적용했다. 783 → 793건, 기존 공고 버전·해시 유지, Outbox +10, 통합 유의사항 8건과 date_only 10건 보존, 신규 모집 상태는 모두 unknown이다. 운영 실행에만 임시 최소 권한 DB 계정을 생성하고 작업 후 제거했으며 기존 대화용 계정 권한은 넓히지 않았다. 서버의 보호된 /opt/career/backups 경로에 적용 전 SQL gzip 백업을 만들고 압축 무결성을 확인했다. 이는 실제 복원 훈련 완료를 뜻하지 않는다. 실행 결과는 workspace/ingestion-reports/quality01_1021_mapping_validation/production_apply.json에 보관했다. 원본 실행 패키지는 기존 비공개 S3 버킷의 ingestion-samples 경로에 보관했다. 정기 실행·Elasticsearch 소비자·고용24 연계는 여전히 미구현이다. 현재 로컬 .env는 조회용 계정이므로 후속 자동 적재의 영구 계정/권한 관리는 별도로 준비해야 한다. 자료 재이용 권한이 확인됐다는 뜻은 아니다.
+
+
+## 2026-10-30 배치 크기 명시
+
+infra/apply_sample.py는 --batch와 --expected-count 1..100으로 검토 건수를 명시한다. 원격 실행에서도 같은 건수와 DB 전후 차이·Outbox 수를 검증한다. 생략 시 기존 10건 동작을 유지하며 신규 전용·백업·배치별 실행 상태·자동 재제출 방지는 유지한다. verify_incremental_mysql.py의 두 번째 인자로 검토 건수를 전달해 격리 시험할 수 있다. 실제 결과는 workspace/ingestion-reports/APPLY_20261030.md 참조.

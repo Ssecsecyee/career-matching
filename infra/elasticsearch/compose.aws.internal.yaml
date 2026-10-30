@@ -1,0 +1,34 @@
+# Reference configuration: the deployed container was created by the maintenance installer.
+# Do not start a second Compose container on the occupied port or assume this named volume is the deployed volume.
+# Same-host deployment only. External search access is intentionally unavailable.
+name: career-search-aws
+services:
+  elasticsearch:
+    build: .
+    image: career-elasticsearch-nori:9.5.5
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: basic
+      xpack.ml.enabled: "false"
+      node.store.allow_mmap: "false"
+      plugin.mandatory: analysis-nori
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:19200:9200"
+    mem_limit: 2g
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - search_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+volumes:
+  search_data:

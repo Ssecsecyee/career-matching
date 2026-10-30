@@ -40,23 +40,26 @@ def main():
         runtime=pymysql.connect(**options)
         batch=Path(sys.argv[1])
         rows,_=prepare(batch)
-        assert len(rows)==10
+        expected=int(sys.argv[2]) if len(sys.argv)>2 else 10
+        assert 1<=expected<=100 and len(rows)==expected
+        expected_combined=sum(bool(r.get('application_notes')) for r in rows)
+        expected_dated=sum((r.get('additional_sections') or {}).get('page_extraction',{}).get('deadline',{}).get('precision')=='date_only' for r in rows)
         preview=ingest(rows,runtime)
-        assert preview['counts']=={'inserted':10}
+        assert preview['counts']=={'inserted':expected}
         first=ingest(rows,runtime,apply=True)
-        assert first['counts']=={'inserted':10}
+        assert first['counts']=={'inserted':expected}
         repeated=ingest(rows,runtime,apply=True)
-        assert repeated['counts']=={'stale_or_replayed':10}
+        assert repeated['counts']=={'stale_or_replayed':expected}
         refreshed=copy.deepcopy(rows)
         for row in refreshed:row['fetched_at']=(datetime.fromisoformat(row['fetched_at'])+timedelta(seconds=1)).isoformat();row['last_seen_at']=row['fetched_at']
-        assert ingest(refreshed,runtime,apply=True)['counts']=={'unchanged':10}
+        assert ingest(refreshed,runtime,apply=True)['counts']=={'unchanged':expected}
         changed=copy.deepcopy(refreshed[:1])
         changed[0]['fetched_at']=(datetime.fromisoformat(changed[0]['fetched_at'])+timedelta(seconds=1)).isoformat()
         changed[0]['qualifications']+='\n[isolated verification change]'
         assert ingest(changed,runtime,apply=True)['counts']=={'updated':1}
         with root.cursor() as cur:
-            cur.execute('SELECT COUNT(*) AS n FROM job_postings');assert cur.fetchone()['n']==10
-            cur.execute('SELECT COUNT(*) AS n FROM search_outbox');assert cur.fetchone()['n']==11
+            cur.execute('SELECT COUNT(*) AS n FROM job_postings');assert cur.fetchone()['n']==expected
+            cur.execute('SELECT COUNT(*) AS n FROM search_outbox');assert cur.fetchone()['n']==expected+1
             cur.execute('SELECT source_version,qualifications FROM job_postings WHERE source_id=%s',(changed[0]['source_id'],))
             before=cur.fetchone();assert before['source_version']==2
             cur.execute('REVOKE INSERT ON '+database+".search_outbox FROM 'career_ingest_verify'@'%'")
@@ -72,11 +75,11 @@ def main():
         with root.cursor() as cur:
             cur.execute('SELECT source_version,qualifications FROM job_postings WHERE source_id=%s',(changed[0]['source_id'],))
             assert cur.fetchone()==before
-            cur.execute('SELECT COUNT(*) AS n FROM search_outbox');assert cur.fetchone()['n']==11
+            cur.execute('SELECT COUNT(*) AS n FROM search_outbox');assert cur.fetchone()['n']==expected+1
             cur.execute("SELECT COUNT(*) AS n FROM job_postings WHERE application_notes IS NOT NULL");combined=cur.fetchone()['n']
             cur.execute("SELECT COUNT(*) AS n FROM job_postings WHERE deadline_at IS NULL AND JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.page_extraction.deadline.precision'))='date_only'");dated=cur.fetchone()['n']
-        assert combined==8 and dated==10
-        print(json.dumps({'status':'passed','isolated_mysql':True,'jobs':10,'combined_sections':combined,'date_only_preserved':dated,
+        assert combined==expected_combined and dated==expected_dated
+        print(json.dumps({'status':'passed','isolated_mysql':True,'jobs':expected,'combined_sections':combined,'date_only_preserved':dated,
             'duplicate_retry':'passed','newer_identical_version_stable':'passed','content_revision':'passed','outbox_failure_rollback':'passed','production_changes':0}))
     finally:
         if runtime:runtime.close()

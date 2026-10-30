@@ -55,8 +55,14 @@ class MySQLChatStore:
                     connection.commit()
                     return {"cached": cached["response"]}
                 cur.execute("SELECT structured_content FROM chat_messages WHERE session_id=%s AND idempotency_key=%s AND role='user'", (session_id, request_id))
-                if cur.fetchone():
-                    raise FlowError("request_replay_expired_use_new_request_id", 409)
+                previous_message=cur.fetchone()
+                if previous_message:
+                    previous_payload=unpacked(previous_message['structured_content'])
+                    delivery=previous_payload.get('_delivery',{})
+                    if not delivery or delivery.get('status')=='succeeded':
+                        raise FlowError("request_replay_expired_use_new_request_id",409)
+                    if delivery.get('fingerprint')!=fingerprint:
+                        raise FlowError("request_id_reused_with_different_content",409)
                 state = unpacked(row["requirement_answers"])
                 if state.get("_lease", {}).get("until", 0) > time.time():
                     raise FlowError("session_busy_retry_later", 409)
@@ -66,6 +72,14 @@ class MySQLChatStore:
                     cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))
                     rows = cur.fetchall()
                     restore_user_statements(state, [(item['sequence_no'], unpacked(item['structured_content'])) for item in reversed(rows)])
+                received=dict(payload,_delivery={'status':'received','fingerprint':fingerprint})
+                if previous_message:
+                    cur.execute("UPDATE chat_messages SET structured_content=%s WHERE session_id=%s AND idempotency_key=%s AND role='user'",(packed(received),session_id,request_id))
+                else:
+                    cur.execute("SELECT COALESCE(MAX(sequence_no),0) AS n FROM chat_messages WHERE session_id=%s",(session_id,))
+                    sequence=int(cur.fetchone()['n'])+1
+                    cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,'user',%s,%s,%s,%s)",
+                                (session_id,sequence,request_id,packed(payload),packed(received),row['stage'],row['expires_at']))
                 state["_lease"] = {"request": request_id, "until": time.time() + 90}
                 cur.execute("UPDATE chat_sessions SET requirement_answers=%s WHERE session_id=%s", (packed(state), session_id))
             connection.commit()
@@ -89,8 +103,10 @@ class MySQLChatStore:
                             (ticket["session_id"], ticket["owner"], self.max_calls))
                 if cur.rowcount != 1:
                     raise FlowError("session_model_budget_exceeded", 429)
-                cur.execute("INSERT INTO model_invocations(invocation_id,session_id,request_id,purpose,model_id,region,prompt_version,policy_version,input_fingerprint,status,started_at,expires_at) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s,%s)",
-                            (identity, ticket["session_id"], ticket["request_id"], purpose, model, region,
+                cur.execute("SELECT COALESCE(MAX(attempt_no),0)+1 AS n FROM model_invocations WHERE session_id=%s AND request_id=%s AND purpose=%s",(ticket['session_id'],ticket['request_id'],purpose))
+                attempt=int(cur.fetchone()['n'])
+                cur.execute("INSERT INTO model_invocations(invocation_id,session_id,request_id,purpose,attempt_no,model_id,region,prompt_version,policy_version,input_fingerprint,status,started_at,expires_at) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'pending',%s,%s)",
+                            (identity, ticket["session_id"], ticket["request_id"], purpose, attempt, model, region,
                              prompt_version, "dialogue-memory-v2", hashlib.sha256(packed(inputs).encode()).hexdigest(), now(), ticket["expires_at"]))
             connection.commit()
             return identity
@@ -133,10 +149,10 @@ class MySQLChatStore:
                              packed(state.get("profile", {})), packed(state), ticket["session_id"]))
                 cur.execute("SELECT COALESCE(MAX(sequence_no),0) AS n FROM chat_messages WHERE session_id=%s", (ticket["session_id"],))
                 sequence = int(cur.fetchone()["n"])
-                for offset, role, content in ((1, "user", payload), (2, "assistant", response)):
-                    cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
-                                (ticket["session_id"], sequence + offset, ticket["request_id"], role,
-                                 packed(content), packed(content), state["stage"], ticket["expires_at"]))
+                delivered=dict(payload,_delivery={'status':'succeeded','fingerprint':ticket['fingerprint']})
+                cur.execute("UPDATE chat_messages SET structured_content=%s WHERE session_id=%s AND idempotency_key=%s AND role='user'",(packed(delivered),ticket['session_id'],ticket['request_id']))
+                cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,'assistant',%s,%s,%s,%s)",
+                            (ticket['session_id'],sequence+1,ticket['request_id'],packed(response),packed(response),state['stage'],ticket['expires_at']))
                 message_id = cur.lastrowid
                 for item in evidence:
                     job, check = item["job"], item["check"]
@@ -166,7 +182,7 @@ class MySQLChatStore:
                 unpacked(current["requirement_answers"]).get("_lease", {}).get("request") != ticket["request_id"]):
             raise FlowError("session_state_conflict", 409)
 
-    def abort(self, ticket):
+    def abort(self, ticket, failure=None):
         connection = self.factory()
         try:
             connection.begin()
@@ -175,6 +191,12 @@ class MySQLChatStore:
                 cur.execute("SELECT requirement_answers FROM chat_sessions WHERE session_id=%s", (ticket["session_id"],))
                 state = unpacked(cur.fetchone()["requirement_answers"])
                 state.pop("_lease", None)
+                cur.execute("SELECT structured_content FROM chat_messages WHERE session_id=%s AND idempotency_key=%s AND role='user'",(ticket['session_id'],ticket['request_id']))
+                message=cur.fetchone()
+                if message:
+                    recorded=unpacked(message['structured_content'])
+                    recorded['_delivery']={'status':'failed','fingerprint':ticket['fingerprint'],'failure':failure or {'error_code':'request_failed'}}
+                    cur.execute("UPDATE chat_messages SET structured_content=%s WHERE session_id=%s AND idempotency_key=%s AND role='user'",(packed(recorded),ticket['session_id'],ticket['request_id']))
                 cur.execute("UPDATE chat_sessions SET requirement_answers=%s WHERE session_id=%s", (packed(state), ticket["session_id"]))
             connection.commit()
         except Exception:

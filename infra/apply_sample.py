@@ -18,8 +18,10 @@ STATE=ROOT/'infra/.build/sample-apply-state.json'
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['submit','result'])
-    parser.add_argument('--batch', type=Path, help='Explicit reviewed ten-record batch directory')
+    parser.add_argument('--batch', type=Path, help='Explicit reviewed batch directory (1..100 records)')
+    parser.add_argument('--expected-count', type=int, default=10, help='Reviewed record count, 1..100')
     args=parser.parse_args()
+    if not 1<=args.expected_count<=100:raise ValueError('Expected count must be 1..100')
     global STATE
     if args.batch:
         batch_path = args.batch.resolve()
@@ -48,7 +50,7 @@ def main():
     from incremental_jumpit import prepare
     batch=batch_path if args.batch else ROOT/'workspace/incoming/jumpit/jumpit_20261028_094454_quality01'
     rows,_=prepare(batch)
-    if len(rows)!=10:raise ValueError('Expected exactly ten sample records')
+    if len(rows)!=args.expected_count:raise ValueError('Reviewed count does not match batch')
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     folder=ROOT/'infra/.build'/('sample-apply-'+stamp);folder.mkdir(parents=True,exist_ok=False)
     package=folder/'sample.zip'
@@ -74,16 +76,16 @@ with zipfile.ZipFile(io.BytesIO(data)) as archive:
         if path.is_absolute() or '..' in path.parts or member.file_size>4*1024*1024:raise RuntimeError('Invalid package path or size')
     if sum(x.file_size for x in archive.infolist())>50*1024*1024:raise RuntimeError('Expanded package too large')
     archive.extractall(folder)
-result=subprocess.run(['/opt/career/venv/bin/python',str(folder/'remote_apply_new.py'),str(folder/'batch')],cwd=folder)
+result=subprocess.run(['/opt/career/venv/bin/python',str(folder/'remote_apply_new.py'),str(folder/'batch'),str(EXPECTED)],cwd=folder)
 raise SystemExit(result.returncode)
-""".replace('STAMP',repr(stamp)).replace('URL',repr(url)).replace('CHECKSUM',repr(checksum))
+""".replace('STAMP',repr(stamp)).replace('URL',repr(url)).replace('CHECKSUM',repr(checksum)).replace('EXPECTED',repr(args.expected_count))
     encoded=base64.b64encode(script.encode()).decode()
     command="/opt/career/venv/bin/python -c \"import base64; exec(base64.b64decode('"+encoded+"'))\""
     result=ssm.send_command(InstanceIds=[outputs['WorkerInstanceId']],DocumentName='AWS-RunShellScript',Parameters={'commands':[command]},TimeoutSeconds=300,
-        Comment='Requested 10 new jobs only; verified DB backup; temporary least-privilege writer')
+        Comment='Reviewed new-only batch; verified DB backup; temporary least-privilege writer')
     saved={'command_id':result['Command']['CommandId'],'instance_id':outputs['WorkerInstanceId'],'folder':str(folder),'package_sha256':checksum,'s3_key':key,'batch_id':batch.name}
     STATE.write_text(json.dumps(saved,indent=2),encoding='utf-8')
-    print(json.dumps({'submitted':True,'command_id':saved['command_id'],'expected_new_jobs':10}))
+    print(json.dumps({'submitted':True,'command_id':saved['command_id'],'expected_new_jobs':args.expected_count}))
 
 if __name__=='__main__':
     try:main()

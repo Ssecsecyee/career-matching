@@ -131,7 +131,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
     except Exception as exc:
         if ticket and "cached" not in ticket:
             try:
-                store.abort(ticket)
+                store.abort(ticket, failure={'error_code':error_code(exc),'error_type':type(exc).__name__})
             except Exception:
                 # No source/user content or database exception text is logged.
                 pass
