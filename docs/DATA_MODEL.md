@@ -118,3 +118,7 @@ AWS EC2 MySQL training_offerings에 실제 공개 교육 7건을 적재했습니
 
 ## 관리자 대시보드 진행 기록 (2026-10-31)
 관리자 별도 인증·호출 한도 분리·DB 탐색/감사 변경의 구현/검증/배포 현황은 [ADMIN_DASHBOARD.md](ADMIN_DASHBOARD.md)를 기준으로 한다. 운영 반영 완료 여부와 후속 범위를 구분한다.
+
+## 2026-10-31 보안·배포 후 운영 개선 계획
+
+후속 보안·운영 스키마는 [보안·운영 개선 계획](SECURITY_OPERATIONS_ROADMAP.md)의 2~4절을 따른다. app_principals·security_events·사용량 예산 3개·operational_runs·deployment_releases·schema_migrations의 논리 설계와 기존 테이블 nullable 확장을 구분했다. 이 문서 연결만으로 DDL은 적용되지 않는다. 비밀번호·MFA 시드·원문 인증 토큰을 앱 DB에 추가하지 않는다.
