@@ -122,3 +122,8 @@ AWS EC2 MySQL training_offerings에 실제 공개 교육 7건을 적재했습니
 ## 2026-10-31 보안·배포 후 운영 개선 계획
 
 후속 보안·운영 스키마는 [보안·운영 개선 계획](SECURITY_OPERATIONS_ROADMAP.md)의 2~4절을 따른다. app_principals·security_events·사용량 예산 3개·operational_runs·deployment_releases·schema_migrations의 논리 설계와 기존 테이블 nullable 확장을 구분했다. 이 문서 연결만으로 DDL은 적용되지 않는다. 비밀번호·MFA 시드·원문 인증 토큰을 앱 DB에 추가하지 않는다.
+
+
+## 2026-10-31 문답 후 답변 정리 수정안 (미구현)
+
+문답 종료 후 사용자 선택과 보충 설명을 근거로 필수·우대별 충족/미충족/미확인을 먼저 정리하고, 전부 충족한 경우에도 다음 행동을 선택하도록 연결할 계획이다. 모름을 미충족으로 판단하거나 취업 점수/합격 가능성을 만들지 않는다. 기존 저장소 재사용·후속 문맥·검증 기준은 [답변 정리 개선안](ASSESSMENT_SUMMARY_PLAN.md)을 따른다. 이번에는 문서만 반영했으며 코드·DB·AWS는 변경하지 않았다.
