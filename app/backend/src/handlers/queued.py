@@ -57,14 +57,10 @@ class JobStore:
 
 
 def authorize(headers):
-    headers={k.lower():v for k,v in headers.items()}
-    token=read_secret(os.environ['CHAT_SECRET_ARN']).get('token','')
-    if len(token)<32 or not hmac.compare_digest(headers.get('authorization',''),'Bearer '+token):
-        return None
-    identity=headers.get('x-client-token','')
-    if not isinstance(identity,str) or not re.fullmatch(r'[A-Za-z0-9_-]{32,128}',identity): return None
-    owner=hmac.new(token.encode(),identity.encode(),hashlib.sha256).hexdigest()
-    return owner,identity
+    from src.services.admin_auth import authenticate
+    secret=read_secret(os.environ['CHAT_SECRET_ARN'])
+    return authenticate(headers,secret.get('token',''),secret.get('admin_token',''))
+
 
 
 def handle(event, *, store=None, queue=None, auth=None):
@@ -76,22 +72,29 @@ def handle(event, *, store=None, queue=None, auth=None):
         return response(404,{'status':'not_found'})
     identity=auth if auth is not None else authorize(event.get('headers',{}))
     if not identity: return response(401,{'status':'unauthorized'})
-    owner,client_token=identity
-    store=store or JobStore()
+    owner,client_token=identity[:2]
+    role=identity[2] if len(identity)==3 else "user"
     if method=='GET':
+        store=store or JobStore()
         row=store.get(path.rsplit('/',1)[1])
         return job_response(row,owner)
     try:
         raw=event.get('body','')
         if event.get('isBase64Encoded') or not isinstance(raw,str) or len(raw)>24000: raise ValueError()
-        payload=validate_payload(json.loads(raw))
+        value=json.loads(raw)
+        if isinstance(value,dict) and value.get('action')=='admin':
+            if role!='admin':return response(403,{'status':'admin_required'})
+            from src.services.admin import validate_admin
+            payload=validate_admin(value)
+        else:payload=validate_payload(value)
     except (ValueError,TypeError,KeyError,AttributeError):
         return response(400,{'status':'invalid_request'})
+    store=store or JobStore()
     request_id=payload['request_id']
     job_id=hashlib.sha256((owner+':'+request_id).encode()).hexdigest()
     fingerprint=hashlib.sha256(json.dumps(payload,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
     row={'job_id':job_id,'owner':owner,'client_token':client_token,'fingerprint':fingerprint,
-         'payload_json':json.dumps(payload,ensure_ascii=False),'state':'queued','expires_at':int(time.time())+86400}
+         'auth_role':role,'payload_json':json.dumps(payload,ensure_ascii=False),'state':'queued','expires_at':int(time.time())+86400}
     created=store.create(row)
     if not created:
         row=store.get(job_id)

@@ -77,15 +77,11 @@ def validate_payload(value):
 
 def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None):
     headers = {key.lower(): value for key, value in event.get("headers", {}).items()}
-    expected = os.getenv("CHAT_API_TOKEN", "")
-    if len(expected) < 32:
-        return response(503, {"status": "chat_auth_not_configured"})
-    if not hmac.compare_digest(headers.get("authorization", ""), "Bearer " + expected):
-        return response(401, {"status": "unauthorized"})
-    client_token = headers.get("x-client-token", "")
-    if not isinstance(client_token, str) or not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", client_token):
-        return response(400, {"status": "client_token_required"})
-    owner = hmac.new(expected.encode(), client_token.encode(), hashlib.sha256).hexdigest()
+    from src.services.admin_auth import authenticate
+    identity=authenticate(headers,os.getenv('CHAT_API_TOKEN',''),os.getenv('ADMIN_API_TOKEN',''))
+    if not identity:
+        return response(401, {'status':'unauthorized'})
+    owner,client_token,role=identity
     try:
         body = event.get("body", "{}")
         if event.get("isBase64Encoded"):
@@ -98,7 +94,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         model = os.getenv("MODEL_ID") or os.getenv("BEDROCK_MODEL_ID")
         retention = int(os.environ["CHAT_RETENTION_HOURS"])
         jobs = jobs or create_job_repository(connect_mysql, include_unverified=include_unverified)
-        store = store or MySQLChatStore(connect_mysql, retention_hours=retention)
+        store = store or MySQLChatStore(connect_mysql, retention_hours=retention, max_calls=None if role=="admin" else 12)
         planner = planner or (BedrockPlanner(model, region, on_partial=on_progress) if on_progress is not None else BedrockPlanner(model, region))
         questioner = questioner or BedrockQuestioner(model, region)
     except (ValueError, TypeError, AttributeError):

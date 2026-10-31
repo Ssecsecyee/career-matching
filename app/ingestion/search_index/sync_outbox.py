@@ -89,7 +89,7 @@ class Consumer:
         # pretend that a source page was revisited. One close event per version.
         with self.db.cursor() as cur:
             cur.execute("INSERT IGNORE INTO search_outbox(entity_type,entity_id,source_version,operation) "
-                        "SELECT 'job',job_id,source_version,'close' FROM job_postings WHERE recruitment_status='closed' OR NOT " + VISIBLE_SQL)
+                        "SELECT 'job',job_id,source_version,'close' FROM job_postings WHERE recruitment_status IN ('closed','unavailable') OR NOT " + VISIBLE_SQL)
             return cur.rowcount
 
     def process(self, event):
@@ -112,7 +112,7 @@ class Consumer:
             cur.execute("SELECT event_id FROM search_outbox WHERE entity_type=%s AND entity_id=%s AND source_version>=%s AND operation='delete' LIMIT 1", (kind, event['entity_id'], row['source_version']))
             remove = remove or bool(cur.fetchone())
         if kind == 'job':
-            remove = remove or row['recruitment_status'] == 'closed' or expired(row)
+            remove = remove or row['recruitment_status'] in {'closed','unavailable'} or expired(row)
             # A close event alone is not proof of actual source closure; current
             # DB status/expiry is authoritative even for old close events.
         self.engine.apply(kind, row, remove=remove)

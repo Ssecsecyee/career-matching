@@ -64,3 +64,6 @@ Thumbs.db
 Desktop.ini
 *.tmp
 *.swp
+
+# Host-only privileged DB credentials
+admin-db.json

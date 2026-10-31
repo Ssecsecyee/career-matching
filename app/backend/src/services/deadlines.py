@@ -16,11 +16,12 @@ VISIBLE_SQL = ("(deadline_type='always_open' OR ((deadline_at IS NULL OR deadlin
 def effective_deadline(row):
     if row.get('deadline_type') == 'always_open':
         return None
+    candidates = []
     value = row.get('deadline_at')
     if value:
         if isinstance(value, str):
             value = datetime.fromisoformat(value.replace('Z', '+00:00'))
-        return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+        candidates.append(value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value)
     extra = row.get('additional_sections') or {}
     if isinstance(extra, (str, bytes)):
         extra = json.loads(extra)
@@ -28,10 +29,11 @@ def effective_deadline(row):
     if deadline.get('precision') == 'date_only':
         try:
             date = datetime.strptime(deadline['raw'], '%Y-%m-%d').date()
-            return datetime.combine(date + timedelta(days=1), time(), KST).astimezone(timezone.utc)
+            candidates.append(datetime.combine(date + timedelta(days=1), time(), KST).astimezone(timezone.utc))
         except (KeyError, TypeError, ValueError):
             pass
-    return None
+    # Match VISIBLE_SQL: either elapsed deadline excludes a conflicting snapshot.
+    return min(candidates) if candidates else None
 
 
 def expired(row, now=None):

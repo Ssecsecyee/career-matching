@@ -114,3 +114,7 @@ chat_sessions(소유 범위·상태·프로필 버전), chat_messages(순서·�
 
 ## 교육 표본 실제 적재 보완 (2026-10-28)
 AWS EC2 MySQL training_offerings에 실제 공개 교육 7건을 적재했습니다. 모집 상태는 모두 unknown이며 additional_sections.recommendation_eligible=false입니다. training outbox 7건을 생성했고 챗봇 추천 및 검색엔진 소비자는 미연결입니다. 상세 검증 결과는 workspace/incoming/boottent/boottent_20261028_real02/aws-result.json 참조.
+
+
+## 관리자 대시보드 진행 기록 (2026-10-31)
+관리자 별도 인증·호출 한도 분리·DB 탐색/감사 변경의 구현/검증/배포 현황은 [ADMIN_DASHBOARD.md](ADMIN_DASHBOARD.md)를 기준으로 한다. 운영 반영 완료 여부와 후속 범위를 구분한다.

@@ -21,6 +21,14 @@ def configure(path=CONFIG):
         MYSQL_HOST='127.0.0.1',MYSQL_PORT='3308',MYSQL_DATABASE='career_matching',ENABLE_LIVE_BEDROCK='true',
         CHAT_RUNTIME_ENABLED='true',CHAT_INCLUDE_UNVERIFIED='true',CHAT_RETENTION_HOURS='24',
         MODEL_ID='global.anthropic.claude-sonnet-4-6',BEDROCK_REGION=os.environ['AWS_REGION'])
+    os.environ['ADMIN_API_TOKEN']=auth.get('admin_token','')
+    os.environ['ADMIN_MYSQL_USER']=database.get('admin_username','')
+    os.environ['ADMIN_MYSQL_PASSWORD']=database.get('admin_password','')
+    admin_path=Path(path).parent/'admin-db.json'
+    if admin_path.is_file():
+        admin=json.loads(admin_path.read_text(encoding='utf-8'))
+        os.environ['ADMIN_MYSQL_USER']=admin['username']
+        os.environ['ADMIN_MYSQL_PASSWORD']=admin['password']
     # A host role is used; local workstation profile must never be copied here.
     os.environ.pop('AWS_PROFILE',None)
 
@@ -33,7 +41,19 @@ def process(message, store, *, handler=handle_request):
     # One worker is deployed. SQS can redeliver; MySQL request leases and replay cache remain authoritative.
     payload=json.loads(row['payload_json'])
     progress={'on_progress':ProgressPublisher(store,value['job_id'])} if hasattr(store,'progress') and handler is handle_request else {}
-    result=handler({'headers':{'Authorization':'Bearer '+os.environ['CHAT_API_TOKEN'],
+    role=row.get('auth_role','user')
+    if role not in {'user','admin'}:raise ValueError('Invalid role')
+    token=os.environ.get('ADMIN_API_TOKEN','') if role=='admin' else os.environ['CHAT_API_TOKEN']
+    if role=='admin' and len(token)<32:raise ValueError('Admin token not configured')
+    if handler is handle_request:
+        from src.services.admin_auth import authenticate
+        trusted=authenticate({'Authorization':'Bearer '+token,'X-Client-Token':row['client_token']},os.environ['CHAT_API_TOKEN'],os.environ.get('ADMIN_API_TOKEN',''))
+        if not trusted or trusted[0]!=row.get('owner'):raise ValueError('Invalid queued owner')
+    if payload.get('action')=='admin':
+        if role!='admin':raise ValueError('Admin required')
+        from src.handlers.admin import handle_admin
+        handler=handle_admin;progress={}
+    result=handler({'headers':{'Authorization':'Bearer '+token,
                               'X-Client-Token':row['client_token']},'body':json.dumps(payload,ensure_ascii=False)},**progress)
     if result['statusCode']==409 and json.loads(result['body']).get('status')=='session_busy_retry_later':
         raise RuntimeError('Existing request is still leased')

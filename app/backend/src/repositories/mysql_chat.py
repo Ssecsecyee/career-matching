@@ -66,7 +66,7 @@ class MySQLChatStore:
                 state = unpacked(row["requirement_answers"])
                 if state.get("_lease", {}).get("until", 0) > time.time():
                     raise FlowError("session_busy_retry_later", 409)
-                if row["model_call_count"] >= self.max_calls:
+                if self.max_calls is not None and row["model_call_count"] >= self.max_calls:
                     raise FlowError("session_model_budget_exceeded", 429)
                 if not memory(state).get('user_history_version'):
                     cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))
@@ -86,7 +86,7 @@ class MySQLChatStore:
             return {"session_id": session_id, "owner": owner, "request_id": request_id,
                     "fingerprint": fingerprint, "cache_key": cache_key,
                     "state": state, "state_version": row["state_version"],
-                    "expires_at": row["expires_at"], "calls_remaining": self.max_calls - row["model_call_count"]}
+                    "expires_at": row["expires_at"], "calls_remaining": None if self.max_calls is None else self.max_calls - row["model_call_count"]}
         except Exception:
             connection.rollback()
             raise
@@ -99,8 +99,11 @@ class MySQLChatStore:
         try:
             connection.begin()
             with connection.cursor() as cur:
-                cur.execute("UPDATE chat_sessions SET model_call_count=model_call_count+1 WHERE session_id=%s AND owner_scope=%s AND model_call_count<%s",
-                            (ticket["session_id"], ticket["owner"], self.max_calls))
+                sql="UPDATE chat_sessions SET model_call_count=model_call_count+1 WHERE session_id=%s AND owner_scope=%s"
+                params=[ticket["session_id"],ticket["owner"]]
+                if self.max_calls is not None:
+                    sql+=" AND model_call_count<%s";params.append(self.max_calls)
+                cur.execute(sql,params)
                 if cur.rowcount != 1:
                     raise FlowError("session_model_budget_exceeded", 429)
                 cur.execute("SELECT COALESCE(MAX(attempt_no),0)+1 AS n FROM model_invocations WHERE session_id=%s AND request_id=%s AND purpose=%s",(ticket['session_id'],ticket['request_id'],purpose))

@@ -30,6 +30,14 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(doc['deadline_at'],'2026-10-30T15:00:00+00:00')
         self.assertEqual(doc['deadline_at_raw'],'2026-10-30')
 
+    def test_conflicting_dates_exclude_on_either_elapsed_deadline(self):
+        row=self.row(deadline_type='fixed_date',deadline_at='2026-11-25T14:59:59Z',
+                     additional_sections={'page_extraction':{'deadline':{'raw':'2026-10-27','precision':'date_only'}}})
+        self.assertTrue(expired(row,datetime(2026,10,31,tzinfo=timezone.utc)))
+        self.assertEqual(job_document(row)[1]['deadline_at'],'2026-10-27T15:00:00+00:00')
+        row['deadline_at']='2026-10-20T12:00:00Z'
+        self.assertEqual(job_document(row)[1]['deadline_at'],'2026-10-20T12:00:00+00:00')
+
     def test_always_open_and_unknown_dates(self):
         self.assertFalse(expired(self.row(deadline_type='always_open',deadline_at='2000-01-01T00:00:00Z')))
         self.assertFalse(expired(self.row(additional_sections={'page_extraction':{'deadline':{'raw':'not a date','precision':'date_only'}}})))
@@ -41,6 +49,12 @@ class SyncTests(unittest.TestCase):
         self.assertFalse(engine.apply.call_args.kwargs['remove'])
         self.assertEqual(engine.apply.call_args.args[1]['source_version'],2)
         self.assertIn('processed_at',cur.sql[-1][0])
+
+    def test_administratively_unavailable_job_is_removed_from_search(self):
+        row=self.row();row['recruitment_status']='unavailable'
+        cur=Cursor(row);db=Mock();db.cursor.return_value=cur;engine=Mock()
+        Consumer(db,engine).process(dict(entity_type='job',entity_id=1,source_version=2,operation='close',event_id=9))
+        self.assertTrue(engine.apply.call_args.kwargs['remove'])
 
     def test_engine_failure_does_not_ack(self):
         cur=Cursor(self.row());db=Mock();db.cursor.return_value=cur;engine=Mock();engine.apply.side_effect=TimeoutError

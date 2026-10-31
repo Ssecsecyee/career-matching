@@ -31,7 +31,11 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, UnicodeError):
             self.send_error(400)
             return
-        result = lambda_handler({"headers": dict(self.headers), "body": body}, None)
+        event={"headers":dict(self.headers),"body":body}
+        if json.loads(body).get('action')=='admin':
+            from src.handlers.admin import handle_admin
+            result=handle_admin(event)
+        else:result=lambda_handler(event,None)
         self.send_response(result["statusCode"])
         for key, value in result["headers"].items():
             self.send_header(key, value)
