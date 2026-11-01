@@ -8,6 +8,7 @@ from incremental_jumpit import connect, sql_date
 
 
 def inventory(rows, *, now=None, dated_days=3, unknown_days=7, limit=100):
+    if not isinstance(limit,int) or limit<0:raise ValueError("invalid_inventory_limit")
     now=now or datetime.now(timezone.utc)
     current=now.astimezone(timezone.utc).replace(tzinfo=None)
     known=[];due=[];excluded=[]
@@ -24,22 +25,25 @@ def inventory(rows, *, now=None, dated_days=3, unknown_days=7, limit=100):
             due.append({'source_id':identity,'source_url':'https://jumpit.saramin.co.kr/position/'+identity,
                 'last_checked_at':fetched.isoformat()+'Z','due_at':next_check.isoformat()+'Z'})
     due.sort(key=lambda x:(x['due_at'],x['source_id']))
-    return {'schema_version':1,'generated_at':now.isoformat(),'known_ids':known,'recheck_due':due[:limit],
-        'remaining_due_count':max(0,len(due)-limit),'skip_routine_details':excluded,
+    return {'schema_version':1,'generated_at':now.isoformat(),'known_ids':known,'recheck_due':due if limit==0 else due[:limit],
+        'due_total_count':len(due),'recheck_limit':limit,
+        'remaining_due_count':0 if limit==0 else max(0,len(due)-limit),'skip_routine_details':excluded,
         'note':'Dates are scheduling hints. Missing from a list or past deadline does not independently verify closure.'}
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument("--limit",type=int,default=100,help="Maximum due IDs; 0 exports all")
     args=parser.parse_args()
+    if args.limit<0:parser.error("--limit must be 0 or greater")
     try:
         if args.output.exists():raise ValueError('output_already_exists')
         connection=connect()
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT source_id,recruitment_status,deadline_type,deadline_at,fetched_at FROM job_postings WHERE source=%s",('jumpit',))
-                result=inventory(cursor.fetchall())
+                result=inventory(cursor.fetchall(),limit=args.limit)
         finally:connection.close()
         args.output.parent.mkdir(parents=True,exist_ok=True)
         with args.output.open('x',encoding='utf-8') as output:json.dump(result,output,ensure_ascii=False,indent=2)
