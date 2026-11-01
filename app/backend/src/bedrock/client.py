@@ -82,6 +82,11 @@ class BedrockPlanner:
                 'history.conversation_target=training이면 교육 후속 질문을 채용 검색으로 바꾸지 마세요. '
                 'history.user_statements는 이전 사용자 원문이며 이미 확인한 기술·경력을 근거 없이 다시 묻지 마세요. '
                 'selected_job과 condition_answers 전체 및 assessment_summary를 먼저 확인하세요. 마지막 우대조건만으로 요약하지 마세요. '
+                'history.answer_summary는 서버가 사용자 선택으로 집계한 정리입니다. 이를 먼저 참조하고 필수/우대·미확인/미답변을 구분하세요. '
+                'answer_summary.conflicts는 사용자 진술과 선택의 추가 확인 대상으로 어느 쪽도 검증된 사실이라고 단정하지 마세요. '
+                '모든 조건을 충족한다고 답한 경우 부족 역량을 새로 만들지 말고 이력서·포트폴리오·면접 준비로 이어가세요. '
+                '이력서·면접 안내는 실제 경력/성과 수치를 만들지 말고 자기 진술을 표현하는 예시와 준비할 증빙을 제안하세요. '
+                '미확인 조건 설명 요청은 이미 전달된 원문을 쉽게 설명하고 새 역량 체크리스트를 자동으로 시작하지 마세요. '
                 '필수조건 미충족, 필수 미확인, 우대 미충족을 구분하고 필수조건부터 설명하세요. '
                 '기술·학력·경력과 소통·의지 같은 성격의 조건을 구분하세요. 경력 연수는 강의 수료로 대체할 수 없습니다. '
                 '사용자가 말한 기술 경험과 체크 답변이 충돌하면 둘 다 언급하고 해석을 확인하세요. 최신 체크만으로 경험이 없다고 단정하지 마세요. '
@@ -110,7 +115,7 @@ class BedrockPlanner:
                 'React 공고 요청은 keyword 빈 문자열과 skills [React]로 표현하고, React 프론트엔드 개발 같은 복합 키워드를 만들지 마세요.'}],
             messages=[{'role':'user','content':[{'text':json.dumps({'message':message,'history':history},ensure_ascii=False)}]}],
             inferenceConfig={'maxTokens':1024}), partial, model_id=self.model_id, region=self.region)
-        usage=usage_metadata(response,model_id=self.model_id,region=self.region,prompt_version='conversation-preferences-v5',started=started)
+        usage=usage_metadata(response,model_id=self.model_id,region=self.region,prompt_version='conversation-answer-summary-v6',started=started)
         if response.get('stopReason')!='end_turn':raise ModelOutputFormatError(usage)
         value=parse_object(''.join(b.get('text','') for b in response['output']['message']['content']),usage)
         if value.get('intent')=='chat' and set(value)=={'intent','reply'} and isinstance(value['reply'],str) and 1<=len(value['reply'])<=4000:

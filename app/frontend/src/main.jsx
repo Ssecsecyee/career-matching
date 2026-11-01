@@ -5,6 +5,7 @@ import './style.css';
 import { Admin } from './Admin.jsx';
 import { TypingText } from './TypingText.jsx';
 import { AssessmentStepper } from './AssessmentStepper.jsx';
+import { AssessmentSummary } from './AssessmentSummary.jsx';
 
 const names = { met: '충족해요', unmet: '미충족이에요', unknown: '아직 모르겠어요' };
 const conditionPreview = text => text.split('\n').map(line => line.trim().replace(/^[-*•●▪·]\s*/, '')).filter(Boolean).join(' · ').slice(0, 180);
@@ -12,7 +13,7 @@ const isQuestion = data => ['checking_required', 'checking_preferred'].includes(
 
 function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment }) {
   return <>
-    {data.message && <TypingText text={data.message} animate={active && !data.cached} streaming={data.stage === 'streaming'} />}
+    {data.message && !data.answer_summary && <TypingText text={data.message} animate={active && !data.cached} streaming={data.stage === 'streaming'} />}
     {data.stage === 'choose_job' && <><p>조건에 맞는 공고가 총 {data.total}건 있습니다. 먼저 살펴볼 공고를 골라 주세요.</p><div className="job-list">{data.candidate_jobs.map(job => <article className="job" key={job.source_id}>
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
@@ -25,7 +26,8 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment }
       <details className="source"><summary>조건 원문 확인하기</summary><pre>{data.quote}</pre><a href={safeSourceUrl(data.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a></details>
       {active && <><p className="fine">아래에서 답을 고르세요. 보충 설명은 입력창에 먼저 적을 수 있습니다.</p><div className="choices">{Object.entries(names).map(([value, label]) => <button key={value} disabled={busy} onClick={() => onAnswer(value)}>{label}</button>)}</div></>}
       <p className="fine">원문 목록 항목별로 확인하며, 합격 여부를 판정하지 않습니다.</p></>}
-    {['completed', 'gap_guidance'].includes(data.stage) && <><p>{data.stage === 'completed' ? '지원 조건 확인을 마쳤습니다.' : '보완이 필요한 조건을 확인했습니다.'} 답변하신 내용을 정리해 드릴게요.</p>{data.unconfirmed_count > 0 && <p className="muted">아직 확인하지 못한 조건이 {data.unconfirmed_count}개 있습니다.</p>}
+    {data.answer_summary && <AssessmentSummary summary={data.answer_summary} checks={data.checks} active={active} busy={busy} onContinue={onAssessment} paused={data.assessment_paused}/> }
+    {!data.answer_summary && ['completed', 'gap_guidance'].includes(data.stage) && <><p>{data.stage === 'completed' ? '지원 조건 확인을 마쳤습니다.' : '보완이 필요한 조건을 확인했습니다.'} 답변하신 내용을 정리해 드릴게요.</p>{data.unconfirmed_count > 0 && <p className="muted">아직 확인하지 못한 조건이 {data.unconfirmed_count}개 있습니다.</p>}
       {data.checks.map((check, i) => <div className="check" key={i}><strong>{check.type === 'required' ? '자격요건' : '우대조건'} · {names[check.assessment]}</strong><p>{check.summary || conditionPreview(check.quote)}</p><details className="source"><summary>조건 원문 보기</summary><pre>{check.quote}</pre></details><p>{check.explanation}</p>{check.detail && <p>남긴 설명: {check.detail}</p>}</div>)}
       <p className="fine">사용자가 확인한 답변에 따른 결과입니다. 교육은 학습 참고 자료와 신청 후보를 구분하며, 모집 여부와 지원 자격은 원문에서 다시 확인해 주세요.</p></>}
     {data.learning_search && <section className="source"><h3>학습 루트 참고 교육</h3>
@@ -66,7 +68,9 @@ function App() {
   const conversation = useRef(null);
   useEffect(() => {
     const stepper=conversation.current?.querySelector('.assessment-stepper');
+    const summary=conversation.current?.querySelector('.message:last-of-type .assessment-summary');
     if(stepper)stepper.scrollIntoView({behavior:'smooth',block:'start'});
+    else if(summary)summary.scrollIntoView({behavior:'smooth',block:'start'});
     else bottom.current?.scrollIntoView({behavior:'smooth',block:'end'});
   }, [messages,busy,error]);
 
@@ -130,6 +134,7 @@ function App() {
   }
   const question = isQuestion(result) && !result.grouped;
   const sequential = isQuestion(result) && result.grouped;
+  const compactComposer = sequential || !!result?.answer_summary;
   const noteOnly = false; // Free conversation and stopping questions stay available during assessments.
   return <div className="app">
     <aside className="sidebar"><a className="brand" href="/">ROUNDUP<span>CAREER</span></a><button disabled={busy} onClick={reset}>＋ 새 대화</button><div className="sidebar-bottom">내 조건에 맞는 다음 기회<p>공고 검색 · 지원 조건 확인</p></div></aside>
@@ -142,7 +147,7 @@ function App() {
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />
         </main>
-        <div className={`composer-area${sequential ? " assessment-mode" : ""}`}>{session && <div className="memory-tools"><button className="quiet" type="button" disabled={busy || !!pending} onClick={() => setMemoryMode(old => !old)}>{memoryMode ? '경험 수정 취소' : '기억한 경험 수정'}</button><span className="fine">현재 대화 안에서 기억합니다</span></div>}{result?.memory?.facts?.length > 0 && <details className="memory-summary"><summary>기억한 내용 {result.memory.facts.length}개</summary>{result.memory.facts.map((fact, i) => <p key={i}><strong>{fact.subject}</strong> · {fact.quote}</p>)}</details>}<form className="composer" onSubmit={search}><label className="sr-only" htmlFor="message">{memoryMode ? '경험 수정' : noteOnly ? '답변 보충 설명' : '찾고 싶은 공고'}</label><textarea id="message" value={draft} maxLength={question || memoryMode ? 2000 : 4000} disabled={busy || !!pending} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !noteOnly) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} placeholder={memoryMode ? '예: 앞서 말한 경험을 정정할게요. Linux는 아직 사용해 본 적 없어요.' : noteOnly ? '보충 설명을 적고 대화 속 답변 버튼을 눌러 주세요.' : '예: React 교육을 찾아줘. 또는 역량 질문은 그만해줘.'} rows={sequential ? 1 : 2} />
+        <div className={`composer-area${compactComposer ? " assessment-mode" : ""}`}>{session && <div className="memory-tools"><button className="quiet" type="button" disabled={busy || !!pending} onClick={() => setMemoryMode(old => !old)}>{memoryMode ? '경험 수정 취소' : '기억한 경험 수정'}</button><span className="fine">현재 대화 안에서 기억합니다</span></div>}{result?.memory?.facts?.length > 0 && <details className="memory-summary"><summary>기억한 내용 {result.memory.facts.length}개</summary>{result.memory.facts.map((fact, i) => <p key={i}><strong>{fact.subject}</strong> · {fact.quote}</p>)}</details>}<form className="composer" onSubmit={search}><label className="sr-only" htmlFor="message">{memoryMode ? '경험 수정' : noteOnly ? '답변 보충 설명' : '찾고 싶은 공고'}</label><textarea id="message" value={draft} maxLength={question || memoryMode ? 2000 : 4000} disabled={busy || !!pending} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !noteOnly) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} placeholder={memoryMode ? '예: 앞서 말한 경험을 정정할게요. Linux는 아직 사용해 본 적 없어요.' : noteOnly ? '보충 설명을 적고 대화 속 답변 버튼을 눌러 주세요.' : '예: React 교육을 찾아줘. 또는 역량 질문은 그만해줘.'} rows={compactComposer ? 1 : 2} />
           <div className="composer-bottom"><span>{memoryMode ? '수정 시 이전 조건 답변을 다시 확인합니다' : noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </>}

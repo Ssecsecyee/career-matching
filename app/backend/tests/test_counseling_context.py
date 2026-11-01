@@ -24,7 +24,7 @@ class CounselingTests(unittest.TestCase):
 
     def test_all_required_and_preferred_reach_counseling_not_only_last_four(self):
         state=self.fixture();router=Router()
-        _,result,_=DialogueFlow(Jobs(),router,Questioner()).advance(state,{'action':'search','message':'지금까지 뭐가 부족한지 정리해줘'},invoke)
+        _,result,_=DialogueFlow(Jobs(),router,Questioner()).advance(state,{'action':'search','message':'지금까지 답변을 바탕으로 면접 준비를 도와줘'},invoke)
         self.assertEqual(len(router.history['condition_answers']),13)
         self.assertEqual(router.history['assessment_summary']['counts']['required']['unmet'],6)
         self.assertEqual(router.history['selected_job']['source_id'],'42')

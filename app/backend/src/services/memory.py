@@ -133,6 +133,9 @@ def consultation_context(state):
         'total':len(state.get('conditions', [])), 'basis':'explicit_user_self_assessment',
         'stage':state.get('stage'), 'not_a_hiring_decision':True}
     result['condition_answers'] = [{k:c.get(k) for k in ('condition_id','type','assessment','quote','detail')} for c in checks]
+    if state.get('answer_summary'):
+        from src.services.assessment_summary import summary_context
+        result['answer_summary']=summary_context(state['answer_summary'])
     result['context_limits'] = {'user_history_window':40,'user_history_chars':12000,
         'older_user_statements_may_be_omitted':True, 'condition_text_shortened':False}
     # Preserve all assessments even for unusually long source/detail text.

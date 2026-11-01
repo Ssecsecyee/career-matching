@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from src.schemas.search import SearchPlan
 from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
 from src.services.condition_display import display_condition
+from src.services.assessment_summary import build_summary, summary_requested
 from src.services.learning import retrieve as retrieve_learning, attach as attach_learning
 from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
 
@@ -57,6 +58,8 @@ class DialogueFlow:
                     return state, self.next_question(state, invoke, evidence), evidence
                 else:
                     return state, {'stage':'conversation','message':'역량 확인 질문을 다시 허용했습니다. 공고를 선택하면 확인할 수 있습니다.','memory':public_memory(state)}, evidence
+            if payload.get('search_plan') is None and state.get('selected') and summary_requested(text):
+                return state, self.summary_response(state), evidence
             if target == 'clarify':
                 state['stage'] = 'conversation'
                 return state, {'stage':'conversation','message':'채용공고와 교육 과정 중 어떤 것을 먼저 찾아드릴까요?','memory':public_memory(state)}, evidence
@@ -119,11 +122,13 @@ class DialogueFlow:
             cards = [{key: row.get(key) for key in
                       ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
                        'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
+            state.pop('answer_summary', None)
             state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
                          candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])
             return state, self.search_response(state), evidence
 
         if action == 'select':
+            state.pop('answer_summary', None)
             if payload['source_id'] not in state.get('candidate_ids', []):
                 raise FlowError('job_not_in_session_candidates', 409)
             job = self.jobs.get(payload['source_id'])
@@ -154,6 +159,7 @@ class DialogueFlow:
             return state, result, evidence
 
         if action == 'remember':
+            state.pop('answer_summary', None)
             # Explicit corrections invalidate previous confirmations, rather than retaining stale eligibility.
             memory(state)['facts'] = []
             memory(state)['confirmed'] = {}
@@ -263,11 +269,32 @@ class DialogueFlow:
                 'memory':public_memory(state), 'generation':'source_checklist'}
 
     @staticmethod
+    def attach_summary(state, result):
+        summary=build_summary(state)
+        if summary:
+            state['answer_summary']=summary
+            result['answer_summary']=summary
+            result['checks']=list(state.get('checks', []))
+            result['unconfirmed_count']=sum(c['assessment']=='unknown' for c in state.get('checks', []))
+        return result
+
+    @staticmethod
+    def summary_response(state):
+        state['stage']='conversation'
+        result=DialogueFlow.attach_summary(state, {'stage':'conversation','memory':public_memory(state)})
+        result['message']=result['answer_summary']['headline']
+        if not preferences(state)['ask_assessment']:
+            result['assessment_paused']=True
+        return result
+
+    @staticmethod
     def paused_response(state):
         state['stage'] = 'conversation'
-        return {'stage':'conversation','assessment_paused':True,'message':'역량 확인 질문을 중단했습니다. 다시 허용하기 전까지 묻지 않고, 이미 알려주신 내용으로 안내하겠습니다.','memory':public_memory(state)}
+        result={'stage':'conversation','assessment_paused':True,'message':'역량 확인 질문을 중단했습니다. 다시 허용하기 전까지 묻지 않고, 이미 알려주신 내용으로 안내하겠습니다.','memory':public_memory(state)}
+        return DialogueFlow.attach_summary(state,result) if state.get('conditions') or state.get('checks') else result
 
     def next_question(self, state, invoke, evidence):
+        state.pop('answer_summary', None)
         if not preferences(state)['ask_assessment']:
             return self.paused_response(state)
         if state.get('grouped'):
@@ -298,6 +325,8 @@ class DialogueFlow:
                 'message': '원문 조건 확인을 마쳤습니다. 미확인 조건은 충족으로 판단하지 않습니다. 합격 판단은 아닙니다.',
                 'learning_opportunities': [], 'limitations': [
                   '원문 목록 항목 기준이며 AND·OR 관계를 임의로 나누지 않습니다.', '조건 충족 여부는 사용자 진술에 근거합니다.']}
+        result=self.attach_summary(state,result)
+        result['message']=result['answer_summary']['headline']
         if self.training is not None and any(c['assessment'] == 'unmet' for c in state['checks']):
             learning = retrieve_learning(state, '부족한 역량 학습', self.training)
             attach_learning(result, learning)

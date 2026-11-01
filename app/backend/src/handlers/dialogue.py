@@ -109,7 +109,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
 
         def invoke(purpose, function, *args):
             adapter = planner if purpose in {"search_plan", "conversation"} else questioner
-            version = "conversation-preferences-v5" if purpose == "conversation" else ("search-v1" if purpose == "search_plan" else "question-memory-v2")
+            version = "conversation-answer-summary-v6" if purpose == "conversation" else ("search-v1" if purpose == "search_plan" else "question-memory-v2")
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             try:
                 result, usage = function(*args)
