@@ -30,3 +30,8 @@ cd app\backend
 python -m unittest discover -s tests -v
 ```
 MySQL 통합 테스트는 별도 격리 DB 설정이 필요합니다. 기본 테스트는 실제 모델을 호출하지 않습니다.
+
+
+### 2026-10-31 문답 후 답변 정리 구현
+
+answer_summary 필드로 필수·우대별 충족/미충족/미확인/미답변을 구분한다. 기존 세션 상태·assistant 구조화 응답·캐시·근거 테이블을 재사용하며 DDL 변경은 없다. 요약 생성은 추가 모델 호출 없이 처리한다. 구현·격리 검증 완료, 운영 배포는 대기 중이다. [상세 구현 및 검증 기록](docs/ASSESSMENT_SUMMARY_IMPLEMENTATION.md).

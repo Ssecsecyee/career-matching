@@ -1,5 +1,6 @@
 # API 설계
 
+
 ## 2026-10-30 검색 조건과 이유 설명 계약 예정
 
 검증된 검색 계획에 희망 직무·보유 역량·명시적 필수 조건·조합 의도를 구분하는 계약을 추가할 예정이다. 추천 응답은 대상의 source+ID·버전과 근거 참조를 연결하고 후속 이유 질문은 같은 세션의 표시/선택 대상을 해석한다. 새 action/필드/엔드포인트는 아직 확정·구현하지 않았으며 기존 클라이언트와의 호환성을 검사한다.
@@ -147,6 +148,27 @@ Elasticsearch 연결 실패·시간 초과·502/503/504 시 채용·교육 검�
 현재 관리자 API는 기존 POST /api/chat의 action=admin 및 인증된 큐/폴링 경로다. 개인 로그인·MFA·권한 회수·예산 차단·감사 조회 API의 후속 요구사항은 [보안·운영 개선 계획](SECURITY_OPERATIONS_ROADMAP.md)에 정리했다. 신원/역할의 클라이언트 입력을 신뢰하지 않으며 새 API 계약은 각 단계에서 확정한다.
 
 
-## 2026-10-31 문답 후 답변 정리 수정안 (미구현)
+## 2026-10-31 문답 후 답변 정리 최초 설계 기록 (당시 미구현)
 
-문답 종료 후 사용자 선택과 보충 설명을 근거로 필수·우대별 충족/미충족/미확인을 먼저 정리하고, 전부 충족한 경우에도 다음 행동을 선택하도록 연결할 계획이다. 모름을 미충족으로 판단하거나 취업 점수/합격 가능성을 만들지 않는다. 기존 저장소 재사용·후속 문맥·검증 기준은 [답변 정리 개선안](ASSESSMENT_SUMMARY_PLAN.md)을 따른다. 이번에는 문서만 반영했으며 코드·DB·AWS는 변경하지 않았다.
+문답 종료 후 사용자 선택과 보충 설명을 근거로 필수·우대별 충족/미충족/미확인을 먼저 정리하고, 전부 충족한 경우에도 다음 행동을 선택하도록 연결할 계획이다. 모름을 미충족으로 판단하거나 취업 점수/합격 가능성을 만들지 않는다. 기존 저장소 재사용·후속 문맥·검증 기준은 [답변 정리 개선안](ASSESSMENT_SUMMARY_PLAN.md)을 따른다. 최초 작성 시에는 문서만 반영했다. 이후 구현 및 검증 상태는 [구현 기록](ASSESSMENT_SUMMARY_IMPLEMENTATION.md)을 따른다.
+
+
+### 2026-10-31 문답 후 답변 정리 구현
+
+answer_summary 필드로 필수·우대별 충족/미충족/미확인/미답변을 구분한다. 기존 세션 상태·assistant 구조화 응답·캐시·근거 테이블을 재사용하며 DDL 변경은 없다. 요약 생성은 추가 모델 호출 없이 처리한다. 구현·격리 검증 완료, 운영 배포는 대기 중이다. [상세 구현 및 검증 기록](ASSESSMENT_SUMMARY_IMPLEMENTATION.md).
+
+응답 answer_summary 계약(선택 필드):
+
+| 필드 | 용도 |
+|---|---|
+| version / summary_id | 생성 규칙 버전과 해당 공고·답변 스냅샷 식별자 |
+| kind / headline | 집계 조합에 따른 상태와 짧은 안내 |
+| source | source_id, source_version, source_url, company_name, title |
+| groups.required / groups.preferred | label, condition_ids, counts(met/unmet/unknown/unanswered/total) |
+| total / answered / unanswered / partial | 전체·답변·미답변 수, 부분 종료 여부 |
+| items | 조건 ID·필수/우대·선택·짧은 조건 문구·보충 설명 미리보기 |
+| conflicts | 명시적 경력 진술과 충족 선택의 추가 확인 근거 |
+| next_actions | id, label, 기존 search action에 보낼 message |
+| basis / not_a_hiring_decision / limitations | 자기 평가 기준과 판정 한계 |
+
+원문과 전체 보충 설명은 같은 응답 checks 및 기존 evidence에 남는다. answer_summary의 detail은 최대 300자 미리보기다. 상태 completed/gap_guidance는 그대로 유지하며, 일부 중단/재조회는 conversation과 함께 제공한다. 구 응답에 이 필드가 없으면 기존 결과 화면으로 표시한다.
