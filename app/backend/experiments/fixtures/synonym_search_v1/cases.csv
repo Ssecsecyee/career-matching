@@ -1,0 +1,81 @@
+﻿case_id,bucket,AND_skills,OR_skills,region,expected_rule,gold_status
+SYN-001,canonical_single,React,,,exact_tag_membership,pending_snapshot
+SYN-002,canonical_single,Python,,,exact_tag_membership,pending_snapshot
+SYN-003,canonical_single,MySQL,,,exact_tag_membership,pending_snapshot
+SYN-004,canonical_single,PostgreSQL,,,exact_tag_membership,pending_snapshot
+SYN-005,canonical_single,TypeScript,,,exact_tag_membership,pending_snapshot
+SYN-006,canonical_single,JavaScript,,,exact_tag_membership,pending_snapshot
+SYN-007,canonical_single,Java,,,exact_tag_membership,pending_snapshot
+SYN-008,canonical_single,Docker,,,exact_tag_membership,pending_snapshot
+SYN-009,canonical_single,Kubernetes,,,exact_tag_membership,pending_snapshot
+SYN-010,canonical_single,Git,,,exact_tag_membership,pending_snapshot
+SYN-011,canonical_single,AWS,,,exact_tag_membership,pending_snapshot
+SYN-012,canonical_single,Redis,,,exact_tag_membership,pending_snapshot
+SYN-013,canonical_single,Linux,,,exact_tag_membership,pending_snapshot
+SYN-014,canonical_single,Node.js,,,exact_tag_membership,pending_snapshot
+SYN-015,canonical_single,MongoDB,,,exact_tag_membership,pending_snapshot
+SYN-016,canonical_single,Spring Boot,,,exact_tag_membership,pending_snapshot
+SYN-017,registered_alias_or_case,react,,,exact_tag_membership,pending_snapshot
+SYN-018,registered_alias_or_case,REACT,,,exact_tag_membership,pending_snapshot
+SYN-019,registered_alias_or_case,ReAcT,,,exact_tag_membership,pending_snapshot
+SYN-020,registered_alias_or_case,리액트,,,exact_tag_membership,pending_snapshot
+SYN-021,registered_alias_or_case,리엑트,,,exact_tag_membership,pending_snapshot
+SYN-022,registered_alias_or_case,React.js,,,exact_tag_membership,pending_snapshot
+SYN-023,registered_alias_or_case,react.js,,,exact_tag_membership,pending_snapshot
+SYN-024,registered_alias_or_case,REACT.JS,,,exact_tag_membership,pending_snapshot
+SYN-025,registered_alias_or_case,python,,,exact_tag_membership,pending_snapshot
+SYN-026,registered_alias_or_case,PYTHON,,,exact_tag_membership,pending_snapshot
+SYN-027,registered_alias_or_case,PyThOn,,,exact_tag_membership,pending_snapshot
+SYN-028,registered_alias_or_case,파이썬,,,exact_tag_membership,pending_snapshot
+SYN-029,registered_alias_or_case,postgres,,,exact_tag_membership,pending_snapshot
+SYN-030,registered_alias_or_case,POSTGRES,,,exact_tag_membership,pending_snapshot
+SYN-031,registered_alias_or_case,postgresql,,,exact_tag_membership,pending_snapshot
+SYN-032,registered_alias_or_case,POSTGRESQL,,,exact_tag_membership,pending_snapshot
+SYN-033,boundary_or_negative,C,,,exact_tag_membership,pending_snapshot
+SYN-034,boundary_or_negative,C++,,,exact_tag_membership,pending_snapshot
+SYN-035,boundary_or_negative,C#,,,exact_tag_membership,pending_snapshot
+SYN-036,boundary_or_negative,SQL,,,exact_tag_membership,pending_snapshot
+SYN-037,boundary_or_negative,Go,,,exact_tag_membership,pending_snapshot
+SYN-038,boundary_or_negative,Golang,,,exact_tag_membership,pending_snapshot
+SYN-039,boundary_or_negative,Next.js,,,exact_tag_membership,pending_snapshot
+SYN-040,boundary_or_negative,Vue.js,,,exact_tag_membership,pending_snapshot
+SYN-041,boundary_or_negative,Angular 2,,,exact_tag_membership,pending_snapshot
+SYN-042,boundary_or_negative,NonexistentSkillXYZ918,,,verify_absent_then_zero,pending_snapshot
+SYN-043,boundary_or_negative,DefinitelyMissingTech_20261101,,,verify_absent_then_zero,pending_snapshot
+SYN-044,boundary_or_negative,마이에스큐엘,,,exact_tag_membership,pending_snapshot
+SYN-045,and_combination,React AND TypeScript,,,exact_tag_membership,pending_snapshot
+SYN-046,and_combination,리액트 AND TypeScript,,,exact_tag_membership,pending_snapshot
+SYN-047,and_combination,Python AND MySQL,,,exact_tag_membership,pending_snapshot
+SYN-048,and_combination,파이썬 AND MySQL,,,exact_tag_membership,pending_snapshot
+SYN-049,and_combination,Python AND PostgreSQL,,,exact_tag_membership,pending_snapshot
+SYN-050,and_combination,파이썬 AND Postgres,,,exact_tag_membership,pending_snapshot
+SYN-051,and_combination,React AND Git,,,exact_tag_membership,pending_snapshot
+SYN-052,and_combination,React.js AND Git,,,exact_tag_membership,pending_snapshot
+SYN-053,and_combination,React AND JavaScript,,,exact_tag_membership,pending_snapshot
+SYN-054,and_combination,리엑트 AND JavaScript,,,exact_tag_membership,pending_snapshot
+SYN-055,and_combination,Python AND Docker,,,exact_tag_membership,pending_snapshot
+SYN-056,and_combination,파이썬 AND Docker,,,exact_tag_membership,pending_snapshot
+SYN-057,and_combination,PostgreSQL AND Docker,,,exact_tag_membership,pending_snapshot
+SYN-058,and_combination,Postgres AND Docker,,,exact_tag_membership,pending_snapshot
+SYN-059,and_combination,React AND Python,,,exact_tag_membership,pending_snapshot
+SYN-060,and_combination,리액트 AND 파이썬,,,exact_tag_membership,pending_snapshot
+SYN-061,or_combination,,React OR Vue.js,,exact_tag_membership,pending_snapshot
+SYN-062,or_combination,,리액트 OR Vue.js,,exact_tag_membership,pending_snapshot
+SYN-063,or_combination,,Python OR Java,,exact_tag_membership,pending_snapshot
+SYN-064,or_combination,,파이썬 OR Java,,exact_tag_membership,pending_snapshot
+SYN-065,or_combination,,PostgreSQL OR MySQL,,exact_tag_membership,pending_snapshot
+SYN-066,or_combination,,Postgres OR MySQL,,exact_tag_membership,pending_snapshot
+SYN-067,or_combination,,React OR Python,,exact_tag_membership,pending_snapshot
+SYN-068,or_combination,,React.js OR 파이썬,,exact_tag_membership,pending_snapshot
+SYN-069,region_combination,React,,서울,exact_tag_membership,pending_snapshot
+SYN-070,region_combination,리액트,,서울,exact_tag_membership,pending_snapshot
+SYN-071,region_combination,React,,경기,exact_tag_membership,pending_snapshot
+SYN-072,region_combination,리액트,,경기,exact_tag_membership,pending_snapshot
+SYN-073,region_combination,React,,부산,exact_tag_membership,pending_snapshot
+SYN-074,region_combination,리액트,,부산,exact_tag_membership,pending_snapshot
+SYN-075,region_combination,Python,,서울,exact_tag_membership,pending_snapshot
+SYN-076,region_combination,파이썬,,서울,exact_tag_membership,pending_snapshot
+SYN-077,region_combination,Python,,경기,exact_tag_membership,pending_snapshot
+SYN-078,region_combination,파이썬,,경기,exact_tag_membership,pending_snapshot
+SYN-079,region_combination,Python,,인천,exact_tag_membership,pending_snapshot
+SYN-080,region_combination,파이썬,,인천,exact_tag_membership,pending_snapshot

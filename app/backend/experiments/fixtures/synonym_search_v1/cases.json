@@ -1,0 +1,1386 @@
+[
+  {
+    "case_id": "SYN-001",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-002",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-003",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "MySQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-004",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "PostgreSQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-005",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "TypeScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-006",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "JavaScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-007",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Java"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-008",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Docker"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-009",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Kubernetes"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-010",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Git"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-011",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "AWS"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-012",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Redis"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-013",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Linux"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-014",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Node.js"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-015",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "MongoDB"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-016",
+    "bucket": "canonical_single",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Spring Boot"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-017",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "react"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-018",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "REACT"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-019",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "ReAcT"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-020",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-021",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리엑트"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-022",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React.js"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-023",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "react.js"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-024",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "REACT.JS"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-025",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "python"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-026",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "PYTHON"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-027",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "PyThOn"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-028",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-029",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "postgres"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-030",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "POSTGRES"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-031",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "postgresql"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-032",
+    "bucket": "registered_alias_or_case",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "POSTGRESQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "등록된 동의어 적용 시 같은 canonical 조건과 ID 집합 비교. 대소문자 무시는 모든 비교군에 동일 적용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-033",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "C"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-034",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "C++"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-035",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "C#"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-036",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "SQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-037",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Go"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-038",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Golang"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-039",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Next.js"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-040",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Vue.js"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-041",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Angular 2"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-042",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "NonexistentSkillXYZ918"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "verify_absent_then_zero",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-043",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "DefinitelyMissingTech_20261101"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "verify_absent_then_zero",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-044",
+    "bucket": "boundary_or_negative",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "마이에스큐엘"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "구두점·접두사로 다른 기술을 대체하지 않음. Go/Golang·마이에스큐엘은 현재 고정 동의어 사전에 등록하지 않음. 함께 태그된 공고는 허용.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-045",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React",
+        "TypeScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-046",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트",
+        "TypeScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-047",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python",
+        "MySQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-048",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬",
+        "MySQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-049",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python",
+        "PostgreSQL"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-050",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬",
+        "Postgres"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-051",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React",
+        "Git"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-052",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React.js",
+        "Git"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-053",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React",
+        "JavaScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-054",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리엑트",
+        "JavaScript"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-055",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python",
+        "Docker"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-056",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬",
+        "Docker"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-057",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "PostgreSQL",
+        "Docker"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-058",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Postgres",
+        "Docker"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-059",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React",
+        "Python"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-060",
+    "bucket": "and_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트",
+        "파이썬"
+      ],
+      "skills_any": [],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-061",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "React",
+        "Vue.js"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-062",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "리액트",
+        "Vue.js"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-063",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "Python",
+        "Java"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-064",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "파이썬",
+        "Java"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-065",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "PostgreSQL",
+        "MySQL"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-066",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "Postgres",
+        "MySQL"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-067",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "React",
+        "Python"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-068",
+    "bucket": "or_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [],
+      "skills_any": [
+        "React.js",
+        "파이썬"
+      ],
+      "region": ""
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "OR는 평가 도구의 명시적 분기다. 현재 서비스 SearchPlan의 AND 조건을 자동 변경하지 않는다.",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-069",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React"
+      ],
+      "skills_any": [],
+      "region": "서울"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-070",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트"
+      ],
+      "skills_any": [],
+      "region": "서울"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-071",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React"
+      ],
+      "skills_any": [],
+      "region": "경기"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-072",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트"
+      ],
+      "skills_any": [],
+      "region": "경기"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-073",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "React"
+      ],
+      "skills_any": [],
+      "region": "부산"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-074",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "리액트"
+      ],
+      "skills_any": [],
+      "region": "부산"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-075",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python"
+      ],
+      "skills_any": [],
+      "region": "서울"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-076",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬"
+      ],
+      "skills_any": [],
+      "region": "서울"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-077",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python"
+      ],
+      "skills_any": [],
+      "region": "경기"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-078",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬"
+      ],
+      "skills_any": [],
+      "region": "경기"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-079",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "Python"
+      ],
+      "skills_any": [],
+      "region": "인천"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  },
+  {
+    "case_id": "SYN-080",
+    "bucket": "region_combination",
+    "search_input": {
+      "keyword": "",
+      "skills_all": [
+        "파이썬"
+      ],
+      "skills_any": [],
+      "region": "인천"
+    },
+    "expected_rule": "exact_tag_membership",
+    "note": "",
+    "gold_status": "pending_snapshot",
+    "expected_count_by_arm": null,
+    "expected_ids_by_arm": null
+  }
+]

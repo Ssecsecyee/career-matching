@@ -1,0 +1,57 @@
+{
+  "dataset_version": "synonym-search-v1",
+  "created_at_kst": "2026-11-01",
+  "status": "cases_frozen_gold_not_generated_search_not_executed",
+  "scope": "structured skill-tag search only; no Bedrock routing, text relevance labels or ranking quality scores",
+  "arms": [
+    "sql_no_synonyms",
+    "sql_with_synonyms",
+    "es_no_synonyms",
+    "es_with_synonyms"
+  ],
+  "cases": 80,
+  "planned_search_operations": 320,
+  "bucket_counts": {
+    "canonical_single": 16,
+    "registered_alias_or_case": 16,
+    "boundary_or_negative": 12,
+    "and_combination": 16,
+    "or_combination": 8,
+    "region_combination": 12
+  },
+  "synonym_groups": [
+    [
+      "react",
+      "리액트",
+      "리엑트",
+      "react.js"
+    ],
+    [
+      "python",
+      "파이썬"
+    ],
+    [
+      "postgresql",
+      "postgres"
+    ]
+  ],
+  "gold_policy": {
+    "source": "independently iterate frozen MySQL snapshot, never derive truth from an arm search result",
+    "identity": [
+      "source",
+      "source_id"
+    ],
+    "eligibility": "same frozen clock, status and deadline policy across all arms",
+    "casefold": "lowercase for all arms; no punctuation stripping, stemming, fuzzy matching or undeclared aliases",
+    "synonym_disabled": "literal lowercased tag equality",
+    "synonym_enabled": "lowercase then map query and stored tags through the declared groups",
+    "AND": "all skills_all match; no extra skill requirement from skills_any",
+    "OR": "at least one skills_any matches; empty OR contributes no restriction",
+    "region": "same explicit stored location substring policy across arms, no geographic inference",
+    "negative": "verify token absent in frozen tags before assigning expected_count=0",
+    "zero": "valid expected outcome; do not require every canonical to have a result",
+    "full_sets": "fetch all result IDs via paging; do not compare only top 5",
+    "counts": "not computed until a fixed snapshot is captured"
+  },
+  "cases_sha256": "988bc54d9c8c4036d576fe672a4526a1c5831ef9e1e91306ded83b325aa21d13"
+}
