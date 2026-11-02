@@ -86,3 +86,6 @@ python infrauild_condition_review_bundle.py
 설치 전 MySQL 압축 백업과 해시 검증을 완료했고, 채용 1020건·교육 7건의 원본 버전과 내용 해시는 동일했다. 백업은 같은 서버에 있어 서버 밖 백업을 대체하지 않는다.
 분류 결과 0건, 이번 연결의 실제 모델 호출 0회다. 질문 선정과 순위 보강 플래그는 false를 유지한다. 소량 실제 분류와 사람 평가 후 별도로 활성화한다. 연결 완료가 AI 정확도 검증 완료를 뜻하지 않는다.
 infra/condition_connection.py는 submit --confirm-maintenance 후 result로 확인한다. 설치 완료 서버에 submit을 반복하지 않는다. 분류 계정의 live_calls_allowed=false를 유지하며 비밀 설정은 출력·커밋하지 않는다.
+
+## 추출과 색인 분리
+2026-11-03부터 직접 --apply 발행을 차단하고 --stage 대기 적재 → 별도 verify → publish로 분리한다. 기존 위의 직접 발행 예시는 폐기한다. 현재 절차와 AWS 상태는 [조건 추출 대기와 검증 후 색인](CONDITION_EXTRACTION_STAGING.md)을 따른다.

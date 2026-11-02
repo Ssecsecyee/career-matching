@@ -150,3 +150,6 @@ answer_summary 필드로 필수·우대별 충족/미충족/미확인/미답변�
 ## AI 조건 분류 이력
 
 job_condition_reviews의 별도 이력·원문 해시·정책 버전·usage와 r: Outbox 연결을 로컬 구현했다. 운영 마이그레이션은 미실행이다. 현재 계약은 [AI 조건 분류](AI_CONDITION_CLASSIFICATION.md), 활성화와 권한은 [운영 준비](AI_CONDITION_RUNBOOK.md)를 따른다.
+
+## 조건 추출 검증 대기
+job_condition_review_drafts는 원문 스냅샷·후보·해시·사용량과 pending/verified/published/rejected 상태를 보관한다. job_condition_reviews는 검증 후 발행되는 결과이며 기존 ES 소비자는 대기 테이블을 읽지 않는다. 상세: [조건 추출과 검증](CONDITION_EXTRACTION_STAGING.md).

@@ -34,6 +34,7 @@ class ReviewDatabaseTests(unittest.TestCase):
         with self.factory() as db:
             with db.cursor() as c:
                 c.execute('DELETE FROM search_outbox WHERE entity_type=%s AND entity_id=%s',('job',self.job['job_id']))
+                c.execute('DELETE FROM job_condition_review_drafts WHERE job_id=%s',(self.job['job_id'],))
                 c.execute('DELETE FROM job_condition_reviews WHERE job_id=%s',(self.job['job_id'],))
                 c.execute('DELETE FROM job_postings WHERE job_id=%s',(self.job['job_id'],))
     def save(self,store=None):return (store or self.store).save(self.job,self.review,{'model_id':'offline-fixture','region':'test'},apply=True)
@@ -73,10 +74,29 @@ class ReviewDatabaseTests(unittest.TestCase):
         model=Mock();model.classify.return_value=(self.review,{'model_id':'offline-fixture','region':'test'})
         result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1)
         self.assertEqual(result['planned'],1);model.classify.assert_not_called();self.assertIsNone(self.store.get(self.job))
-        result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,apply=True)
-        self.assertEqual(result['saved'],1);model.classify.assert_called_once()
-        result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,apply=True)
-        self.assertEqual(result['reused'],1);model.classify.assert_called_once()
+        with self.assertRaises(ValueError):run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,apply=True)
+        result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,stage=True)
+        self.assertEqual(result['staged'],1);model.classify.assert_called_once()
+        self.assertIsNone(self.store.get(self.job))
+    def test_draft_stays_out_of_search_until_complete_approval(self):
+        from src.repositories.condition_drafts import ConditionDraftStore,candidate_hash
+        drafts=ConditionDraftStore(self.factory)
+        staged=drafts.stage(self.job,self.review,{'model_id':'offline-fixture','region':'test'})
+        self.assertIsNone(self.store.get(self.job))
+        with self.factory() as db:
+            with db.cursor() as c:
+                c.execute('SELECT COUNT(*) AS n FROM search_outbox WHERE entity_id=%s',(self.job['job_id'],));self.assertEqual(c.fetchone()['n'],0)
+        with self.assertRaises(ValueError):drafts.publish(staged['draft_id'])
+        approval={'candidate_hash':candidate_hash(self.review),'reviewer':'offline integration QA','conditions':[
+            {'condition_id':c['condition_id'],'source_complete':True,'logic_preserved':True,'label_confirmed':True,'note':'Synthetic original reviewed'} for c in self.review['conditions']]}
+        drafts.verify(staged['draft_id'],approval)
+        published=drafts.publish(staged['draft_id'])
+        self.assertEqual(drafts.publish(staged['draft_id'])['review_id'],published['review_id'])
+        self.assertIsNotNone(self.store.get(self.job))
+        with self.factory() as db:
+            with db.cursor() as c:
+                c.execute('SELECT COUNT(*) AS n FROM search_outbox WHERE entity_id=%s',(self.job['job_id'],));self.assertEqual(c.fetchone()['n'],1)
+
     def test_full_snapshot_export_contains_current_review_without_source_changes(self):
         self.save()
         with self.factory() as db:rows=export(db)
