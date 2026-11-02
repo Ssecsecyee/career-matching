@@ -20,11 +20,15 @@ TABLES={
 
 
 def validate_admin(value):
-    if not isinstance(value,dict) or set(value)-{'action','request_id','operation','table','offset','session_id','job_id','source_version','reason'}:
+    if not isinstance(value,dict) or set(value)-{'action','request_id','operation','table','offset','session_id','job_id','source_version','reason','decision_id','include_raw','filter_request_id','validation_status','execution_status'}:
         raise ValueError('invalid_admin_request')
-    UUID(value.get('request_id',''))
+    if not isinstance(value.get('request_id'),str):raise ValueError('invalid_admin_request_id')
+    UUID(value['request_id'])
     op=value.get('operation')
-    if value.get('action')!='admin' or op not in {'summary','rows','hide_job','restore_job'}:raise ValueError('invalid_admin_operation')
+    if value.get('action')!='admin' or op not in {'summary','rows','hide_job','restore_job','intent_rows','intent_detail'}:raise ValueError('invalid_admin_operation')
+    if op in {'intent_rows','intent_detail'}:
+        from src.services.admin_intents import validate
+        return validate(value)
     if op=='rows':
         if value.get('table') not in TABLES or type(value.get('offset',0)) is not int or not 0<=value.get('offset',0)<=1000000:raise ValueError('invalid_admin_page')
         if value.get('session_id'):UUID(value['session_id'])
@@ -53,6 +57,9 @@ def execute(factory,payload,actor):
     c=factory()
     try:
         op=payload['operation']
+        if op in {'intent_rows','intent_detail'}:
+            from src.services.admin_intents import query
+            return query(c,payload)
         if op=='summary':
             with c.cursor() as cur:
                 counts={}

@@ -1,6 +1,7 @@
 import React, {useRef,useState} from 'react';
 import {clientToken,postChat,requestPayload} from './api.js';
 import {UsageOverview} from './UsageOverview.jsx';
+import {IntentAudit} from './IntentAudit.jsx';
 
 export function Admin() {
  const [token,setToken]=useState('');const owner=useRef(clientToken());
@@ -11,7 +12,7 @@ export function Admin() {
   setBusy(true);setError('');
   try {
    const result=await postChat({payload:requestPayload('admin',values),accessCode:token.trim(),ownerToken:owner.current});
-   if(!result.ok)throw new Error(({unauthorized:'관리자 토큰을 확인해 주세요.',admin_required:'일반 접속 코드는 관리자 기능을 사용할 수 없습니다.',admin_source_changed_refresh:'다른 작업에서 변경한 공고입니다. 새로고침 후 다시 선택하세요.',admin_restore_not_available:'관리자 화면에서 숨긴 공고만 복구할 수 있습니다.'})[result.body.status]||`처리 실패: ${result.body.status}`);
+   if(!result.ok)throw new Error(({unauthorized:'관리자 토큰을 확인해 주세요.',admin_required:'일반 접속 코드는 관리자 기능을 사용할 수 없습니다.',admin_source_changed_refresh:'다른 작업에서 변경한 공고입니다. 새로고침 후 다시 선택하세요.',admin_restore_not_available:'관리자 화면에서 숨긴 공고만 복구할 수 있습니다.',admin_intent_not_found_or_expired:'기록이 없거나 보관 기한이 지났습니다. 목록을 새로고침해 주세요.',admin_dependency_failed:'조회 연결 또는 관리자 DB 권한을 확인해 주세요.'})[result.body.status]||`처리 실패: ${result.body.status}`);
    return result.body;
   }catch(e){setError(e.message);return null;}finally{setBusy(false);}
  }
@@ -26,6 +27,7 @@ export function Admin() {
  {!summary?<form className="admin-login" onSubmit={e=>{e.preventDefault();loadSummary();}}><h2>관리자 로그인</h2><label>관리자 전용 토큰<input type="password" autoComplete="off" required minLength={32} value={token} onChange={e=>setToken(e.target.value)}/></label><button disabled={busy}>관리 화면 열기</button><p>토큰은 현재 화면의 메모리에서만 사용합니다.</p></form>:<>
  <div className="admin-cards">{[['채용공고',summary.counts.job_postings],['교육',summary.counts.training_offerings],['검색 노출 대상',summary.visible_jobs],['대화 세션',summary.counts.chat_sessions],['모델 호출',summary.counts.model_invocations],['동기화 대기',summary.sync.pending]].map(([k,v])=><section key={k}><span>{k}</span><strong>{Number(v).toLocaleString()}</strong></section>)}</div>
  <UsageOverview summary={summary} busy={busy} onRefresh={loadSummary}/>
+ <IntentAudit request={request} busy={busy}/>
  <section className="admin-section"><div className="admin-section-heading"><div><span className="admin-eyebrow">DATABASE EXPLORER</span><h2>테이블 탐색</h2></div></div><div className="admin-tabs">{summary.tables.map(t=><button key={t.name} disabled={busy} aria-pressed={table===t.name&&!!data} onClick={()=>rows(t.name)}>{t.description}<small>{t.name} · {summary.counts[t.name]}</small></button>)}</div>
  <label>대화 세션 ID로 필터 (대화·메시지·모델 기록)<input value={session} onChange={e=>setSession(e.target.value)} placeholder="session_id — 비워두면 전체"/></label><button disabled={busy} onClick={()=>rows()}>조회 / 새로고침</button>
  {data&&<><p>{data.total}건 중 {data.offset+1}~{Math.min(data.offset+data.rows.length,data.total)} · 페이지당 25건</p><details><summary>컬럼 정보</summary>{data.columns.map(c=><p key={c.name}><b>{c.name}</b> · {c.type} {c.description}</p>)}</details><div className="admin-scroll"><table><thead><tr><th>상세</th>{(data.columns||[]).slice(0,7).map(c=><th key={c.name}>{c.name}</th>)}</tr></thead><tbody>{data.rows.map((r,i)=><tr key={i}><td><details><summary>전체 필드</summary><pre>{JSON.stringify(r,null,2)}</pre>{table==='job_postings'&&<button disabled={busy} onClick={()=>{setSelected(r);setReason('');}}>{r.recruitment_status==='unavailable'?'숨김 복구 검토':'공고 숨김 검토'}</button>}{r.session_id&&<button onClick={()=>setSession(r.session_id)}>이 대화로 필터</button>}</details></td>{data.columns.slice(0,7).map(c=><td key={c.name}>{String(r[c.name]??'').slice(0,180)}</td>)}</tr>)}</tbody></table></div><div className="admin-paging"><button disabled={busy||data.offset===0} onClick={()=>rows(table,Math.max(0,data.offset-25))}>이전</button><button disabled={busy||data.offset+25>=data.total} onClick={()=>rows(table,data.offset+25)}>다음</button></div></>}

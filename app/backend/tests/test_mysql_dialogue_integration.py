@@ -223,3 +223,30 @@ class MySQLDialogueIntegrationTests(unittest.TestCase):
                 cur.execute('SELECT validation_status,execution_status,raw_output FROM intent_decisions WHERE request_id=%s',(payload['request_id'],))
                 row=cur.fetchone();self.assertEqual(row['validation_status'],'invalid');self.assertEqual(row['execution_status'],'failed')
                 self.assertEqual(row['raw_output'],'invalid model JSON')
+
+
+    def test_admin_intent_read_views_filters_raw_mask_and_expiry(self):
+        from src.repositories.intent_decisions import IntentDecisionStore
+        from src.services.admin import execute
+        _,initial=self.start()
+        owner=hmac.new(self.auth.encode(),self.token.encode(),hashlib.sha256).hexdigest()
+        payload={'action':'search','session_id':initial['session_id'],'request_id':str(uuid4()),'search_plan':{'skills':['Python']}}
+        ticket=self.store.begin(owner,payload)
+        audit=IntentDecisionStore(self.factory)
+        identity=audit.start(ticket,'model',{'stage':'choose_job','email':'a@example.com'})
+        audit.classified(ticket,identity,'{"token":"private-example"}',{'target':'jobs','action':'next_results','reason':'Synthetic QA'})
+        audit.finish(ticket,identity,error='SyntheticFailure')
+        self.store.abort(ticket)
+        base={'action':'admin','request_id':str(uuid4())}
+        listed=execute(self.factory,dict(base,operation='intent_rows',session_id=initial['session_id'],filter_request_id=payload['request_id'],execution_status='failed'),'admin')
+        self.assertEqual(listed['total'],1)
+        self.assertNotIn('context_snapshot',listed['rows'][0]);self.assertNotIn('raw_output',listed['rows'][0])
+        detail=execute(self.factory,dict(base,operation='intent_detail',decision_id=identity),'admin')
+        self.assertNotIn('raw_output',detail['record']);self.assertFalse(detail['raw_included'])
+        self.assertNotIn('a@example.com',json.dumps(detail,default=str))
+        raw=execute(self.factory,dict(base,operation='intent_detail',decision_id=identity,include_raw=True),'admin')
+        self.assertTrue(raw['raw_included']);self.assertNotIn('private-example',json.dumps(raw,default=str))
+        with self.factory() as conn:
+            with conn.cursor() as cur:cur.execute('UPDATE intent_decisions SET expires_at=UTC_TIMESTAMP(6)-INTERVAL 1 SECOND WHERE decision_id=%s',(identity,))
+        with self.assertRaises(FlowError) as error:execute(self.factory,dict(base,operation='intent_detail',decision_id=identity),'admin')
+        self.assertEqual(error.exception.status,404)

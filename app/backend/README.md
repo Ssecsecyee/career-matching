@@ -67,3 +67,5 @@ CONTEXT_ROUTING_ENABLED=true는 database/intent_migration.sql 적용 및 런타�
 DBeaver에서 intent_debug_queries.sql로 세션·요청별 판단을 확인할 수 있다. 원본 분류 기록은 공개 API/웹 콘솔에 출력하지 않는다. 실제 모델 평가용 사례는 experiments/context_intent에 있고 현재 정확도 측정 결과는 아니다.
 
 2026-11-02 운영 배포·기록 테이블·실제 smoke 결과: [배포 결과](../../docs/CONTEXT_INTENT_DEPLOYMENT_20261102.md). 설정 기본값과 운영 활성화 상태는 구분한다.
+
+관리자 의도 기록 조회: admin의 intent_rows/intent_detail 읽기 전용 작업. [계획·사용법·검증](../../docs/ADMIN_INTENT_VIEW_PLAN.md). 목록에는 문맥/원문 미포함, 선택 상세와 명시적 include_raw 요청을 분리한다. 배포 전 관리자 DB 계정의 intent_decisions SELECT 권한이 필요하다.
