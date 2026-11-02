@@ -1,6 +1,7 @@
 """MySQL sessions, per-request leases, replay cache and evidence transactions."""
 import hashlib
 import json
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4, uuid5, NAMESPACE_URL
@@ -67,8 +68,8 @@ class MySQLChatStore:
                 state = unpacked(row["requirement_answers"])
                 if state.get("_lease", {}).get("until", 0) > time.time():
                     raise FlowError("session_busy_retry_later", 409)
-                if not (payload["action"] == "confirm_search" or (payload["action"] == "consult" and payload.get("task") == "defer")) and self.max_calls is not None and row["model_call_count"] >= self.max_calls:
-                    raise FlowError("session_model_budget_exceeded", 429)
+                # Model budgets are enforced atomically in begin_invocation, not on
+                # non-model navigation, stored summaries or explicit checklist controls.
                 if not memory(state).get('user_history_version'):
                     cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))
                     rows = cur.fetchall()
@@ -81,7 +82,7 @@ class MySQLChatStore:
                     sequence=int(cur.fetchone()['n'])+1
                     cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,'user',%s,%s,%s,%s)",
                                 (session_id,sequence,request_id,packed(payload),packed(received),row['stage'],row['expires_at']))
-                state["_lease"] = {"request": request_id, "until": time.time() + 90}
+                state["_lease"] = {"request": request_id, "until": time.time() + (180 if os.getenv("CONTEXT_ROUTING_ENABLED") == "true" else 90)}
                 cur.execute("UPDATE chat_sessions SET requirement_answers=%s WHERE session_id=%s", (packed(state), session_id))
             connection.commit()
             return {"session_id": session_id, "owner": owner, "request_id": request_id,

@@ -15,8 +15,9 @@ class SearchFailover:
     def get(self, identity):
         return self.fallback.get(identity)
 
-    def search(self, query, *, exclude_ids=()):
+    def search(self, query, *, exclude_ids=(), delivery_mode=None):
         kwargs = {'exclude_ids': exclude_ids} if exclude_ids else {}
+        if delivery_mode is not None:kwargs['delivery_mode']=delivery_mode
         self.last_search_backend = 'elasticsearch'
         self.search_degraded = False
         try:

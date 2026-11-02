@@ -11,7 +11,7 @@ TRAINING_FIELDS = ('offering_id,source,source_id,source_url,source_version,title
                   'cost_description,recruitment_status,additional_sections,application_deadline,content_hash')
 
 
-def build_training_query(topics):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None):
     if (not isinstance(topics, list) or not 1 <= len(topics) <= 8 or
             any(not isinstance(t, str) or not 1 <= len(t) <= 60 for t in topics)):
         raise ValueError('Invalid training topics')
@@ -24,10 +24,16 @@ def build_training_query(topics):
                 'fields': ['title^4', 'curriculum^3', 'eligibility', 'preferred_conditions',
                            'benefits', 'selection_process', 'application_notes', 'provider_name']}}
         ], 'minimum_should_match': 1}})
+    from src.services.training_navigation import training_exclusions, training_mode
+    excluded=training_exclusions(exclude_ids);training_mode(delivery_mode)
+    extra=[]
+    if excluded:
+        extra.append({'bool':{'must_not':[{'bool':{'filter':[{'term':{'source':source}},{'term':{'source_id':identity}}]}} for source,identity in excluded]}})
+    if delivery_mode:extra.append({'term':{'delivery_mode':delivery_mode}})
     return {'size': 1000, 'track_total_hits': True, 'timeout': '5s',
             '_source': ['source', 'source_id', 'source_version'],
             'query': {'bool': {'filter': [{'terms': {'source': ['boottent', 'goyong24_training']}},
-                                          {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}],
+                                          {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}]+extra,
                                'should': clauses, 'minimum_should_match': 1}},
             'sort': ['_score', {'document_key': 'asc'}]}
 
@@ -38,8 +44,8 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
-    def search(self, topics):
-        result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics))
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None):
+        result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics, exclude_ids=exclude_ids, delivery_mode=delivery_mode))
         if result.get('timed_out'):
             raise SearchUnavailable('elasticsearch_query_timeout')
         if result.get('_shards', {}).get('failed', 0):

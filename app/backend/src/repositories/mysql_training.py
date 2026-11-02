@@ -36,18 +36,26 @@ def card(row, topics):
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None):
         if not isinstance(topics,list) or not 1<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
         expressions=[];params=['boottent','goyong24_training']
         for topic in topics:
             expressions.append("(JSON_CONTAINS(LOWER(CAST(COALESCE(learning_topics,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s))) OR JSON_CONTAINS(LOWER(CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s))))")
             params.extend([topic,topic])
+        from src.services.training_navigation import training_exclusions, training_mode
+        excluded=training_exclusions(exclude_ids);training_mode(delivery_mode)
+        extra=''
+        if excluded:
+            extra+=' AND NOT ('+' OR '.join(['(source=%s AND source_id=%s)']*len(excluded))+')'
+            params.extend(v for pair in excluded for v in pair)
+        if delivery_mode:
+            extra+=' AND delivery_mode=%s';params.append(delivery_mode)
         fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,content_hash'
         conn=self.factory()
         try:
             with conn.cursor() as cur:
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' OR '.join(expressions)+") ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 20",params)
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' OR '.join(expressions)+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 20",params)
                 cards=[card(row,topics) for row in cur.fetchall()]
             cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
             return cards[:3]

@@ -14,6 +14,9 @@ def main():
     try:
         connection.begin()
         with connection.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='intent_decisions'")
+            if cur.fetchone()['n']:
+                tables=('intent_decisions',)+tables
             for table in tables:
                 cur.execute("SELECT COUNT(*) AS n FROM " + table + " WHERE expires_at<=UTC_TIMESTAMP(6)")
                 print(table, "expired:", cur.fetchone()["n"])

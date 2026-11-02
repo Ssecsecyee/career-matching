@@ -9,9 +9,9 @@ test('known summary counseling actions bypass the search classifier', () => {
     assert.equal(result.values.summary_id, 'a'.repeat(64));
   }
 });
-test('similar jobs remains a search without a consultation summary reference', () => {
+test('similar jobs directly requests the next job list without a classifier', () => {
   assert.deepEqual(summaryActionRequest({ id: 'similar_jobs', message: '다른 공고 찾아줘' }),
-    { action: 'search', values: { message: '다른 공고 찾아줘' } });
+    { action: 'next_results', values: { target: 'jobs' } });
 });
 test('unknown tasks and stale malformed references cannot be sent', () => {
   assert.throws(() => summaryActionRequest({ id: 'prepare', message: '준비' }, 'old'));

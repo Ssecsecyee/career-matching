@@ -1,0 +1,25 @@
+-- Additive migration. Run explicitly before enabling CONTEXT_ROUTING_ENABLED.
+CREATE TABLE IF NOT EXISTS intent_decisions (
+ decision_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+ session_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ request_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ attempt_no INT UNSIGNED NOT NULL,
+ decision_source VARCHAR(16) NOT NULL,
+ context_snapshot JSON NOT NULL,
+ model_invocation_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NULL,
+ raw_output TEXT NULL,
+ validated_decision JSON NULL,
+ validation_status VARCHAR(24) NOT NULL DEFAULT 'pending',
+ executed_action VARCHAR(40) NULL,
+ execution_status VARCHAR(24) NOT NULL DEFAULT 'pending',
+ result_summary JSON NULL,
+ error_code VARCHAR(128) NULL,
+ policy_version VARCHAR(80) NOT NULL,
+ created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+ finished_at DATETIME(6) NULL,
+ expires_at DATETIME(6) NOT NULL,
+ UNIQUE KEY uq_intent_attempt(session_id,request_id,attempt_no),
+ KEY ix_intent_request(session_id,request_id),
+ KEY ix_intent_expiry(expires_at),
+ CONSTRAINT fk_intent_session FOREIGN KEY(session_id) REFERENCES chat_sessions(session_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

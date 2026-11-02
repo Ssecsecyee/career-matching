@@ -1,0 +1,309 @@
+[
+  {
+    "id": "jobs_more",
+    "message": "딴거",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "choose_job"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "next_results",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "training_more",
+    "message": "딴거",
+    "context_hint": {
+      "conversation_target": "training",
+      "stage": "conversation"
+    },
+    "expected": {
+      "target": "training",
+      "action": "next_results",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "unclear_more",
+    "message": "딴거",
+    "context_hint": {
+      "conversation_target": null,
+      "stage": "new"
+    },
+    "expected": {
+      "target": "unspecified",
+      "action": "clarify",
+      "question": "채용공고와 교육 중 어떤 것을 찾으시나요?",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "review_more",
+    "message": "다른 거 추천해줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "search_review"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "next_results",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "review_yes",
+    "message": "그 기준으로 보여줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "search_review"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "confirm_search",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "region_change",
+    "message": "다른 거, 부산 쪽으로",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "choose_job"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "changes": {
+        "regions": [
+          "부산"
+        ]
+      },
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "region_clear",
+    "message": "지역은 이제 상관없어",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "choose_job"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "changes": {
+        "regions": []
+      },
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "tech_change",
+    "message": "Python을 꼭 쓰는 곳으로",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "choose_job"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "changes": {
+        "required_skills": [
+          "Python"
+        ]
+      },
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "switch_education",
+    "message": "이번엔 ROS 2 온라인 교육을 찾아줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "choose_job"
+    },
+    "expected": {
+      "target": "training",
+      "action": "search",
+      "topics": [
+        "ROS 2"
+      ],
+      "delivery_mode": "online",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "education_mode",
+    "message": "그럼 오프라인으로 바꿔줘",
+    "context_hint": {
+      "conversation_target": "training",
+      "stage": "conversation"
+    },
+    "expected": {
+      "target": "training",
+      "action": "refine_search",
+      "delivery_mode": "offline",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "education_compare",
+    "message": "이 중 어떤 걸 먼저 참고하면 좋을까?",
+    "context_hint": {
+      "conversation_target": "training",
+      "stage": "conversation"
+    },
+    "expected": {
+      "target": "training",
+      "action": "chat",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "switch_jobs",
+    "message": "교육 말고 Python 백엔드 채용공고 찾아줘",
+    "context_hint": {
+      "conversation_target": "training",
+      "stage": "conversation"
+    },
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "plan": {
+        "schema_version": 2,
+        "roles": [
+          "백엔드"
+        ],
+        "owned_skills": [
+          "Python"
+        ]
+      },
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "selected_prepare",
+    "message": "답한 경험을 이력서에 어떻게 써?",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "completed"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "task": "prepare",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "selected_gaps",
+    "message": "미충족 조건부터 보완 순서 알려줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "gap_guidance"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "task": "learning_plan",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "selected_unknown",
+    "message": "모르겠다고 한 항목을 쉽게 설명해줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "completed"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "task": "explain_unknown",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "selected_summary",
+    "message": "내 답변만 다시 정리해줘",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "completed"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "summary",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "stop",
+    "message": "역량은 더 물어보지 마",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "checking_required"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "control": "stop",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "resume",
+    "message": "다시 조건 확인을 이어가자",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "conversation"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "control": "resume",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "preferred",
+    "message": "우대사항도 이어서 확인하자",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "assessment_checkpoint"
+    },
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "control": "preferred",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "greeting",
+    "message": "좋은 아침이야",
+    "context_hint": {
+      "conversation_target": null,
+      "stage": "new"
+    },
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "합성 QA 정답 라벨"
+    }
+  },
+  {
+    "id": "ordinary_chat",
+    "message": "오늘 너무 피곤하네",
+    "context_hint": {
+      "conversation_target": "jobs",
+      "stage": "checking_required"
+    },
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "합성 QA 정답 라벨"
+    }
+  }
+]

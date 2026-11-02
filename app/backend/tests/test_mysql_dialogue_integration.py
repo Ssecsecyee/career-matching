@@ -178,3 +178,48 @@ class MySQLDialogueIntegrationTests(unittest.TestCase):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT model_call_count FROM chat_sessions WHERE session_id=%s", (body["session_id"],))
                 self.assertEqual(cursor.fetchone()["model_call_count"], 1)
+
+
+    def test_non_model_navigation_remains_available_at_model_cap(self):
+        self.store=MySQLChatStore(self.factory,retention_hours=1,max_calls=1)
+        _,body=self.select()
+        result=self.request({'action':'next_results','target':'jobs','session_id':body['session_id'],'request_id':str(uuid4())})
+        self.assertEqual(result['statusCode'],200,result)
+        with self.factory() as conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT model_call_count FROM chat_sessions WHERE session_id=%s',(body['session_id'],))
+                self.assertEqual(cur.fetchone()['model_call_count'],1)
+
+    def test_context_routing_audit_success_and_invalid_output_persist(self):
+        from unittest.mock import Mock
+        from src.repositories.intent_decisions import IntentDecisionStore
+        from src.bedrock.model_json import ModelOutputFormatError
+        with self.factory() as conn:
+            with conn.cursor() as cur:
+                cur.execute((Path(__file__).parents[1]/'database/intent_migration.sql').read_text(encoding='utf-8'))
+        class Planner:
+            model_id='offline-router';region='offline-region';fail=False
+            def classify(self,message,history):
+                if self.fail:
+                    error=ModelOutputFormatError({});error.intent_raw_output='invalid model JSON';raise error
+                return {'decision':{'target':'general','action':'chat','reason':'Greeting'},'raw_output':'{"target":"general","action":"chat","reason":"Greeting"}'},{}
+            def respond(self,message,history):return {'reply':'반갑습니다.'},{}
+        planner=Planner()
+        def send():
+            payload={'action':'search','message':'안녕','request_id':str(uuid4())}
+            event={'headers':{'Authorization':'Bearer '+self.auth,'X-Client-Token':self.token},'body':json.dumps(payload)}
+            with patch.dict(os.environ,{'CONTEXT_ROUTING_ENABLED':'true'}):
+                result=handle_request(event,jobs=self.jobs,store=self.store,planner=planner,questioner=self.model,training=Mock(),intent_store=IntentDecisionStore(self.factory))
+            return payload,result
+        payload,result=send();self.assertEqual(result['statusCode'],200,result)
+        with self.factory() as conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT i.validation_status,i.execution_status,m.purpose FROM intent_decisions i JOIN model_invocations m ON m.invocation_id=i.model_invocation_id WHERE i.request_id=%s',(payload['request_id'],))
+                self.assertEqual(cur.fetchone(),{'validation_status':'validated','execution_status':'succeeded','purpose':'intent_classification'})
+        planner.fail=True
+        payload,result=send();self.assertEqual(result['statusCode'],502,result)
+        with self.factory() as conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT validation_status,execution_status,raw_output FROM intent_decisions WHERE request_id=%s',(payload['request_id'],))
+                row=cur.fetchone();self.assertEqual(row['validation_status'],'invalid');self.assertEqual(row['execution_status'],'failed')
+                self.assertEqual(row['raw_output'],'invalid model JSON')

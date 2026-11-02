@@ -157,34 +157,8 @@ class DialogueFlow:
                     plan = SearchPlan.parse(routed['plan'])
                 else:
                     plan = invoke('search_plan', self.planner.plan, text)
-            state.pop('learning_context', None)
             raw_plan = payload.get('search_plan') or (routed.get('raw_plan', routed['plan']) if 'routed' in locals() else plan.to_dict())
-            # Superseded review IDs must not reveal the new search's candidates.
-            previous_search = state.pop('search_context', None)
-            total, jobs = self.jobs.search(plan)
-            state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
-            state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
-            cards = [{key: row.get(key) for key in
-                      ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
-                       'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
-            state['search_navigation'] = {'plan': plan.to_dict(), 'shown_ids': []}
-            state.pop('answer_summary', None)
-            state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
-                         candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])
-            if plan.schema_version == 2:
-                remember_search(state, plan, raw_plan, payload, total, jobs)
-                state['pending_candidate_jobs'] = cards
-                state['candidate_ids'] = []
-                if not jobs:
-                    state['candidate_jobs'] = []
-                    return state, review_response(state), evidence
-                if needs_review(plan, text, changing=bool(previous_search)):
-                    state['stage'] = 'search_review'
-                    state['candidate_jobs'] = []
-                    return state, review_response(state), evidence
-                state['candidate_ids'] = [j['source_id'] for j in jobs]
-            mark_shown(state)
-            return state, self.search_response(state), evidence
+            return self.execute_search(state, plan, raw_plan, payload)
 
         if action == 'select':
             state.pop('answer_summary', None)
@@ -313,6 +287,38 @@ class DialogueFlow:
                 'assessment_paused':not preferences(state)['ask_assessment'],
                 'consultation':{'task':task,'generation':'text_model',
                     'source_id':state['selected']['source_id'],'source_version':state['selected']['source_version']}}
+
+    def execute_search(self, state, plan, raw_plan, payload, *, require_review=False):
+        """Execute a validated plan without any free-text interpretation."""
+        evidence = []
+        text = payload.get('message', '')
+        state.pop('learning_context', None)
+        # Superseded review IDs must not reveal the new search's candidates.
+        previous_search = state.pop('search_context', None)
+        total, jobs = self.jobs.search(plan)
+        state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
+        state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
+        cards = [{key: row.get(key) for key in
+                  ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
+                   'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
+        state['search_navigation'] = {'plan': plan.to_dict(), 'shown_ids': []}
+        state.pop('answer_summary', None)
+        state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
+                     candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])
+        if plan.schema_version == 2:
+            remember_search(state, plan, raw_plan, payload, total, jobs)
+            state['pending_candidate_jobs'] = cards
+            state['candidate_ids'] = []
+            if not jobs:
+                state['candidate_jobs'] = []
+                return state, review_response(state), evidence
+            if require_review or needs_review(plan, text, changing=bool(previous_search)):
+                state['stage'] = 'search_review'
+                state['candidate_jobs'] = []
+                return state, review_response(state), evidence
+            state['candidate_ids'] = [j['source_id'] for j in jobs]
+        mark_shown(state)
+        return state, self.search_response(state), evidence
 
     def more_jobs(self, state):
         page = state['search_navigation']

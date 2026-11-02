@@ -29,7 +29,7 @@ def validate_payload(value):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
     fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
-              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
+              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
         raise ValueError("Unsupported request fields")
@@ -49,6 +49,10 @@ def validate_payload(value):
         profile = value.get("profile", {})
         if not isinstance(profile, dict) or len(json.dumps(profile, ensure_ascii=False)) > 4000:
             raise ValueError("Invalid profile")
+    elif action == "next_results":
+        if value.get("target") not in {"jobs","training"}:raise ValueError("Invalid navigation target")
+    elif action == "assessment_control":
+        if value.get("control") not in {"stop","resume","preferred"}:raise ValueError("Invalid assessment control")
     elif action == "consult":
         from src.services.consultation import TASKS
         if not isinstance(value.get('task'),str) or value['task'] not in TASKS:
@@ -87,7 +91,7 @@ def validate_payload(value):
     return value
 
 
-def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None):
+def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None, intent_store=None):
     headers = {key.lower(): value for key, value in event.get("headers", {}).items()}
     from src.services.admin_auth import authenticate
     identity=authenticate(headers,os.getenv('CHAT_API_TOKEN',''),os.getenv('ADMIN_API_TOKEN',''))
@@ -114,17 +118,29 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
     except KeyError:
         return response(503, {"status": "retention_not_configured"})
     ticket = None
+    audit = None
+    decision_id = None
     try:
         ticket = store.begin(owner, payload)
         if "cached" in ticket:
             return response(200, dict(ticket["cached"], cached=True))
+        routing_enabled = os.getenv("CONTEXT_ROUTING_ENABLED", "false") == "true"
+        if routing_enabled:
+            from src.repositories.intent_decisions import IntentDecisionStore
+            from src.services.intent_context import routing_context
+            audit = intent_store or IntentDecisionStore(connect_mysql)
+            source = "model" if payload["action"] == "search" and payload.get("search_plan") is None else "direct"
+            decision_id = audit.start(ticket, source, routing_context(ticket["state"]))
 
         def invoke(purpose, function, *args):
-            adapter = planner if purpose in {"search_plan", "conversation", "consultation"} else questioner
+            adapter = planner if purpose in {"search_plan", "conversation", "consultation", "intent_classification", "context_response"} else questioner
             from src.bedrock.prompts import CONVERSATION_PROMPT_VERSION, SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
             version = CONVERSATION_PROMPT_VERSION if purpose == "conversation" else (SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2")
             if purpose == 'consultation':version = CONSULTATION_PROMPT_VERSION
+            if purpose == 'intent_classification':version = 'context-intent-v1'
+            if purpose == 'context_response':version = 'context-response-v1'
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
+            if purpose == 'intent_classification':ticket['_intent_invocation_id'] = identity
             try:
                 result, usage = function(*args)
             except Exception as exc:
@@ -135,12 +151,30 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
 
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
                             training=training if training is not None else create_training_repository(connect_mysql))
-        state, result, evidence = flow.advance(ticket["state"], payload, invoke)
+        if routing_enabled or payload['action'] in {'next_results','assessment_control'}:
+            from src.services.context_router import ContextRouter
+            def decided(raw, decision):
+                if audit:audit.classified(ticket, decision_id, raw, decision)
+            state, result, evidence = ContextRouter(flow).advance(ticket['state'], payload, invoke, decided)
+        else:
+            state, result, evidence = flow.advance(ticket["state"], payload, invoke)
         if state.get("selected"):
             result["active_job"] = {k:state["selected"].get(k) for k in ("source_id","title","company_name","source_version")}
+        if decision_id:result["intent_decision_id"] = decision_id
         result["snapshot_warning"] = include_unverified
-        return response(200, store.finish(ticket, payload, state, result, evidence))
+        delivered = store.finish(ticket, payload, state, result, evidence)
+        if audit:audit.finish(ticket, decision_id, result=result)
+        return response(200, delivered)
     except Exception as exc:
+        if audit and decision_id:
+            try:
+                if hasattr(exc,'intent_raw_output'):
+                    audit.classified(ticket, decision_id, exc.intent_raw_output, None, valid=False)
+                audit.finish(ticket, decision_id, error=error_code(exc))
+            except Exception:
+                # Audit failures are not silently accepted as successful execution.
+                # Start/validated records remain for reconciliation; never log raw exception text.
+                pass
         if ticket and "cached" not in ticket:
             try:
                 store.abort(ticket, failure={'error_code':error_code(exc),'error_type':type(exc).__name__})
@@ -148,9 +182,13 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
                 # No source/user content or database exception text is logged.
                 pass
         if isinstance(exc, FlowError):
-            return response(exc.status, {"status": exc.code})
+            info = {"status": exc.code, "request_id": payload["request_id"]}
+            if ticket and ticket.get("session_id"):info["session_id"] = ticket["session_id"]
+            if decision_id:info["intent_decision_id"] = decision_id
+            return response(exc.status, info)
         status_code, error = dependency_error(exc)
         error["request_id"] = payload["request_id"]
+        if decision_id:error["intent_decision_id"] = decision_id
         if ticket and "session_id" in ticket:
             error["session_id"] = ticket["session_id"]
         return response(status_code, error)
