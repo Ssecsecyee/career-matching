@@ -1,0 +1,562 @@
+[
+  {
+    "id": "v3-01",
+    "message": "안녕",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-02",
+    "message": "좋은 아침",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-03",
+    "message": "나 힘들어",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-04",
+    "message": "오늘 뭐 먹지",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-05",
+    "message": "고마워",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-06",
+    "message": "검색 말고 그냥 이야기하자",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "general",
+      "action": "chat",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-07",
+    "message": "바이오 공고 찾아줘",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2,
+        "roles": [
+          "바이오",
+          "생명과학"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-08",
+    "message": "React 공고 있어?",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2,
+        "owned_skills": [
+          "React"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-09",
+    "message": "백엔드로 취업하고 싶어",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2,
+        "roles": [
+          "백엔드"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-10",
+    "message": "부산이나 경남 공고",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2,
+        "regions": [
+          "부산",
+          "경남"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-11",
+    "message": "교육 들었어 이제 채용 찾아줘",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2
+      }
+    }
+  },
+  {
+    "id": "v3-12",
+    "message": "질문 말고 Python 공고 찾아줘",
+    "context_fixture": "none",
+    "expected": {
+      "target": "jobs",
+      "action": "search",
+      "reason": "Synthetic labeled intent",
+      "plan": {
+        "schema_version": 2,
+        "owned_skills": [
+          "Python"
+        ]
+      },
+      "ask_assessment": false
+    }
+  },
+  {
+    "id": "v3-13",
+    "message": "지역 상관없어",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "regions": []
+      }
+    }
+  },
+  {
+    "id": "v3-14",
+    "message": "부산으로만",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "regions": [
+          "부산"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-15",
+    "message": "Java도 가능해",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "owned_skills": [
+          "Java"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-16",
+    "message": "직무는 데이터 엔지니어",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "roles": [
+          "데이터 엔지니어"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-17",
+    "message": "Python을 반드시 써야 해",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "required_skills": [
+          "Python"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-18",
+    "message": "지역무관이라는 뜻은 아니고 경남으로",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "refine_search",
+      "reason": "Synthetic labeled intent",
+      "changes": {
+        "regions": [
+          "경남"
+        ]
+      }
+    }
+  },
+  {
+    "id": "v3-19",
+    "message": "딴거",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-20",
+    "message": "딴거",
+    "context_fixture": "training",
+    "expected": {
+      "target": "training",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-21",
+    "message": "이것 말고 또 볼 만한 건?",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-22",
+    "message": "다른 과정",
+    "context_fixture": "training",
+    "expected": {
+      "target": "training",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-23",
+    "message": "다음 공고",
+    "context_fixture": "jobs",
+    "expected": {
+      "target": "jobs",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-24",
+    "message": "그거 말고 다른 교육",
+    "context_fixture": "training",
+    "expected": {
+      "target": "training",
+      "action": "next_results",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-25",
+    "message": "응 이 조건으로",
+    "context_fixture": "review",
+    "expected": {
+      "target": "jobs",
+      "action": "confirm_search",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-26",
+    "message": "공고 보여줘",
+    "context_fixture": "review",
+    "expected": {
+      "target": "jobs",
+      "action": "confirm_search",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-27",
+    "message": "좋아 진행해",
+    "context_fixture": "review",
+    "expected": {
+      "target": "jobs",
+      "action": "confirm_search",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-28",
+    "message": "확인했어",
+    "context_fixture": "review",
+    "expected": {
+      "target": "jobs",
+      "action": "confirm_search",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-29",
+    "message": "그만 물어봐",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "stop"
+    }
+  },
+  {
+    "id": "v3-30",
+    "message": "다시는 역량 묻지 마",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "stop"
+    }
+  },
+  {
+    "id": "v3-31",
+    "message": "이제 다시 확인해줘",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "resume"
+    }
+  },
+  {
+    "id": "v3-32",
+    "message": "우대조건도 확인해줘",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "preferred"
+    }
+  },
+  {
+    "id": "v3-33",
+    "message": "질문하지 말라는 뜻은 아니야 계속해",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "resume"
+    }
+  },
+  {
+    "id": "v3-34",
+    "message": "문답 중단",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "assessment_control",
+      "reason": "Synthetic labeled intent",
+      "control": "stop"
+    }
+  },
+  {
+    "id": "v3-35",
+    "message": "이력서에 연결해줘",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "prepare"
+    }
+  },
+  {
+    "id": "v3-36",
+    "message": "면접 준비 도와줘",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "interview"
+    }
+  },
+  {
+    "id": "v3-37",
+    "message": "교육 수료로 경력 대체하지 말고 보완 방향",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "learning_plan"
+    }
+  },
+  {
+    "id": "v3-38",
+    "message": "미확인 조건을 쉽게 설명",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "explain_unknown"
+    }
+  },
+  {
+    "id": "v3-39",
+    "message": "미확인은 나중에 볼게",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "defer"
+    }
+  },
+  {
+    "id": "v3-40",
+    "message": "그 예시 더 자세히",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "consult",
+      "reason": "Synthetic labeled intent",
+      "task": "general"
+    }
+  },
+  {
+    "id": "v3-41",
+    "message": "내가 답한 내용만 요약",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "summary",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-42",
+    "message": "왜 그렇게 정리했어?",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "summary",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-43",
+    "message": "아까 답변 정정할게 실무 경력 없어",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "remember",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-44",
+    "message": "내 경험을 수정할래",
+    "context_fixture": "selected",
+    "expected": {
+      "target": "selected",
+      "action": "remember",
+      "reason": "Synthetic labeled intent"
+    }
+  },
+  {
+    "id": "v3-45",
+    "message": "둘 다 해줘",
+    "context_fixture": "none",
+    "expected": {
+      "target": "unspecified",
+      "action": "clarify",
+      "reason": "Synthetic labeled intent",
+      "question": "채용과 교육 중 어느 쪽을 원하시나요?"
+    }
+  },
+  {
+    "id": "v3-46",
+    "message": "그거",
+    "context_fixture": "none",
+    "expected": {
+      "target": "unspecified",
+      "action": "clarify",
+      "reason": "Synthetic labeled intent",
+      "question": "채용과 교육 중 어느 쪽을 원하시나요?"
+    }
+  },
+  {
+    "id": "v3-47",
+    "message": "더",
+    "context_fixture": "none",
+    "expected": {
+      "target": "unspecified",
+      "action": "clarify",
+      "reason": "Synthetic labeled intent",
+      "question": "채용과 교육 중 어느 쪽을 원하시나요?"
+    }
+  },
+  {
+    "id": "v3-48",
+    "message": "다른 방향은?",
+    "context_fixture": "none",
+    "expected": {
+      "target": "unspecified",
+      "action": "clarify",
+      "reason": "Synthetic labeled intent",
+      "question": "채용과 교육 중 어느 쪽을 원하시나요?"
+    }
+  }
+]

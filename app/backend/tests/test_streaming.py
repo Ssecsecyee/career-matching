@@ -18,7 +18,7 @@ class StreamingTests(unittest.TestCase):
 
     def test_real_delta_path_emits_before_generation_finishes_and_keeps_usage(self):
         finished=[];snapshots=[]
-        raw=json.dumps({'intent':'chat','reply':'안녕하세요. React 학습을 도와드릴게요.'},ensure_ascii=False)
+        raw='안녕하세요. React 학습을 도와드릴게요.'
         class Events:
             closed=False
             def __iter__(self):
@@ -31,19 +31,18 @@ class StreamingTests(unittest.TestCase):
         def partial(text):
             self.assertFalse(finished);snapshots.append(text)
         with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'true'}):
-            result,usage=BedrockPlanner('model','region',client=client,on_partial=partial).route('안녕',{})
+            result,usage=BedrockPlanner('model','region',client=client,on_partial=partial).respond('안녕',{})
         self.assertGreater(len(snapshots),2)
         self.assertEqual(snapshots[-1],result['reply']);self.assertTrue(events.closed)
         self.assertEqual(usage['output_tokens'],20);client.converse.assert_not_called()
 
-    def test_streaming_search_plan_never_publishes_json_or_filters(self):
-        events=MagicMock();events.__iter__.return_value=iter([
-            {'contentBlockDelta':{'delta':{'text':json.dumps({'intent':'search','plan':{'keyword':'','skills':['React']}})}}},
-            {'messageStop':{'stopReason':'end_turn'}},{'metadata':{'usage':{}}}])
-        client=MagicMock();client.converse_stream.return_value={'stream':events};partial=MagicMock()
+    def test_search_classification_never_streams_json_or_filters(self):
+        from test_backend import FakeRuntime
+        runtime=FakeRuntime(json.dumps({'target':'jobs','action':'search','reason':'QA','plan':{'schema_version':2,'owned_skills':['React']}}))
+        partial=MagicMock()
         with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'true'}):
-            result,_=BedrockPlanner('model','region',client=client,on_partial=partial).route('React 공고',{})
-        self.assertEqual(result['intent'],'search');partial.assert_not_called()
+            result,_=BedrockPlanner('model','region',client=runtime,on_partial=partial).classify('React 공고',{})
+        self.assertEqual(result['decision']['action'],'search');partial.assert_not_called()
 
     def test_progress_rate_limit_and_failure_do_not_break_model_completion(self):
         store=MagicMock();clock=MagicMock(side_effect=[0,0.1,1,2,3])

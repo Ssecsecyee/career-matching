@@ -132,8 +132,8 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         ticket = store.begin(owner, payload)
         if "cached" in ticket:
             return response(200, dict(ticket["cached"], cached=True))
-        routing_enabled = os.getenv("CONTEXT_ROUTING_ENABLED", "false") == "true"
-        if routing_enabled:
+        audit_enabled = os.getenv("INTENT_AUDIT_ENABLED", os.getenv("CONTEXT_ROUTING_ENABLED", "false")) == "true"
+        if audit_enabled:
             from src.repositories.intent_decisions import IntentDecisionStore
             from src.services.intent_context import routing_context
             audit = intent_store or IntentDecisionStore(connect_mysql)
@@ -141,9 +141,9 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             decision_id = audit.start(ticket, source, routing_context(ticket["state"]))
 
         def invoke(purpose, function, *args):
-            adapter = planner if purpose in {"search_plan", "conversation", "consultation", "intent_classification", "context_response"} else questioner
-            from src.bedrock.prompts import CONVERSATION_PROMPT_VERSION, SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
-            version = CONVERSATION_PROMPT_VERSION if purpose == "conversation" else (SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2")
+            adapter = planner if purpose in {"search_plan", "consultation", "intent_classification", "context_response"} else questioner
+            from src.bedrock.prompts import SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
+            version = SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2"
             if purpose == 'consultation':version = CONSULTATION_PROMPT_VERSION
             if purpose == 'intent_classification':
                 from src.schemas.intent import INTENT_VERSION
@@ -161,13 +161,10 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
 
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
                             training=training if training is not None else create_training_repository(connect_mysql))
-        if routing_enabled or payload['action'] in {'next_results','assessment_control'}:
-            from src.services.context_router import ContextRouter
-            def decided(raw, decision):
-                if audit:audit.classified(ticket, decision_id, raw, decision)
-            state, result, evidence = ContextRouter(flow).advance(ticket['state'], payload, invoke, decided)
-        else:
-            state, result, evidence = flow.advance(ticket["state"], payload, invoke)
+        from src.services.context_router import ContextRouter
+        def decided(raw, decision):
+            if audit:audit.classified(ticket, decision_id, raw, decision)
+        state, result, evidence = ContextRouter(flow).advance(ticket['state'], payload, invoke, decided)
         if state.get("selected"):
             result["active_job"] = {k:state["selected"].get(k) for k in ("source_id","title","company_name","source_version")}
         if decision_id:result["intent_decision_id"] = decision_id

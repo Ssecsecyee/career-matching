@@ -48,9 +48,9 @@ class Jobs:
 
 class Planner:
     def __init__(self): self.calls=0
-    def route(self, text, history):
+    def classify(self, text, history):
         self.calls += 1
-        return {'intent':'search','plan':copy.deepcopy(COMPLEX_PLAN)}, {}
+        return {'decision':{'target':'jobs','action':'search','reason':'Synthetic complex search','plan':copy.deepcopy(COMPLEX_PLAN)},'raw_output':''}, {}
 
 
 def invoke(purpose, function, *args):
@@ -137,8 +137,9 @@ class SearchReviewTests(unittest.TestCase):
         self.assertEqual(len(result['candidate_jobs']),2)
         self.assertEqual((self.planner.calls,self.jobs.calls),(1,1))
 
-    def test_natural_confirmation_has_no_additional_model_call(self):
+    def test_natural_confirmation_uses_classifier_but_no_new_search(self):
         self.start()
+        self.planner.classify=lambda *args:({'decision':{'target':'jobs','action':'confirm_search','reason':'Synthetic confirmation'},'raw_output':''},{})
         _,result,_=self.flow.advance(self.state,{'action':'search','message':'공고 보여줘'},invoke)
         self.assertEqual(result['stage'],'choose_job')
         self.assertEqual(self.planner.calls,1)
@@ -185,15 +186,15 @@ class ModelContractTests(unittest.TestCase):
         from unittest.mock import patch
         from src.bedrock.client import BedrockPlanner
         from test_backend import FakeRuntime
-        runtime=FakeRuntime(json.dumps({'intent':'search','plan':COMPLEX_PLAN}))
+        runtime=FakeRuntime(json.dumps({'target':'jobs','action':'search','reason':'Synthetic complex plan','plan':COMPLEX_PLAN}))
         with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'true'}):
-            result,usage=BedrockPlanner('offline-model','offline-region',client=runtime).route(COMPLEX_MESSAGE,{})
-        plan=SearchPlan.parse(result['plan'])
+            result,usage=BedrockPlanner('offline-model','offline-region',client=runtime).classify(COMPLEX_MESSAGE,{})
+        plan=SearchPlan.parse(result['decision']['plan'])
         self.assertEqual(plan.regions,('부산','경남'))
         self.assertEqual(plan.required_skills,())
         self.assertIn('FFI',plan.owned_skills)
-        self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],4096)
-        self.assertEqual(usage['prompt_version'],'conversation-qa-budget-v8')
+        self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1536)
+        self.assertEqual(usage['prompt_version'],'context-intent-v3')
 
     def test_dangerous_or_mixed_model_output_is_rejected(self):
         import os
@@ -201,9 +202,9 @@ class ModelContractTests(unittest.TestCase):
         from src.bedrock.client import BedrockPlanner
         from test_backend import FakeRuntime
         for extra in [{'sql':'SELECT *'}, {'region':'부산 경남'}]:
-            runtime=FakeRuntime(json.dumps({'intent':'search','plan':dict(COMPLEX_PLAN,**extra)}))
+            runtime=FakeRuntime(json.dumps({'target':'jobs','action':'search','reason':'Synthetic invalid plan','plan':dict(COMPLEX_PLAN,**extra)}))
             with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'true'}), self.assertRaises(ValueError):
-                BedrockPlanner('offline-model','offline-region',client=runtime).route(COMPLEX_MESSAGE,{})
+                BedrockPlanner('offline-model','offline-region',client=runtime).classify(COMPLEX_MESSAGE,{})
 
 
 class PreferenceAndPersistenceTests(unittest.TestCase):
@@ -224,9 +225,10 @@ class PreferenceAndPersistenceTests(unittest.TestCase):
             self.assertEqual(kept.regions,('부산',))
 
     def test_modified_simple_search_still_has_review_checkpoint(self):
-        from src.services.search_review import needs_review
-        self.assertTrue(needs_review(SearchPlan(regions=['부산']), '부산으로 바꿔줘', changing=True))
-        self.assertTrue(needs_review(SearchPlan(regions=['부산']), '부산 공고 바로 보여줘', changing=True))
+        flow=DialogueFlow(Jobs(),None,None,include_unverified=True)
+        for text in ('부산으로 바꿔줘','부산 공고 바로 보여줘'):
+            _,result,_=flow.advance({},dict(action='search',message=text,search_plan={'schema_version':2,'regions':['부산']}),invoke)
+            self.assertEqual(result['stage'],'search_review')
 
     def test_search_record_is_transactional_and_not_returned_to_browser(self):
         from datetime import datetime, timedelta

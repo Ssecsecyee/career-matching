@@ -39,6 +39,9 @@ def routing_context(state):
                     'delivery_mode':learning.get('delivery_mode'),
                     'displayed_courses':[{k:c.get(k) for k in ('source','source_id','title')} for c in learning.get('courses',[])][:10]},
         'assessment':{'ask_assessment':state.get('profile',{}).get('assistant_preferences',{}).get('ask_assessment',True),
-                      'answered':len(state.get('checks',[])),'total':len(state.get('conditions',[]))},
+                      'answered':len(state.get('checks',[])),'total':len(state.get('conditions',[])),
+                      'preferred_approved':bool(state.get('preferred_approved')),
+                      'required_unanswered':sum(c.get('type')=='required' and c.get('id') not in {a.get('condition_id') for a in state.get('checks',[])} for c in state.get('conditions',[]))},
         'pending_clarification':state.get('intent_clarification'),
+        'consultation_focus':state.get('consultation_focus'),
         'recent_messages':[{'kind':r.get('kind'),'text':r.get('text','')[:500]} for r in history[-8:]]})

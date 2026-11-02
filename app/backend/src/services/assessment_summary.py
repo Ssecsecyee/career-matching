@@ -99,6 +99,3 @@ def build_summary(state, *, partial=False):
 def summary_context(summary):
     if not summary:return None
     return {k:summary[k] for k in ('version','summary_id','kind','headline','basis','not_a_hiring_decision','source','total','answered','unanswered','partial','groups','conflicts')}
-
-# Compatibility imports; free-text v2 routing does not use these classifiers.
-from src.services.legacy_intent import summary_requested

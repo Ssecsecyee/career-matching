@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v2'
+INTENT_VERSION = 'context-intent-v3'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -55,8 +55,9 @@ class IntentJobPlan(BaseModel):
 class IntentDecision(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
     target: Literal['jobs','training','selected','general','unspecified']
-    action: Literal['chat','search','refine_search','next_results','consult','assessment_control','clarify','confirm_search','summary']
+    action: Literal['chat','search','refine_search','next_results','consult','assessment_control','clarify','confirm_search','summary','remember']
     reason: Annotated[str, Field(min_length=1, max_length=500)]
+    ask_assessment: bool | None = None
     plan: IntentJobPlan | None = None
     changes: SearchChanges | None = None
     topics: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
@@ -74,7 +75,9 @@ class IntentDecision(BaseModel):
 
     @model_validator(mode='after')
     def action_contract(self):
-        fields=self.model_fields_set-{'target','action','reason'}
+        fields=self.model_fields_set-{'target','action','reason','ask_assessment'}
+        if 'ask_assessment' in self.model_fields_set and self.ask_assessment is None:
+            raise ValueError('Preference must be an explicit boolean')
         allowed=set()
         if self.action in {'search','refine_search'}:
             if self.target=='jobs':
@@ -92,6 +95,8 @@ class IntentDecision(BaseModel):
         elif self.action=='assessment_control':
             allowed={'control'}
             if self.target!='selected' or self.control is None:raise ValueError('Assessment control required')
+        elif self.action=='remember':
+            if self.target!='selected':raise ValueError('Correction targets saved experience')
         elif self.action in {'confirm_search'}:
             if self.target!='jobs':raise ValueError('Only job review can be confirmed')
         elif self.action=='summary':
@@ -101,6 +106,8 @@ class IntentDecision(BaseModel):
             if self.question is None:raise ValueError('Clarification question required')
         elif self.action=='chat':
             if self.target=='unspecified':raise ValueError('Chat target required')
+        if self.action=='assessment_control' and self.ask_assessment is not None:
+            if self.ask_assessment != (self.control!='stop'):raise ValueError('Conflicting assessment preference')
         if fields-allowed:raise ValueError('Fields do not match action')
         return self
 

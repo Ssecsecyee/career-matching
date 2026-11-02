@@ -8,7 +8,7 @@ from src.repositories.elasticsearch_jobs import build_query
 from src.repositories.search_failover import SearchFailover, SearchUnavailable
 from src.schemas.search import SearchPlan
 from src.services.dialogue import DialogueFlow
-from src.services.search_continuation import is_more_request
+from src.schemas.intent import IntentDecision
 
 class ContinuationTests(unittest.TestCase):
     def setUp(self):
@@ -26,7 +26,7 @@ class ContinuationTests(unittest.TestCase):
             'search_plan':{'skills':['Python'],'limit':3}},self.invoke)
         return r
     def more(self,text='다른 거 추천해줘'):
-        self.state,r,_=self.flow.advance(self.state,{'action':'search','message':text},self.invoke)
+        self.state,r,_=self.flow.advance(self.state,{'action':'next_results','target':'jobs'},self.invoke)
         return r
     def test_pages_exclude_shown_and_exhaust(self):
         pages=[self.start(),self.more(),self.more('이거 말고 몇개 더 보여줘')]
@@ -45,10 +45,10 @@ class ContinuationTests(unittest.TestCase):
         self.assertEqual(self.start()['candidate_jobs'][0]['source_id'],'1')
         self.assertEqual(self.state['search_navigation']['shown_ids'],['1','2','3'])
     def test_unambiguous_intent_only(self):
-        for t in ['다른 거 추천해줘','이거 말고 몇개 더 보여줘','다음 공고 보여줘','다른 공고 없어?']:
-            self.assertTrue(is_more_request(t),t)
-        for t in ['부산 지역 다른 공고 추천해줘','다른 교육 추천해줘','Python 말고 Java로 찾아줘','다른 부트캠프 있어?','학위 조건 더 설명해줘']:
-            self.assertFalse(is_more_request(t),t)
+        for target in ('jobs','training'):
+            value=IntentDecision(target=target,action='next_results',reason='Validated model target')
+            self.assertEqual(value.target,target)
+        with self.assertRaises(ValueError):IntentDecision(target='general',action='next_results',reason='Invalid target')
     def test_exclusion_reaches_es_and_mysql_fallback(self):
         plan=SearchPlan(skills=['Python'])
         query=build_query(plan,exclude_ids=['1','2'])

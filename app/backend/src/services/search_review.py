@@ -4,8 +4,6 @@ from uuid import uuid4
 from src.services.search_terms import POLICY_VERSION
 
 
-
-
 def execution_summary(plan, total, backend, degraded):
     if plan.schema_version == 1:
         return {'filters': [], 'ranking': [], 'limitations': ['이전 검색 형식의 조건입니다.']}
@@ -53,6 +51,3 @@ def review_response(state):
             'message': ('검색 기준을 확인해 주세요. 이 기준으로 공고를 보여드릴까요?' if data['total'] else
                         '이 검색 기준에 맞는 저장 공고를 찾지 못했습니다. 적용한 조건을 확인하고 변경할 항목을 말씀해 주세요.'),
             'search_backend': state.get('search_backend'), 'search_degraded': state.get('search_degraded', False)}
-
-# Compatibility imports; free-text v2 routing does not use these classifiers.
-from src.services.legacy_intent import is_confirmation, needs_review

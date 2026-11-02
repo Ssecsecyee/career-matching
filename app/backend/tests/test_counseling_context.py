@@ -7,9 +7,11 @@ from test_dialogue import Jobs, Questioner, invoke
 
 class Router:
     def __init__(self):self.history=None
-    def route(self,message,history):
+    def classify(self,message,history):
+        return {"decision":{"target":"general","action":"chat","reason":"Synthetic conversation"},"raw_output":""},{}
+    def respond(self,message,history):
         self.history=copy.deepcopy(history)
-        return {'intent':'chat','reply':'저장된 답변을 기준으로 정리할게요.'},{}
+        return {'reply':'저장된 답변을 기준으로 정리할게요.'},{}
 
 class CounselingTests(unittest.TestCase):
     def fixture(self):

@@ -1,3 +1,4 @@
+from routing_fixture import advance_intent
 """Counseling is text-only and never invokes search or new education retrieval."""
 import copy
 import json
@@ -9,7 +10,7 @@ from uuid import uuid4
 from src.bedrock.client import BedrockPlanner
 from src.bedrock.model_json import ModelOutputFormatError,ModelOutputTruncatedError
 from src.handlers.dialogue import validate_payload
-from src.services.consultation import BUTTON_MESSAGES,legacy_task
+
 from src.services.dialogue import DialogueFlow,FlowError
 from src.services.assessment_summary import build_summary
 from src.services.memory import memory,restore_user_statements
@@ -54,8 +55,8 @@ class ConsultationFlowTests(unittest.TestCase):
 
     def test_gap_counseling_does_not_treat_education_disclaimer_as_a_lookup(self):
         self.state['learning_context']={'status':'need_topic','topics':[],'courses':[]}
-        text=next(m for m,t in BUTTON_MESSAGES.items() if t=='learning_plan')
-        _,response,_=self.flow.advance(self.state,{'action':'search','message':text},invoke)
+        text='미충족 조건 보완 방향을 정리해줘. 교육 수료로 경력을 대체하지 마.'
+        _,response,_=self.flow.advance(self.state,{'action':'consult','task':'learning_plan','message':text},invoke)
         self.assertEqual(response['consultation']['task'],'learning_plan')
         self.assertNotIn('learning_search',response)
         self.assertNotIn('training_retrieval',self.planner.inputs[0][1])
@@ -63,9 +64,10 @@ class ConsultationFlowTests(unittest.TestCase):
 
     def test_all_old_button_requests_follow_their_known_purpose(self):
         original=copy.deepcopy(self.state)
-        for message,task in BUTTON_MESSAGES.items():
+        for task in ('prepare','interview','learning_plan','explain_unknown','defer'):
+            message='Synthetic explicit counseling request'
             with self.subTest(task=task):
-                _,response,_=self.flow.advance(copy.deepcopy(original),{'action':'search','message':message},invoke)
+                _,response,_=self.flow.advance(copy.deepcopy(original),{'action':'consult','task':task,'message':message},invoke)
                 self.assertEqual(response['consultation']['task'],task)
 
     def test_defer_uses_stored_summary_without_model_or_retrieval(self):
@@ -84,20 +86,21 @@ class ConsultationFlowTests(unittest.TestCase):
     def test_refusal_and_original_answers_are_preserved_without_reasking(self):
         before=copy.deepcopy(self.state['checks'])
         self.planner.consult=lambda *args:({'reply':'기록으로 안내합니다. 어떤 기술 경험이 있으신가요?'},{})
-        _,response,_=self.flow.advance(self.state,{'action':'consult','task':'prepare','message':'역량 질문하지 마. 이력서를 준비해줘'},invoke)
+        _,response,_=advance_intent(self.flow,self.state,'역량 질문하지 마. 이력서를 준비해줘',dict(target='selected',action='consult',task='prepare',ask_assessment=False))
         self.assertTrue(response['assessment_paused'])
         self.assertNotIn('있으신가요',response['message'])
         self.assertEqual(self.state['checks'],before)
         self.assertNotIn('questions',response)
 
     def test_explicit_search_is_not_intercepted_by_resume_words(self):
-        self.assertIsNone(legacy_task('이력서에 React 경험이 있어. 관련 채용공고를 찾아줘'))
-        self.assertIsNone(legacy_task('실제 교육 과정을 찾아줘'))
-        self.assertEqual(legacy_task('좀 더 구체적인 예시를 보여줘',{'task':'prepare'}),'general')
+        self.jobs.search=MagicMock(return_value=(0,[]))
+        _,result,_=advance_intent(self.flow,self.state,'이력서 대신 공고찾아줘',dict(target='jobs',action='search',plan={'schema_version':2}))
+        self.jobs.search.assert_called_once()
+        self.assertNotIn('consultation',result)
 
     def test_followup_free_text_uses_the_existing_counseling_focus(self):
         self.state['consultation_focus']={'task':'prepare'}
-        _,response,_=self.flow.advance(self.state,{'action':'search','message':'좀 더 자세한 예시를 알려줘'},invoke)
+        _,response,_=advance_intent(self.flow,self.state,'좀 더 자세한 예시를 알려줘',dict(target='selected',action='consult',task='general'))
         self.assertEqual(response['consultation']['task'],'general')
 
     def test_consult_original_message_can_be_restored_in_user_memory(self):
@@ -201,5 +204,7 @@ class ConsultationEndpointTests(unittest.TestCase):
         self.assertEqual(store.finish_invocation.call_args.kwargs['error_code'],'RuntimeError')
 
     def test_no_space_explicit_search_is_not_mistaken_for_counseling(self):
-        self.assertIsNone(legacy_task('이력서를 봤으니 공고찾아줘'))
-        self.assertIsNone(legacy_task('포트폴리오 기반 교육찾아줘'))
+        from src.schemas.intent import IntentDecision
+        for target in ('jobs','training'):
+            fields={'plan':{'schema_version':2}} if target=='jobs' else {'topics':['Python']}
+            self.assertEqual(IntentDecision(target=target,action='search',reason='Explicit model choice',**fields).target,target)

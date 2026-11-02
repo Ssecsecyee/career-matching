@@ -30,6 +30,3 @@ def counseling_context(state,task):
         result['unanswered_conditions']=[];result['unanswered_context_omitted']=bool(pending)
     if len(json.dumps(result,ensure_ascii=False))>60000:raise ValueError('Counseling context exceeds budget')
     return result
-
-# Compatibility imports; free-text v2 routing does not use these classifiers.
-from src.services.legacy_intent import legacy_task, BUTTON_MESSAGES

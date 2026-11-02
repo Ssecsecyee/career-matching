@@ -82,7 +82,7 @@ class MySQLChatStore:
                     sequence=int(cur.fetchone()['n'])+1
                     cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,'user',%s,%s,%s,%s)",
                                 (session_id,sequence,request_id,packed(payload),packed(received),row['stage'],row['expires_at']))
-                state["_lease"] = {"request": request_id, "until": time.time() + (180 if os.getenv("CONTEXT_ROUTING_ENABLED") == "true" else 90)}
+                state["_lease"] = {"request": request_id, "until": time.time() + 180}
                 cur.execute("UPDATE chat_sessions SET requirement_answers=%s WHERE session_id=%s", (packed(state), session_id))
             connection.commit()
             return {"session_id": session_id, "owner": owner, "request_id": request_id,

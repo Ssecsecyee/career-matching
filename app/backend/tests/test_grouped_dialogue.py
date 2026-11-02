@@ -7,8 +7,10 @@ from unittest.mock import patch
 from uuid import uuid4
 
 class Router:
-    def route(self, text, history):
-        return {'intent':'chat','reply':'안녕하세요. 편하게 말씀해 주세요.'}, {}
+    def classify(self,text,history):
+        return {"decision":{"target":"general","action":"chat","reason":"Synthetic greeting"},"raw_output":""},{}
+    def respond(self, text, history):
+        return {'reply':'안녕하세요. 편하게 말씀해 주세요.'}, {}
 
 class GroupedTests(unittest.TestCase):
     def start(self):
@@ -42,7 +44,8 @@ class GroupedTests(unittest.TestCase):
     def test_chat_preserves_pending_checklist(self):
         state,first,_=self.start()
         state,result,_=self.flow.advance(state,{'action':'search','message':'나 힘들어'},invoke)
-        self.assertEqual(result['questions'],first['questions'])
+        self.assertNotIn('questions',result)
+        self.assertEqual(self.flow.batch_response(state)['questions'],first['questions'])
         self.assertIn('안녕하세요',result['message'])
         self.assertEqual(state['checks'],[])
 
@@ -64,10 +67,10 @@ class GroupedTests(unittest.TestCase):
         class Client:
             def converse(self,**kwargs):
                 self.kwargs=kwargs
-                return {'stopReason':'end_turn','output':{'message':{'content':[{'text':json.dumps({'intent':'chat','reply':'안녕하세요'})}]}},'usage':{'inputTokens':5,'outputTokens':3}}
+                return {'stopReason':'end_turn','output':{'message':{'content':[{'text':'안녕하세요'}]}},'usage':{'inputTokens':5,'outputTokens':3}}
         client=Client()
         with patch.dict('os.environ',{'ENABLE_LIVE_BEDROCK':'true'}):
-            result,usage=BedrockPlanner('model','region',client=client).route('안녕',{})
-        self.assertEqual(result['intent'],'chat')
+            result,usage=BedrockPlanner('model','region',client=client).respond('안녕',{})
+        self.assertEqual(result['reply'],'안녕하세요')
         self.assertEqual(client.kwargs['inferenceConfig']['maxTokens'],4096)
         self.assertEqual(usage['input_tokens'],5)

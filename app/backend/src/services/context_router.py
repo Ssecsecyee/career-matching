@@ -40,6 +40,7 @@ class ContextRouter:
 
     def execute(self,state,payload,d,invoke):
         action,target=d.action,d.target
+        if d.ask_assessment is not None:preferences(state)['ask_assessment']=d.ask_assessment
         text=payload.get('message','')
         if action not in {'search','refine_search','consult'} or (target=='training' and action in {'search','refine_search'}):record(state,text,'statement')
         if action=='clarify':return self.clarify(state,d.question)
@@ -74,16 +75,25 @@ class ContextRouter:
             if state.get('stage')!='search_review' or not state.get('search_context'):
                 return self.clarify(state,'현재 확인을 기다리는 검색 기준이 없습니다. 어떤 검색을 원하시나요?')
             return state,self.flow.confirm_search(state,{'search_id':state['search_context']['search_id']}),[]
+        if action=='remember':
+            # Free-text corrections never silently erase all existing answers.
+            result={'stage':'conversation','message':'이전 답변을 바로 초기화하지 않았습니다. 내 답변 보기·수정에서 해당 조건을 수정하거나, 경험 전체 정정을 확인해 주세요.',
+                    'correction_confirmation_required':True,'memory':public_memory(state)}
+            return state,result,[]
         if action in {'consult','summary','assessment_control'}:
             if action=='assessment_control' and d.control=='stop':
                 preferences(state)['ask_assessment']=False
                 return state,self.flow.paused_response(state),[]
+            if action=='assessment_control' and d.control=='resume' and not state.get('selected'):
+                preferences(state)['ask_assessment']=True
+                return state,{'stage':'conversation','message':'역량 질문을 다시 허용했습니다. 공고를 선택하면 확인할 수 있습니다.'},[]
             if not state.get('selected'):
                 return self.clarify(state,'현재 선택한 공고가 없습니다. 먼저 공고를 선택해 주세요.')
             if action=='summary':return state,self.flow.summary_response(state),[]
             if action=='consult':
                 return state,self.flow.consult(state,dict(payload,task=d.task),invoke),[]
             self.flow.validate_selected(state)
+            self.flow.ensure_conditions(state)
             if d.control=='preferred':
                 answered={c.get('condition_id') for c in state.get('checks',[])}
                 if any(c['type']=='required' and c['id'] not in answered for c in state.get('conditions',[])):
@@ -104,7 +114,11 @@ class ContextRouter:
             reply=respect_preferences(reply,state)
             record(state,reply,'assistant')
             # Keep a pending checklist/review resumable; do not turn a chat into a new search.
-            return state,{'stage':'conversation','message':reply,'memory':public_memory(state)},[]
+            result={'stage':'conversation','message':reply,'memory':public_memory(state)}
+            if target=='training':
+                learning=state.get('learning_context')
+                if learning is not None:attach(result,learning)
+            return state,result,[]
         raise FlowError('unsupported_intent_action')
 
     def training(self,state,d,*,reset):

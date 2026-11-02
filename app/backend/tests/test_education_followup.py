@@ -1,47 +1,44 @@
+from routing_fixture import advance_intent
 import copy
 import unittest
 from unittest.mock import MagicMock
 from src.services.dialogue import DialogueFlow
-from src.services.learning import retrieve
+
 from src.repositories.mysql_jobs import MySQLJobRepository
 from src.schemas.search import SearchPlan
 
 class EducationFollowupTests(unittest.TestCase):
     def context(self):
         return {'status':'found','topics':['React'],'courses':[
-            {'source_id':'first','source_version':1,'title':'실제 교육 A','delivery_mode':'online','recommendation_eligible':False},
-            {'source_id':'second','source_version':2,'title':'실제 교육 B','delivery_mode':'offline','recommendation_eligible':False}],
+            {'source':'fixture','source_id':'first','source_version':1,'title':'실제 교육 A','delivery_mode':'online','recommendation_eligible':False},
+            {'source':'fixture','source_id':'second','source_version':2,'title':'실제 교육 B','delivery_mode':'offline','recommendation_eligible':False}],
             'basis':'explicit_learning_topic_and_self_assessed_gaps','limitations':[]}
 
     def test_pronoun_and_recommendation_retain_exact_displayed_list_without_new_query(self):
-        for text in ['이중 어떤걸 제일 추천해?','이 중 뭐가 좋아?','어떤 걸 제일 추천해?','그중 온라인 과정은?','첫 번째랑 두 번째 비교해줘']:
-            with self.subTest(text=text):
-                previous=self.context();repo=MagicMock();repo.search.side_effect=AssertionError('Must retain displayed candidates')
-                result=retrieve({'learning_context':previous},text,repo)
-                self.assertEqual(result['courses'],previous['courses'][:1] if '온라인' in text else previous['courses'])
-                self.assertEqual(result['reference_resolution'],'previously_displayed_training_courses')
-                self.assertIsNot(result,previous)
+        for text in ['이중 어떤걸 제일 추천해?','첫 번째랑 두 번째 비교해줘']:
+            previous=self.context();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'두 과정을 비교합니다.'},{})
+            flow=DialogueFlow(MagicMock(),planner,None,training=repo)
+            _,result,_=advance_intent(flow,{'learning_context':previous},text,dict(target='training',action='chat'))
+            self.assertEqual(result['learning_opportunities'],previous['courses']);repo.search.assert_not_called()
 
     def test_new_job_request_is_not_hijacked_by_previous_education(self):
-        for text in ['React 관련 공고가 있을까 최근 교육을 들었어','이번에는 백엔드 공고 추천해줘','회사 중 어디가 나을까?']:
-            with self.subTest(text=text):
-                repo=MagicMock();self.assertIsNone(retrieve({'learning_context':self.context()},text,repo));repo.search.assert_not_called()
+        repo=MagicMock();jobs=MagicMock();jobs.search.return_value=(0,[])
+        flow=DialogueFlow(jobs,MagicMock(),None,training=repo)
+        advance_intent(flow,{'learning_context':self.context()},'교육 말고 채용',dict(target='jobs',action='search',plan={'schema_version':2}))
+        jobs.search.assert_called_once();repo.search.assert_not_called()
 
     def test_new_education_topic_requeries_instead_of_reusing_react(self):
-        repo=MagicMock();repo.search.return_value=[]
-        result=retrieve({'learning_context':self.context()},'Python 교육은 어떤 게 좋아?',repo)
-        repo.search.assert_called_once_with(['Python']);self.assertEqual(result['topics'],['Python'])
+        repo=MagicMock();repo.search.return_value=[];flow=DialogueFlow(MagicMock(),MagicMock(),None,training=repo)
+        _,result,_=advance_intent(flow,{'learning_context':self.context()},'Python 교육',dict(target='training',action='search',topics=['Python']))
+        repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None)
+        self.assertEqual(result['learning_search']['topics'],['Python'])
 
     def test_completed_checklist_followup_delivers_education_even_with_selected_job(self):
-        previous=self.context();state={'stage':'gap_guidance','checks':[],'selected':{'source_id':'job','title':'프론트엔드 경력 8년'},'learning_context':copy.deepcopy(previous)}
-        jobs=MagicMock();repo=MagicMock();planner=MagicMock()
-        planner.route.return_value=({'intent':'chat','reply':'두 교육의 학습 내용을 비교해 드릴게요.'},{})
-        def invoke(purpose,fn,*args):return fn(*args)[0]
-        _,response,_=DialogueFlow(jobs,planner,None,training=repo).advance(state,{'action':'search','message':'이중 어떤걸 제일 추천해?'},invoke)
-        history=planner.route.call_args.args[1]
-        self.assertEqual(history['conversation_focus']['kind'],'training')
-        self.assertEqual(history['training_retrieval']['courses'],previous['courses'])
-        self.assertEqual(response['learning_opportunities'],previous['courses'])
+        previous=self.context();state={'stage':'gap_guidance','checks':[],'selected':{'source_id':'job'},'learning_context':copy.deepcopy(previous)}
+        jobs=MagicMock();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'교육을 비교합니다.'},{})
+        _,result,_=advance_intent(DialogueFlow(jobs,planner,None,training=repo),state,'이중 어떤걸 제일 추천해?',dict(target='training',action='chat'))
+        self.assertEqual(planner.respond.call_args.args[1]['conversation_focus']['kind'],'training')
+        self.assertEqual(result['learning_opportunities'],previous['courses'])
         jobs.search.assert_not_called();repo.search.assert_not_called()
 
     def test_technology_keyword_search_includes_tags_and_casefold_without_weakening_skill_filter(self):

@@ -24,9 +24,9 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
       <div className="job-bottom"><a href={safeSourceUrl(job.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a><button disabled={!active || busy} onClick={() => onSelect(job)}>이 공고 확인하기 →</button></div>
-    </article>)}</div>{active && <button className="quiet" disabled={busy} onClick={() => onAssessment('다른 공고 추천해줘')}>다음 공고 보기</button>}</>}
-    {data.stage === 'assessment_checkpoint' && active && <div className="choices"><button disabled={busy} onClick={() => onAssessment('우대조건도 계속 확인해줘')}>우대조건 확인</button><button disabled={busy} onClick={() => onAssessment('현재 답변으로 보완 방향을 정리해줘.')}>현재 답변으로 상담</button><button disabled={busy} onClick={() => onAssessment('다른 공고 추천해줘')}>다른 공고 보기</button></div>}
-    {data.assessment_paused && active && <button className="quiet" disabled={busy} onClick={() => onAssessment('다시 역량 조건을 확인해줘')}>원할 때 역량 확인 재개</button>}
+    </article>)}</div>{active && <button className="quiet" disabled={busy} onClick={() => onAssessment('next_jobs')}>다음 공고 보기</button>}</>}
+    {data.stage === 'assessment_checkpoint' && active && <div className="choices"><button disabled={busy} onClick={() => onAssessment('assessment_preferred')}>우대조건 확인</button><button disabled={busy} onClick={() => onAssessment('consult_gaps')}>현재 답변으로 상담</button><button disabled={busy} onClick={() => onAssessment('next_jobs')}>다른 공고 보기</button></div>}
+    {data.assessment_paused && active && <button className="quiet" disabled={busy} onClick={() => onAssessment('assessment_resume')}>원할 때 역량 확인 재개</button>}
     {data.job_overview && <section className="source"><h3>{data.job_overview.title}</h3><details><summary>자격요건·우대조건 원문 보기</summary><h4>자격요건</h4><pre>{data.job_overview.qualifications}</pre><h4>우대조건</h4><pre>{data.job_overview.preferred_requirements}</pre></details><a href={safeSourceUrl(data.job_overview.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a></section>}
     {isQuestion(data) && data.grouped && <AssessmentStepper key={data.questions.map(q => q.question_id).join("|")} data={data} active={active} busy={busy} onBatch={onBatch} onAssessment={onAssessment} />}
     {isQuestion(data) && !data.grouped && <><span className="pill">{data.requirement_type === 'required' ? '자격요건 확인' : '우대조건 확인'}</span><p>{data.question}</p>{data.progress && <p className="fine">{data.progress.answered + 1} / {data.progress.total}번째 조건</p>}
@@ -49,7 +49,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
         {course.warning && <p className="fine">{course.warning}</p>}
         <a href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a>
       </article>)}
-      {active && data.learning_opportunities?.length > 0 && <button className="quiet" disabled={busy} onClick={() => onAssessment('다른 교육 추천해줘')}>다음 교육 보기</button>}
+      {active && data.learning_opportunities?.length > 0 && <button className="quiet" disabled={busy} onClick={() => onAssessment('next_training')}>다음 교육 보기</button>}
     </section>}
     {data.stage === 'no_results' && !data.message && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
     {data.cached && <span className="fine">저장된 응답</span>}
@@ -164,9 +164,9 @@ function App() {
     const detail = draft.trim(); setDraft('');
     send(requestPayload('answer', { question_id: result.question_id, assessment: value, detail }, session), `${names[value]}${detail ? '\n' + detail : ''}`);
   }
-  function assessmentControl(label) {
-    const next = controlRequest(label);
-    send(requestPayload(next.action, next.values, session), label);
+  function assessmentControl(id) {
+    const next = controlRequest(id);
+    send(requestPayload(next.action, next.values, session), next.label);
   }
   function answerBatch(answers) {
     send(requestPayload('answer_batch', { answers }, session), '조건별 답변을 저장할게요.');

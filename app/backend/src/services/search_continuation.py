@@ -13,6 +13,3 @@ def mark_shown(state):
     page = state.get('search_navigation')
     if page is not None:
         page['shown_ids'] = list(dict.fromkeys(page['shown_ids'] + state.get('candidate_ids', [])))
-
-# Compatibility imports; free-text v2 routing does not use these classifiers.
-from src.services.legacy_intent import is_more_request

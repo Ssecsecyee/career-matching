@@ -1,6 +1,7 @@
+from routing_fixture import advance_intent
 import copy,json,unittest
 from unittest.mock import Mock
-from src.services.assessment_summary import build_summary,summary_requested,summary_context
+from src.services.assessment_summary import build_summary,summary_context
 from src.services.dialogue import DialogueFlow
 from src.services.memory import consultation_context
 from test_dialogue import Jobs,Questioner,invoke
@@ -44,10 +45,8 @@ class SummaryTests(unittest.TestCase):
   s['profile']['memory']['user_statements'].append({'id':'2','text':'정정할게요. 이전 회사 경력 3년이 있어요'})
   self.assertEqual(build_summary(s)['conflicts'],[])
  def test_summary_lookup_does_not_capture_learning_or_job_search(self):
-  for text in ['내가 뭐가 부족해?','왜 그렇게 정리했어?','지금까지 답변을 정리해줘','미확인 조건은 나중에 확인할게. 이미 답한 내용만 다시 정리해줘']:
-   self.assertTrue(summary_requested(text),text)
-  for text in ['다른 공고를 찾아줘','미확인 조건을 쉽게 설명해줘','부족한 점을 바탕으로 학습 순서를 정리해줘','이력서 준비해줘']:
-   self.assertFalse(summary_requested(text),text)
+     from src.schemas.intent import IntentDecision
+     self.assertEqual(IntentDecision(target='selected',action='summary',reason='Model summary').action,'summary')
  def test_context_carries_the_persisted_summary_without_duplicate_raw_quotes(self):
   s=state_for(['met'],['unmet']);s['answer_summary']=build_summary(s);r=consultation_context(s)
   self.assertEqual(r['answer_summary']['summary_id'],s['answer_summary']['summary_id']);self.assertNotIn('items',r['answer_summary']);self.assertEqual(len(r['condition_answers']),2)
@@ -64,14 +63,14 @@ class SummaryFlowTests(unittest.TestCase):
  def test_completion_builds_and_persists_summary_with_zero_model_calls(self):
   r=self.start();r,_=self.answer_group(r,'met');r,e=self.answer_group(r,'met')
   self.assertEqual(r['stage'],'completed');self.assertEqual(r['answer_summary']['kind'],'all_self_reported_met');self.assertEqual(self.state['answer_summary'],r['answer_summary']);self.assertEqual(len(e),1)
-  self.state,r,_=self.flow.advance(self.state,dict(action='search',message='왜 그렇게 정리했어?'),Mock(side_effect=AssertionError('Unexpected model call')))
+  self.state,r,_=advance_intent(self.flow,self.state,'왜 그렇게 정리했어?',dict(target='selected',action='summary'))
   self.assertIn('answer_summary',r);self.assertNotIn('questions',r)
  def test_unknown_completion_has_an_explicit_unconfirmed_summary(self):
   r=self.start();r,_=self.answer_group(r,'unknown');r,_=self.answer_group(r,'unknown')
   self.assertEqual(r['answer_summary']['kind'],'all_unconfirmed');self.assertEqual(r['unconfirmed_count'],2)
  def test_pause_retains_answered_and_unanswered_without_reasking(self):
   r=self.start();r,_=self.answer_group(r,'met')
-  self.state,r,_=self.flow.advance(self.state,dict(action='search',message='역량 확인 질문은 그만해줘'),Mock(side_effect=AssertionError('Unexpected model call')))
+  self.state,r,_=self.flow.advance(self.state,dict(action='assessment_control',control='stop'),Mock(side_effect=AssertionError('Unexpected model call')))
   self.assertTrue(r['assessment_paused']);self.assertEqual(r['answer_summary']['unanswered'],1);self.assertEqual(r['answer_summary']['answered'],1);self.assertNotIn('questions',r)
  def test_new_search_clears_previous_summary(self):
   r=self.start();r,_=self.answer_group(r,'met');r,_=self.answer_group(r,'met')
