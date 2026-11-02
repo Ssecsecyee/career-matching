@@ -56,7 +56,8 @@ def reply_prefix(text):
             index+=1
     except (ValueError,IndexError):return ''
 
-def converse_response(client,arguments,on_partial,*,model_id,region):
+def converse_response(client,arguments,on_partial,*,model_id,region,response_mode='json',prompt_version='conversation-preferences-v5'):
+    if response_mode not in {'json','text'}:raise ValueError('Invalid internal response mode')
     if on_partial is None:return client.converse(**arguments)
     started=perf_counter();raw='';last=''
     response=client.converse_stream(**arguments);stream=response['stream']
@@ -69,7 +70,7 @@ def converse_response(client,arguments,on_partial,*,model_id,region):
             if 'contentBlockDelta' in event:
                 raw+=event['contentBlockDelta']['delta'].get('text','')
                 if len(raw)>20000 or perf_counter()-started>65:raise ModelOutputFormatError({})
-                partial=reply_prefix(raw)
+                partial=raw[:4000] if response_mode=='text' else reply_prefix(raw)
                 if len(partial)>len(last) and partial.startswith(last):
                     on_partial(partial);last=partial
             if 'messageStop' in event:result['stopReason']=event['messageStop'].get('stopReason')
@@ -78,7 +79,7 @@ def converse_response(client,arguments,on_partial,*,model_id,region):
         return result
     except Exception as exc:
         # Preserve usage if metadata was received before a late stream failure.
-        exc.usage=usage_metadata(result,model_id=model_id,region=region,prompt_version='conversation-preferences-v5',started=started)
+        exc.usage=usage_metadata(result,model_id=model_id,region=region,prompt_version=prompt_version,started=started)
         raise
     finally:
         if hasattr(stream,'close'):stream.close()

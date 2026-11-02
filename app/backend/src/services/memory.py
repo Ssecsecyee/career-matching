@@ -17,7 +17,7 @@ def record(state, text, kind='statement'):
     value['sequence'] = seq
     item = {'id': str(seq), 'kind': kind, 'text': text[:4000]}
     value['statements'] = (value['statements'] + [item])[-20:]
-    if kind in {'search', 'statement', 'correction', 'answer_detail'}:
+    if kind in {'search', 'statement', 'correction', 'answer_detail', 'consult'}:
         retain_user_statement(value, item)
 
 
@@ -78,8 +78,8 @@ def restore_user_statements(state, payloads):
     for sequence, payload in payloads:
         action = payload.get('action')
         texts = []
-        if action in {'search', 'remember'}:
-            texts.append((payload.get('message', ''), 'correction' if action == 'remember' else 'search'))
+        if action in {'search', 'remember', 'consult'}:
+            texts.append((payload.get('message', ''), 'correction' if action == 'remember' else ('consult' if action == 'consult' else 'search')))
             profile = payload.get('profile', {})
             if isinstance(profile, dict):texts.append((profile.get('user_statement', ''), 'statement'))
         elif action == 'answer':

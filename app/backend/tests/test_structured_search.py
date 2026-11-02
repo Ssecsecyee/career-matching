@@ -191,8 +191,8 @@ class ModelContractTests(unittest.TestCase):
         self.assertEqual(plan.regions,('부산','경남'))
         self.assertEqual(plan.required_skills,())
         self.assertIn('FFI',plan.owned_skills)
-        self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1024)
-        self.assertEqual(usage['prompt_version'],'conversation-structured-search-v7')
+        self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],4096)
+        self.assertEqual(usage['prompt_version'],'conversation-qa-budget-v8')
 
     def test_dangerous_or_mixed_model_output_is_rejected(self):
         import os

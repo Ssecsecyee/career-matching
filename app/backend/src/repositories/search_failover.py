@@ -15,17 +15,18 @@ class SearchFailover:
     def get(self, identity):
         return self.fallback.get(identity)
 
-    def search(self, query):
+    def search(self, query, *, exclude_ids=()):
+        kwargs = {'exclude_ids': exclude_ids} if exclude_ids else {}
         self.last_search_backend = 'elasticsearch'
         self.search_degraded = False
         try:
-            return self.primary.search(query)
+            return self.primary.search(query, **kwargs)
         except SearchUnavailable:
             self.last_search_backend = 'mysql'
             self.search_degraded = True
             # Never include endpoints, credentials, query text, or raw exception text.
             logging.getLogger(__name__).warning('search_backend_fallback entity=%s reason=elasticsearch_unavailable', self.entity)
-            result = self.fallback.search(query)
+            result = self.fallback.search(query, **kwargs)
             if self.entity == 'training':
                 for course in result:
                     course['retrieval_basis'] = 'mysql_fallback_elasticsearch_unavailable'

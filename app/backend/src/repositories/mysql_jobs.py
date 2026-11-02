@@ -34,7 +34,7 @@ class MySQLJobRepository:
         self.connection_factory = connection_factory
         self.include_unverified = include_unverified
 
-    def search(self, plan):
+    def search(self, plan, *, exclude_ids=()):
         conditions = ["source=%s", "recruitment_status IN (%s" + (",%s" if self.include_unverified else "") + ")",
                       VISIBLE_SQL]
         parameters = ["jumpit", "active"] + (["unknown"] if self.include_unverified else [])
@@ -53,6 +53,11 @@ class MySQLJobRepository:
             extra, values, ranking, rank_parameters = structured_clauses(plan)
             conditions.extend(extra)
             parameters.extend(values)
+        from src.services.search_continuation import exclusion_ids
+        excluded = exclusion_ids(exclude_ids)
+        if excluded:
+            conditions.append("source_id NOT IN (" + ",".join(["%s"] * len(excluded)) + ")")
+            parameters.extend(excluded)
         where = " AND ".join(conditions)
         connection = self.connection_factory()
         try:

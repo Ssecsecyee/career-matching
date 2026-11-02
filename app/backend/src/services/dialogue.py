@@ -2,6 +2,8 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
+from src.services.search_continuation import is_more_request, mark_shown
+from src.services.consultation import legacy_task, counseling_context
 from src.services.search_review import is_confirmation, needs_review, remember_search, review_response
 from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
 from src.services.condition_display import display_condition
@@ -35,6 +37,25 @@ class DialogueFlow:
         action = payload['action']
         evidence = []
         memory(state)
+        # Upgrade an already-confirmed pre-navigation session from its stored plan.
+        if (not state.get('search_navigation') and state.get('search_context')
+                and state['search_context'].get('confirmed_at')):
+            state['search_navigation'] = {
+                'plan': state['search_context']['executed_plan'],
+                'shown_ids': list(dict.fromkeys(c['source_id'] for c in state.get('candidate_jobs', [])))}
+        if (action == 'search' and payload.get('search_plan') is None and not payload.get('profile')
+                and state.get('search_navigation') and state.get('stage') != 'search_review'
+                and state.get('conversation_target') != 'training'
+                and is_more_request(payload.get('message', ''))):
+            record(state, payload['message'], 'search_continuation')
+            return state, self.more_jobs(state), evidence
+        if action == 'consult':
+            return state, self.consult(state,payload,invoke), evidence
+        if (action == 'search' and payload.get('search_plan') is None and state.get('selected')
+                and hasattr(self.planner,'consult')):
+            task=legacy_task(payload.get('message',''),state.get('consultation_focus'))
+            if task:
+                return state, self.consult(state,dict(payload,task=task),invoke), evidence
         if action == 'confirm_search':
             return state, self.confirm_search(state, payload), evidence
         if action == 'search' and state.get('stage') == 'search_review' and is_confirmation(payload.get('message', '')):
@@ -134,6 +155,7 @@ class DialogueFlow:
             cards = [{key: row.get(key) for key in
                       ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
                        'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
+            state['search_navigation'] = {'plan': plan.to_dict(), 'shown_ids': []}
             state.pop('answer_summary', None)
             state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
                          candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])
@@ -149,6 +171,7 @@ class DialogueFlow:
                     state['candidate_jobs'] = []
                     return state, review_response(state), evidence
                 state['candidate_ids'] = [j['source_id'] for j in jobs]
+            mark_shown(state)
             return state, self.search_response(state), evidence
 
         if action == 'select':
@@ -248,6 +271,56 @@ class DialogueFlow:
             return state, result, evidence
         raise FlowError('unsupported_action')
 
+    def consult(self,state,payload,invoke):
+        if not state.get('selected'):
+            raise FlowError('consultation_requires_selected_job',409)
+        summary=build_summary(state)
+        if payload.get('summary_id') and (not summary or payload['summary_id']!=summary['summary_id']):
+            raise FlowError('consultation_summary_changed',409)
+        consent=assessment_request(payload['message'])
+        if consent is False:preferences(state)['ask_assessment']=False
+        record(state,payload['message'],'consult')
+        task=payload['task']
+        summary=build_summary(state)
+        if summary:state['answer_summary']=summary
+        if task=='defer':
+            result=self.summary_response(state)
+            result['message']='미확인 조건은 그대로 남겨 두겠습니다. 기존 답변을 보존하며 문답을 자동으로 다시 시작하지 않습니다.'
+            result['consultation']={'task':task,'generation':'stored_summary','source_version':state['selected']['source_version']}
+            return result
+        answer=invoke('consultation',self.planner.consult,payload['message'],counseling_context(state,task),task)
+        reply=respect_preferences(answer['reply'],state)
+        record(state,reply,'assistant')
+        state.update(stage='conversation',conversation_target='jobs',
+                     consultation_focus={'task':task,'source_id':state['selected']['source_id'],
+                                         'source_version':state['selected']['source_version']})
+        if summary:state['answer_summary']=summary
+        return {'stage':'conversation','message':reply,'memory':public_memory(state),
+                'assessment_paused':not preferences(state)['ask_assessment'],
+                'consultation':{'task':task,'generation':'text_model',
+                    'source_id':state['selected']['source_id'],'source_version':state['selected']['source_version']}}
+
+    def more_jobs(self, state):
+        page = state['search_navigation']
+        if len(page['shown_ids']) >= 1000:
+            return {'stage':'conversation', 'message':'현재 탐색 한도에 도달했습니다. 검색 조건을 좁혀 새로 찾아주세요.'}
+        plan = SearchPlan.parse(page['plan'])
+        total, jobs = self.jobs.search(plan, exclude_ids=page['shown_ids'])
+        cards = [{key: row.get(key) for key in
+                  ('source_id','title','company_name','tech_stacks','addresses','source_url',
+                   'source_version','recruitment_status','last_seen_at')} for row in jobs]
+        # A next-page request must never erase the selected snapshot or saved assessments.
+        state.update(candidate_jobs=cards, candidate_ids=[row['source_id'] for row in jobs],
+                     total=total, stage='choose_job' if jobs else 'conversation',
+                     search_backend=getattr(self.jobs,'last_search_backend','mysql'),
+                     search_degraded=getattr(self.jobs,'search_degraded',False))
+        mark_shown(state)
+        result = self.search_response(state)
+        result.update(search_continuation=True, remaining_total=total,
+                      message=(f'앞서 보여드린 공고를 제외한 후보 {total}건 중 {len(cards)}건입니다.' if cards else
+                               '같은 조건에서 아직 보여드리지 않은 공고가 없습니다. 원하시면 검색 조건을 바꿔주세요.'))
+        return result
+
     def confirm_search(self, state, payload):
         search = state.get('search_context') or {}
         if state.get('stage') != 'search_review' or payload.get('search_id') != search.get('search_id'):
@@ -267,6 +340,7 @@ class DialogueFlow:
                         'search_summary':search['summary'], 'search_changed':True, 'candidate_jobs':[]}
         state.update(stage='choose_job', candidate_jobs=cards,
                      candidate_ids=[c['source_id'] for c in cards])
+        mark_shown(state)
         search['confirmed_at'] = datetime.now(timezone.utc).isoformat()
         return self.search_response(state)
 
@@ -375,10 +449,8 @@ class DialogueFlow:
                   '원문 목록 항목 기준이며 AND·OR 관계를 임의로 나누지 않습니다.', '조건 충족 여부는 사용자 진술에 근거합니다.']}
         result=self.attach_summary(state,result)
         result['message']=result['answer_summary']['headline']
-        if self.training is not None and any(c['assessment'] == 'unmet' for c in state['checks']):
-            learning = retrieve_learning(state, '부족한 역량 학습', self.training)
-            attach_learning(result, learning)
-            state['learning_context'] = learning
+        # Education retrieval runs only on an explicit education request.
+        state.pop('learning_context',None)
         return result
 
     def search_response(self, state):

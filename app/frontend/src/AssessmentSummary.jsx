@@ -23,6 +23,6 @@ export function AssessmentSummary({summary,checks=[],active,busy,onContinue,paus
   })}</ol></details>
   <div className="summary-source"><a href={safeSourceUrl(summary.source.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a><span>확인한 공고 버전 {summary.source.source_version} · 당시 조건 기준</span></div>
   <p className="summary-note">선택과 보충 설명을 정리한 결과입니다. 실무 역량 검증·합격 판정·현재 모집 여부 확인이 아닙니다. 미확인과 미답변을 미충족으로 처리하지 않습니다.</p>
-  {active&&<div className="summary-next-actions"><h4>다음에는 무엇을 준비할까요?</h4><div>{summary.next_actions.map(action=><button type="button" key={action.id} disabled={busy} onClick={()=>onContinue(action.message)}>{action.label} →</button>)}</div><p>아래 입력창에서 자유롭게 이어서 물어봐도 됩니다.</p></div>}
+  {active&&<div className="summary-next-actions"><h4>다음에는 무엇을 준비할까요?</h4><div>{summary.next_actions.map(action=><button type="button" key={action.id} disabled={busy} onClick={()=>onContinue(action.message,action.id,summary.summary_id)}>{action.label} →</button>)}</div><p>아래 입력창에서 자유롭게 이어서 물어봐도 됩니다.</p></div>}
  </section>;
 }

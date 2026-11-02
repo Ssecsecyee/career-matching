@@ -77,5 +77,5 @@ class LearningTests(unittest.TestCase):
             _,usage=BedrockPlanner('model','region',client=client).route('학습 루트',{'training_retrieval':{'courses':[]}})
         data=client.converse.call_args.kwargs
         self.assertIn('recommendation_eligible=false',data['system'][0]['text'])
-        self.assertEqual(data['inferenceConfig']['maxTokens'],1024)
-        self.assertEqual(usage['prompt_version'],'conversation-structured-search-v7')
+        self.assertEqual(data['inferenceConfig']['maxTokens'],4096)
+        self.assertEqual(usage['prompt_version'],'conversation-qa-budget-v8')

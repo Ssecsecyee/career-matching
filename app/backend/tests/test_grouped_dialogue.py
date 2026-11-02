@@ -69,5 +69,5 @@ class GroupedTests(unittest.TestCase):
         with patch.dict('os.environ',{'ENABLE_LIVE_BEDROCK':'true'}):
             result,usage=BedrockPlanner('model','region',client=client).route('안녕',{})
         self.assertEqual(result['intent'],'chat')
-        self.assertEqual(client.kwargs['inferenceConfig']['maxTokens'],1024)
+        self.assertEqual(client.kwargs['inferenceConfig']['maxTokens'],4096)
         self.assertEqual(usage['input_tokens'],5)

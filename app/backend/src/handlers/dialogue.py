@@ -29,7 +29,7 @@ def validate_payload(value):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
     fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped"},
-              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "confirm_search": {"search_id"}}
+              "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
         raise ValueError("Unsupported request fields")
@@ -49,6 +49,14 @@ def validate_payload(value):
         profile = value.get("profile", {})
         if not isinstance(profile, dict) or len(json.dumps(profile, ensure_ascii=False)) > 4000:
             raise ValueError("Invalid profile")
+    elif action == "consult":
+        from src.services.consultation import TASKS
+        if not isinstance(value.get('task'),str) or value['task'] not in TASKS:
+            raise ValueError('Invalid counseling task')
+        if not isinstance(value.get('message'),str) or not 1<=len(value['message'].strip())<=4000:
+            raise ValueError('Invalid counseling message')
+        if 'summary_id' in value and (not isinstance(value['summary_id'],str) or not re.fullmatch('[a-f0-9]{64}',value['summary_id'])):
+            raise ValueError('Invalid summary reference')
     elif action == "confirm_search":
         UUID(value.get("search_id", ""))
     elif action == "remember":
@@ -110,9 +118,10 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             return response(200, dict(ticket["cached"], cached=True))
 
         def invoke(purpose, function, *args):
-            adapter = planner if purpose in {"search_plan", "conversation"} else questioner
-            from src.bedrock.prompts import CONVERSATION_PROMPT_VERSION, SEARCH_PROMPT_VERSION
+            adapter = planner if purpose in {"search_plan", "conversation", "consultation"} else questioner
+            from src.bedrock.prompts import CONVERSATION_PROMPT_VERSION, SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
             version = CONVERSATION_PROMPT_VERSION if purpose == "conversation" else (SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2")
+            if purpose == 'consultation':version = CONSULTATION_PROMPT_VERSION
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             try:
                 result, usage = function(*args)

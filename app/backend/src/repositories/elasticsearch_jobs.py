@@ -2,13 +2,17 @@
 from src.schemas.search import SearchPlan
 
 
-def build_query(plan, *, include_unverified=False):
+def build_query(plan, *, include_unverified=False, exclude_ids=()):
     plan = SearchPlan.parse({**plan.to_dict(), 'skills': list(plan.skills)})
     filters = [{'terms': {'recruitment_status': ['active', 'unknown'] if include_unverified else ['active']}},
                {'bool': {'should': [
                    {'term': {'deadline_type': 'always_open'}},
                    {'bool': {'must_not': [{'exists': {'field': 'deadline_at'}}]}},
                    {'range': {'deadline_at': {'gt': 'now'}}}], 'minimum_should_match': 1}}]
+    from src.services.search_continuation import exclusion_ids
+    excluded = exclusion_ids(exclude_ids)
+    if excluded:
+        filters.append({"bool": {"must_not": [{"terms": {"source_id": excluded}}]}})
     if plan.schema_version == 2:
         return structured_query(plan, filters)
     filters += [{'match': {'skills': {'query': s}}} for s in plan.skills]
@@ -60,9 +64,9 @@ class ElasticsearchJobRepository:
         self.index = index
         self.include_unverified = include_unverified
 
-    def search(self, plan):
+    def search(self, plan, *, exclude_ids=()):
         result = self.request('POST', '/' + self.index + '/_search',
-                              build_query(plan, include_unverified=self.include_unverified))
+                              build_query(plan, include_unverified=self.include_unverified, exclude_ids=exclude_ids))
         if result.get('timed_out') or result.get('_shards', {}).get('failed', 0):
             raise RuntimeError('incomplete_search')
         hits = result['hits']

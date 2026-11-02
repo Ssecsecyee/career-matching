@@ -17,9 +17,13 @@ class JsonJobRepository:
         if not isinstance(self.rows, list) or any(not isinstance(r, dict) for r in self.rows):
             raise ValueError("Expected a normalized job array")
 
-    def search(self, plan):
+    def search(self, plan, *, exclude_ids=()):
+        from src.services.search_continuation import exclusion_ids
+        excluded = set(exclusion_ids(exclude_ids))
         results = []
         for row in self.rows:
+            if row.get("source_id") in excluded:
+                continue
             if row.get("recruitment_status") not in ({"active", "unknown"} if self.include_unverified else {"active"}):
                 continue
             from src.services.deadlines import expired

@@ -57,8 +57,8 @@ class VerifiedElasticJobs:
     def get(self, source_id):
         return self.database.get(source_id)
 
-    def search(self, plan):
-        query = build_query(plan, include_unverified=self.include_unverified)
+    def search(self, plan, *, exclude_ids=()):
+        query = build_query(plan, include_unverified=self.include_unverified, exclude_ids=exclude_ids)
         # Current dialogue contract selects numeric Jumpit IDs. Do not merge
         # other sources until source-aware selection and DB lookup are implemented.
         query['query']['bool']['filter'].append({'term': {'source': 'jumpit'}})

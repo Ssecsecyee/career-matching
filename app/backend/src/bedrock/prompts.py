@@ -2,7 +2,9 @@ import json
 from src.schemas.search import SearchPlan
 
 SEARCH_PROMPT_VERSION = "search-structured-v2"
-CONVERSATION_PROMPT_VERSION = "conversation-structured-search-v7"
+CONVERSATION_PROMPT_VERSION = "conversation-qa-budget-v8"
+CONVERSATION_MAX_TOKENS = 4096
+CONSULTATION_PROMPT_VERSION = "consultation-text-v1"
 
 def search_contract():
     schema = SearchPlan.model_json_schema()

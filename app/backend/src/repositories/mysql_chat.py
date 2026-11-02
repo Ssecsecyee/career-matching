@@ -67,7 +67,7 @@ class MySQLChatStore:
                 state = unpacked(row["requirement_answers"])
                 if state.get("_lease", {}).get("until", 0) > time.time():
                     raise FlowError("session_busy_retry_later", 409)
-                if payload["action"] != "confirm_search" and self.max_calls is not None and row["model_call_count"] >= self.max_calls:
+                if not (payload["action"] == "confirm_search" or (payload["action"] == "consult" and payload.get("task") == "defer")) and self.max_calls is not None and row["model_call_count"] >= self.max_calls:
                     raise FlowError("session_model_budget_exceeded", 429)
                 if not memory(state).get('user_history_version'):
                     cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))

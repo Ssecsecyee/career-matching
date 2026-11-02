@@ -9,6 +9,11 @@ class ModelOutputFormatError(ValueError):
         self.usage = usage
 
 
+class ModelOutputTruncatedError(ModelOutputFormatError):
+    """Provider explicitly stopped at max_tokens; do not accept an incomplete reply."""
+    pass
+
+
 def parse_object(text, usage):
     value = text.lstrip("\ufeff").strip()
     if value.startswith("```"):
