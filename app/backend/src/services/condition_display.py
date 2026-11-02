@@ -1,10 +1,11 @@
 """Readable source-derived labels, with no inferred eligibility or removed rules."""
 import re
 from src.services.learning import topics_in
+from src.services.condition_structure import BULLET
 
 
 def display_condition(quote):
-    lines = [re.sub(r'^(?:[-*•●▪·]|\d+[.)])\s*', '', line.strip()) for line in quote.splitlines() if line.strip()]
+    lines = [BULLET.sub('', line.strip(), count=1) for line in quote.splitlines() if line.strip()]
     text = ' · '.join(lines)
     text = re.sub(r'\s+', ' ', text)
     if re.search(r'학력|학사|석사|박사|학위|대졸|졸업', text):

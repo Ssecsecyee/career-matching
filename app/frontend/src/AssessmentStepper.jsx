@@ -28,6 +28,7 @@ export function AssessmentStepper({data,active,busy,onBatch,onAssessment}) {
   <div className="assessment-step-body" key={item.question_id}>
    <span className="assessment-category">{item.category||'직무 조건'}</span>
    <h3 ref={heading} tabIndex={-1}>{item.summary||preview(item.quote)}</h3>
+   {item.source_notice&&<p className="fine" role="note">{item.source_notice}</p>}
    <details className="source"><summary>정확한 조건 원문 보기</summary><pre>{item.quote}</pre><a href={safeSourceUrl(data.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a></details>
    <div className="assessment-options" role="group" aria-label="현재 조건 답변">{Object.entries(assessmentLabels).map(([value,text])=><button type="button" key={value} aria-pressed={selected===value} disabled={busy} onClick={()=>setDraft(old=>chooseAssessment(old,item.question_id,value))}>{selected===value&&<span aria-hidden="true">✓ </span>}{text}</button>)}</div>
    <details className="assessment-detail-disclosure"><summary>보충 설명 (선택)</summary><label className="assessment-detail">경험이나 참고할 내용<input aria-label="현재 조건 보충 설명" placeholder="경험이나 참고할 내용을 적어 주세요" maxLength={300} disabled={busy} value={draft.details[item.question_id]||''} onChange={e=>setDraft(old=>explainAssessment(old,item.question_id,e.target.value))}/></label></details>

@@ -53,31 +53,8 @@ def condition_key(kind, quote):
 
 
 def split_conditions(text, kind, source_id, version):
-    """Split source bullets conservatively; retain OR clauses and continuation lines intact."""
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    bullets = any(re.match(r'^(?:[-*•●▪·]|\d+[.)])\s*', line) for line in lines)
-    groups = []
-    heading = None
-    fresh_heading = False
-    for line in lines:
-        label = re.sub(r'^(?:[-*•●▪·]|\d+[.)])\s*', '', line).rstrip(':：').strip()
-        if label in {'학력','경력','자격요건','자격조건','필수조건','우대사항','우대조건'}:
-            heading, fresh_heading = line, True
-            continue
-        marked = bool(re.match(r'^(?:[-*•●▪·]|\d+[.)])\s*', line))
-        continuation = bool(re.match(r'^(?:또는|혹은|및 |그리고|AND\b|OR\b|\(|※)', line, re.I))
-        if groups and not fresh_heading and (continuation or (bullets and not marked)):
-            groups[-1] += '\n' + line
-        else:
-            groups.append((heading + '\n' if heading else '') + line)
-        fresh_heading = False
-    if not groups and lines:groups = [text]
-    if len(groups) > 40:
-        # Do not silently discard conditions or overrun a session's input budget.
-        raise ValueError('Too many source conditions')
-    section = 'qualifications' if kind == 'required' else 'preferred_requirements'
-    return [{'id': f'{source_id}:{version}:{kind}:{index}', 'type': kind, 'quote': quote,
-             'section': section, 'key': condition_key(kind, quote)} for index, quote in enumerate(groups)]
+    from src.services.condition_structure import structure_conditions
+    return structure_conditions(text, kind, source_id, version)
 
 
 def public_memory(state):
@@ -138,7 +115,7 @@ def consultation_context(state):
     result['assessment_summary'] = {'counts':counts, 'answered':len(checks),
         'total':len(state.get('conditions', [])), 'basis':'explicit_user_self_assessment',
         'stage':state.get('stage'), 'not_a_hiring_decision':True}
-    result['condition_answers'] = [{k:c.get(k) for k in ('condition_id','type','assessment','quote','detail')} for c in checks]
+    result['condition_answers'] = [{k:c.get(k) for k in ('condition_id','type','assessment','quote','detail','source_notice','parse_status','parser_version')} for c in checks]
     if state.get('answer_summary'):
         from src.services.assessment_summary import summary_context
         result['answer_summary']=summary_context(state['answer_summary'])

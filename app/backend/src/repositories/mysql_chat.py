@@ -7,6 +7,7 @@ from uuid import uuid4, uuid5, NAMESPACE_URL
 
 from src.services.dialogue import FlowError
 from src.services.memory import memory, restore_user_statements
+from src.services.condition_structure import source_binding
 
 
 def packed(value):
@@ -165,7 +166,7 @@ class MySQLChatStore:
                     job, check = item["job"], item["check"]
                     cur.execute("INSERT INTO recommendation_evidence(message_id,subject_type,subject_id,source_version,source_url,requirement_type,requirement_snapshot,source_section,evidence_quote,user_fact_snapshot,assessment_status,explanation,validation_status,rule_version,expires_at) VALUES(%s,'job',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'validated','dialogue-memory-v2',%s)",
                                 (message_id, job["job_id"], job["source_version"], job["source_url"], check["type"],
-                                 packed({"section": item["section"], "quote": check["quote"]}), item["section"], check["quote"],
+                                 packed({"section": item["section"], "quote": check["quote"], "condition_id": check.get("condition_id"), "source_binding": source_binding(check)}), item["section"], check["quote"],
                                  packed({"assessment": check["assessment"], "detail": check["detail"]}),
                                  check["assessment"], check["explanation"], ticket["expires_at"]))
                 cur.execute("INSERT INTO response_cache(scope_key,cache_kind,cache_key,session_id,session_state_version,profile_version,stage,policy_version,data_generation,dependency_versions,payload,expires_at) VALUES(%s,'response',%s,%s,%s,1,%s,'dialogue-memory-v2',1,%s,%s,%s)",

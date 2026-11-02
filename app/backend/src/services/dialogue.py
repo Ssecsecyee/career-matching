@@ -5,6 +5,7 @@ from src.schemas.search import SearchPlan
 from src.services.search_review import is_confirmation, needs_review, remember_search, review_response
 from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
 from src.services.condition_display import display_condition
+from src.services.condition_structure import source_binding, source_notice
 from src.services.assessment_summary import build_summary, summary_requested
 from src.services.learning import retrieve as retrieve_learning, attach as attach_learning
 from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
@@ -294,7 +295,7 @@ class DialogueFlow:
                        'unknown': '사용자가 판단하기 어렵다고 답변하여 미확인으로 남겼습니다.'}[status]
         return {'condition_id': condition['id'], 'type': condition['type'], 'assessment': status,
                 'detail': detail, 'quote': condition['quote'], 'explanation': explanation,
-                'reused': reused, **display_condition(condition['quote'])}
+                'reused': reused, **display_condition(condition['quote']), **source_binding(condition), **source_notice(condition)}
 
     @staticmethod
     def batch_conditions(state):
@@ -307,7 +308,7 @@ class DialogueFlow:
     def batch_response(self, state):
         pending = self.batch_conditions(state)
         return {'stage':state['stage'], 'grouped':True,
-                'questions':[dict(question_id=c['id'], quote=c['quote'], **display_condition(c['quote'])) for c in pending],
+                'questions':[dict(question_id=c['id'], quote=c['quote'], **display_condition(c['quote']), **source_notice(c)) for c in pending],
                 'question':'각 원문 조건에 답해 주세요. 판단하기 어려운 조건은 미확인으로 남겨도 됩니다.',
                 'requirement_type':pending[0]['type'], 'source_url':state['selected']['source_url'],
                 'progress':{'answered':len(state['checks']), 'total':len(state['conditions'])},
@@ -354,7 +355,9 @@ class DialogueFlow:
             known = memory(state)['confirmed'].get(condition['key'])
             # Reuse only for the same original criterion in the same verified source version.
             if (known and known['source_id'] == state['selected']['source_id'] and
-                    known['source_version'] == state['selected']['source_version']):
+                    known['source_version'] == state['selected']['source_version'] and
+                    known.get('parser_version') == condition.get('parser_version') and
+                    known.get('section_hash') == condition.get('section_hash')):
                 check = self.make_check(condition, known['assessment'], known['detail'], reused=True)
                 state['checks'].append(check)
                 evidence.append({'job': state['selected'], 'check': check, 'section': condition['section']})
@@ -394,5 +397,5 @@ class DialogueFlow:
                 'source_version': state['selected']['source_version'],
                 'recruitment_status': state['selected']['recruitment_status'], 'assessment_basis': 'user_statement',
                 'progress': {'answered': len(state['checks']), 'total': len(state['conditions'])},
-                'generation': state['question'].get('generation', 'model'),
+                'generation': state['question'].get('generation', 'model'), **source_notice(state['condition']),
                 'memory': public_memory(state)}

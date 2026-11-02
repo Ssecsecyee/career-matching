@@ -4,6 +4,7 @@ from hashlib import sha256
 import json
 import re
 from src.services.condition_display import display_condition
+from src.services.condition_structure import source_notice
 
 VERSION='answer-summary-v1'
 STATUSES=('met','unmet','unknown')
@@ -42,7 +43,7 @@ def build_summary(state, *, partial=False):
             if check:
                 detail=check.get('detail') or ''
                 items.append({'condition_id':condition['id'],'type':kind,'assessment':check['assessment'],
-                    **display_condition(condition['quote']),'detail':detail[:300],'detail_shortened':len(detail)>300})
+                    **display_condition(condition['quote']),**source_notice(condition),'detail':detail[:300],'detail_shortened':len(detail)>300})
     total=len(conditions);answered=len(answers);unknown=sum(c['assessment']=='unknown' for c in answers.values())
     required=groups['required']['counts'];preferred=groups['preferred']['counts']
     partial=bool(partial or answered<total)

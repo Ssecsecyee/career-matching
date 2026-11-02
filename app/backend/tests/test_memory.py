@@ -105,7 +105,7 @@ class MemoryFlowTests(unittest.TestCase):
     def test_or_clauses_and_continuations_are_preserved(self):
         rows = split_conditions('- MySQL 또는 MariaDB 경험\n  및 설계 경험\n- 경력 3년 이상', 'required', '42', 1)
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0]['quote'], '- MySQL 또는 MariaDB 경험\n및 설계 경험')
+        self.assertEqual(rows[0]['quote'], '- MySQL 또는 MariaDB 경험\n  및 설계 경험')
         self.assertIn('3년', rows[1]['quote'])
 
 
