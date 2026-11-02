@@ -87,3 +87,23 @@ class ContinuationTests(unittest.TestCase):
         self.assertEqual(count.args[1][-2:],['1','2'])
         self.assertIn('LIMIT %s',rows.args[0])
         self.assertEqual(rows.args[1][-3:],['1','2',5])
+
+    def test_short_more_forms_keep_plan_and_do_not_restart(self):
+        for text in ['딴거','딴 거 추천해줘','다른거','다음','더보기']:
+            with self.subTest(text=text):
+                self.state={'profile':{}}
+                self.start()
+                self.assertEqual(self.more(text)['candidate_jobs'][0]['source_id'],'4')
+        self.invoke.assert_not_called()
+
+    def test_more_before_confirmation_keeps_same_review(self):
+        self.state,r,_=self.flow.advance(self.state,{'action':'search','message':'찾아줘',
+            'search_plan':{'schema_version':2,'owned_skills':['Python','AWS'],'limit':3}},self.invoke)
+        search_id=r['search_id']
+        for text in ['다른 거 추천해줘','딴거']:
+            r=self.more(text)
+            self.assertEqual(r['stage'],'search_review')
+            self.assertEqual(r['search_id'],search_id)
+            self.assertEqual(self.state['search_navigation']['shown_ids'],[])
+            self.assertIn('아직 공고 목록',r['message'])
+        self.invoke.assert_not_called()

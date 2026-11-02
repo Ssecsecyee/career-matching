@@ -4,6 +4,9 @@ import re
 
 def is_more_request(text):
     value = re.sub(r'[\s.!?~…]', '', text).casefold()
+    value = value.replace('딴', '다른')
+    if value in {'다른거','다른것','다른공고','다음','다음거','다음공고','더보기','더보여줘','이거말고','다른것도'}:
+        return True
     return bool(re.fullmatch(
         r'(?:(?:음|응|네|그럼|그러면))?(?:(?:이거|이것|그거|그것|아까거)말고)?'
         r'(?:(?:다른|다음)(?:거|것|공고|채용공고|기업|회사|목록|결과)|몇개|좀|공고)?'

@@ -43,6 +43,13 @@ class DialogueFlow:
             state['search_navigation'] = {
                 'plan': state['search_context']['executed_plan'],
                 'shown_ids': list(dict.fromkeys(c['source_id'] for c in state.get('candidate_jobs', [])))}
+        if (action == 'search' and payload.get('search_plan') is None
+                and not payload.get('profile') and state.get('stage') == 'search_review'
+                and is_more_request(payload.get('message', ''))):
+            record(state, payload['message'], 'search_continuation')
+            result = review_response(state)
+            result['message'] = '아직 공고 목록을 보여드리기 전입니다. 아래 검색 기준을 확인하면 첫 목록을 보여드리고, 그다음 다른 공고를 이어서 볼 수 있습니다.'
+            return state, result, evidence
         if (action == 'search' and payload.get('search_plan') is None and not payload.get('profile')
                 and state.get('search_navigation') and state.get('stage') != 'search_review'
                 and state.get('conversation_target') != 'training'
