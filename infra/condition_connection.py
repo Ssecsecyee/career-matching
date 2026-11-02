@@ -61,7 +61,7 @@ except Exception as exc:
 """.replace('RELEASE_STAMP_VALUE',repr(stamp)).replace('DOWNLOAD_URL_VALUE',repr(url)).replace('PACKAGE_HASH_VALUE',repr(result['sha256']))
     encoded=base64.b64encode(remote.encode()).decode()
     command="/opt/career/venv/bin/python -c \"import base64;exec(base64.b64decode('"+encoded+"'))\""
-    job=ssm.send_command(InstanceIds=[instance],DocumentName='AWS-RunShellScript',Parameters={'commands':[command]},TimeoutSeconds=900,Comment='Authorized additive condition review table, least-privilege grants, ES mapping and consumer connection; no model calls')
+    job=ssm.send_command(InstanceIds=[instance],DocumentName='AWS-RunShellScript',Parameters={'commands':[command]},TimeoutSeconds=900,Comment='Connect condition review table, grants, ES mapping and consumer; no model calls')
     state={'instance':instance,'command_id':job['Command']['CommandId'],'folder':str(folder),'sha256':result['sha256'],'s3_key':key}
     STATE.write_text(json.dumps(state,indent=2),encoding='utf-8')
     print(json.dumps({'status':'submitted','model_calls':0,'new_aws_resources':0}))
