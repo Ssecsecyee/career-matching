@@ -1,4 +1,5 @@
 """Validated SearchPlan -> Elasticsearch query; not enabled by bootstrap yet."""
+import os
 from src.schemas.search import SearchPlan
 
 
@@ -33,7 +34,9 @@ def build_query(plan, *, include_unverified=False, exclude_ids=()):
 def structured_query(plan, filters):
     from src.services.search_terms import region_terms, role_terms, skill_terms
 
-    def skill(term):
+    def skill(term, condition_anchor=False):
+        if condition_anchor and os.getenv('ENABLE_AI_CONDITION_RANKING')=='true':
+            return {'bool':{'should':[skill(term),{'multi_match':{'query':term,'fields':['required_condition_terms','preferred_condition_terms']}}],'minimum_should_match':1}}
         return {'bool': {'should': [{'match': {'skills': {'query': s}}} for s in skill_terms(term)],
                          'minimum_should_match': 1}}
 
@@ -51,8 +54,11 @@ def structured_query(plan, filters):
     filters += [skill(s) for s in plan.required_skills]
     # Without a role or required skill, at least one owned skill anchors the search.
     if plan.owned_skills and not plan.roles and not plan.required_skills:
-        filters.append({'bool': {'should': [skill(s) for s in plan.owned_skills], 'minimum_should_match': 1}})
+        filters.append({'bool': {'should': [skill(s,condition_anchor=True) for s in plan.owned_skills], 'minimum_should_match': 1}})
     should = [skill(s) for s in dict.fromkeys(plan.owned_skills + plan.preferred_skills)]
+    if os.getenv('ENABLE_AI_CONDITION_RANKING')=='true':
+        for term in dict.fromkeys(plan.owned_skills+plan.preferred_skills):
+            should.append({'multi_match':{'query':term,'fields':['required_condition_terms^2','preferred_condition_terms'],'type':'best_fields'}})
     return {'size': plan.limit, 'track_total_hits': True,
             'query': {'bool': {'filter': filters, 'should': should, 'minimum_should_match': 0}},
             'sort': ['_score', {'published_at': {'order': 'desc', 'missing': '_last'}}, {'document_key': 'asc'}]}

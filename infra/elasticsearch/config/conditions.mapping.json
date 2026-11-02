@@ -1,0 +1,76 @@
+{
+  "properties": {
+    "condition_classification": {
+      "type": "object",
+      "dynamic": "strict",
+      "properties": {
+        "condition_hash": {
+          "type": "keyword"
+        },
+        "policy_version": {
+          "type": "keyword"
+        },
+        "parser_version": {
+          "type": "keyword"
+        }
+      }
+    },
+    "classified_conditions": {
+      "type": "nested",
+      "dynamic": "strict",
+      "properties": {
+        "condition_id": {
+          "type": "keyword"
+        },
+        "requirement_type": {
+          "type": "keyword"
+        },
+        "treatment": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "reason_code": {
+          "type": "keyword"
+        },
+        "reason": {
+          "type": "text",
+          "index": false
+        },
+        "quote": {
+          "type": "text",
+          "analyzer": "ko_text"
+        },
+        "logic": {
+          "type": "object",
+          "enabled": false
+        },
+        "atoms": {
+          "type": "nested",
+          "dynamic": "strict",
+          "properties": {
+            "term": {
+              "type": "keyword",
+              "normalizer": "lowercase_keyword"
+            },
+            "quote": {
+              "type": "text",
+              "index": false
+            }
+          }
+        }
+      }
+    },
+    "required_condition_terms": {
+      "type": "text",
+      "analyzer": "tech_exact",
+      "search_analyzer": "tech_query"
+    },
+    "preferred_condition_terms": {
+      "type": "text",
+      "analyzer": "tech_exact",
+      "search_analyzer": "tech_query"
+    }
+  }
+}

@@ -37,3 +37,11 @@ test('saved summary retains the grouped-source limitation and original quote', (
   assert.match(html, /개별 기술을 모두 검증한 것으로 해석하지 않습니다/);
   assert.match(html, /Python\nSQL/);
 });
+
+const ConditionReferences = component('./ConditionReferences.jsx','ConditionReferences');
+test('AI reference selection keeps original text and reason without a met answer',()=>{
+ const html=renderToStaticMarkup(React.createElement(ConditionReferences,{data:{condition_source_url:'https://example.com',reference_conditions:[{condition_id:'one',type:'required',quote:'학력무관 <script>',reason:'학력 제한이 없습니다.'}]}}));
+ assert.match(html,/충족한 것으로 계산하지 않습니다/);assert.match(html,/학력무관 &lt;script&gt;/);
+ assert.match(html,/학력 제한이 없습니다/);assert.doesNotMatch(html,/<script>/);
+ assert.equal(renderToStaticMarkup(React.createElement(ConditionReferences,{data:{}})),'');
+});

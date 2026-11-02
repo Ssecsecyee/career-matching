@@ -31,7 +31,9 @@ def validate_review(job,proposal):
             nonlocal nodes
             nodes+=1
             if depth>4 or nodes>32:raise ValueError('Logic budget exceeded')
-            if node.operator=='atom' and node.evidence not in original['quote']:raise ValueError('Evidence differs from source')
+            if node.operator=='atom':
+                if node.evidence not in original['quote']:raise ValueError('Evidence differs from source')
+                if node.term.casefold() not in node.evidence.casefold():raise ValueError('Term not extracted from evidence')
             for child in node.children:check(child,depth+1)
         check(item.logic)
         result.append(dict(item.model_dump(mode='json'),requirement_type=original['type'],quote=original['quote'],section=original['section'],source_spans=original['source_spans']))
@@ -67,9 +69,18 @@ def projection(job,envelope):
             for child in node.get('children',[]):collect(child)
         collect(item['logic'])
         # Only skill-classified, source-evidenced terms are ranking hints, never eligibility verdicts.
-        if item['category']=='skill':terms[item['requirement_type']]+=[a['term'] for a in evidence]
+        if item['category']=='skill' and item['treatment']!='reference':terms[item['requirement_type']]+=[a['term'] for a in evidence]
         entries.append({k:item[k] for k in ('condition_id','requirement_type','treatment','category','reason_code','reason','quote')}|{
             'logic':item['logic'],'atoms':evidence})
     return {'condition_classification':{'condition_hash':review['condition_hash'],'policy_version':POLICY_VERSION,'parser_version':PARSER_VERSION},
             'classified_conditions':entries,'required_condition_terms':list(dict.fromkeys(terms['required'])),
             'preferred_condition_terms':list(dict.fromkeys(terms['preferred']))}
+
+def attach_selection(state,result):
+    status=state.get('condition_review')
+    if status:
+        result['condition_review']=status
+        result['reference_conditions']=[{'condition_id':c['id'],'type':c['type'],'quote':c['quote'],
+            'reason':c['ai_review']['reason'],'reason_code':c['ai_review']['reason_code']} for c in state.get('reference_conditions',[])]
+        result['condition_source_url']=(state.get('selected') or {}).get('source_url')
+    return result

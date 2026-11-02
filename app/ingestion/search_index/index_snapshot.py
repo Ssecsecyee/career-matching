@@ -47,7 +47,27 @@ def document(row):
                recruitment_status=status, deadline_type=row.get('deadline_type') or 'unknown',
                deadline_at=row.get('deadline_at'), published_at=row.get('published_at'),
                last_seen_at=row.get('last_seen_at'), deadline_at_raw=row.get('deadline_at_raw') or '')
+    if row.get('condition_review') is not None:
+        from src.services.condition_review import projection
+        doc.update(projection(row,row['condition_review']))
     return hashlib.sha256(key.encode()).hexdigest(), doc
+
+def snapshot_mapping(*,addresses_are_objects=False):
+    mapping = json.loads((ROOT / 'infra/elasticsearch/config/jobs.local.json').read_text(encoding='utf-8'))
+    properties = mapping['mappings']['properties']
+    properties.update(json.loads((ROOT/'infra/elasticsearch/config/conditions.mapping.json').read_text(encoding='utf-8'))['properties'])
+    for f in ['company_name', 'responsibilities', 'preferred_requirements', 'skills_text']:
+        properties[f] = {'type': 'text', 'analyzer': 'ko_text'}
+    for f in ['document_key', 'source_url', 'deadline_type', 'deadline_at_raw']:
+        properties[f] = {'type': 'keyword', 'index': f != 'source_url'}
+    for f in ['benefits', 'hiring_process', 'application_notes']:
+        properties[f] = {'type': 'text', 'index': False}
+    properties['addresses'] = {'type': 'object', 'enabled': False} if addresses_are_objects else {'type': 'keyword', 'index': False}
+    properties['location_search'] = {'type': 'keyword'}
+    for f in ['deadline_at', 'published_at', 'last_seen_at']:
+        properties[f] = {'type': 'date'}
+    return mapping
+
 
 def run(path):
     raw = path.read_bytes()
@@ -57,18 +77,7 @@ def run(path):
     documents = [document(row) for row in rows]
     if len({key for key, _ in documents}) != len(documents):
         raise ValueError('duplicate_source_and_id')
-    mapping = json.loads((ROOT / 'infra/elasticsearch/config/jobs.local.json').read_text(encoding='utf-8'))
-    properties = mapping['mappings']['properties']
-    for f in ['company_name', 'responsibilities', 'preferred_requirements', 'skills_text']:
-        properties[f] = {'type': 'text', 'analyzer': 'ko_text'}
-    for f in ['document_key', 'source_url', 'deadline_type', 'deadline_at_raw']:
-        properties[f] = {'type': 'keyword', 'index': f != 'source_url'}
-    for f in ['benefits', 'hiring_process', 'application_notes']:
-        properties[f] = {'type': 'text', 'index': False}
-    properties['addresses'] = {'type': 'object', 'enabled': False} if any(isinstance(x, dict) for _, d in documents for x in d['addresses']) else {'type': 'keyword', 'index': False}
-    properties['location_search'] = {'type': 'keyword'}
-    for f in ['deadline_at', 'published_at', 'last_seen_at']:
-        properties[f] = {'type': 'date'}
+    mapping = snapshot_mapping(addresses_are_objects=any(isinstance(x,dict) for _,d in documents for x in d['addresses']))
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ').lower()
     index = 'career-jobs-local-' + stamp + '-' + secrets.token_hex(3)
     request('PUT', '/' + index, mapping)

@@ -8,7 +8,7 @@ from test_backend import FakeRuntime
 
 def fixture():
     job={'job_id':1,'source':'jumpit','source_id':'42','source_version':1,
-         'qualifications':'- 학력무관\n- Python 또는 Java 사용 경험','preferred_requirements':'- Docker 활용'}
+         'recruitment_status':'unknown','qualifications':'- 학력무관\n- Python 또는 Java 사용 경험','preferred_requirements':'- Docker 활용'}
     proposal={'conditions':[]}
     for i,c in enumerate(source_conditions(job)):
         proposal['conditions'].append({'condition_id':review_key(c),'treatment':'reference' if i==0 else 'ask',

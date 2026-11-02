@@ -81,8 +81,9 @@ class Engine:
 
 
 class Consumer:
-    def __init__(self, connection, engine, *, batch_size=200):
+    def __init__(self, connection, engine, *, batch_size=200, include_condition_reviews=False):
         self.db, self.engine, self.batch_size = connection, engine, batch_size
+        self.include_condition_reviews=include_condition_reviews
 
     def sweep_expired(self):
         # Derived visibility only: do not alter source recruitment_status or
@@ -94,7 +95,10 @@ class Consumer:
 
     def process(self, event):
         kind = event['entity_type']
-        if kind not in ('job', 'training') or event['operation'] not in ('upsert', 'close', 'delete'):
+        op=event['operation']
+        review_event=isinstance(op,str) and op.startswith('r:') and op[2:].isascii() and op[2:].isdigit() and 0<int(op[2:])<=18446744073709551615
+        if review_event and (kind!='job' or not self.include_condition_reviews):raise ValueError('condition_reviews_not_enabled')
+        if kind not in ('job', 'training') or (op not in ('upsert', 'close', 'delete') and not review_event):
             raise ValueError('unsupported_event')
         table, identity = ('job_postings', 'job_id') if kind == 'job' else ('training_offerings', 'offering_id')
         with self.db.cursor() as cur:
@@ -115,6 +119,10 @@ class Consumer:
             remove = remove or row['recruitment_status'] in {'closed','unavailable'} or expired(row)
             # A close event alone is not proof of actual source closure; current
             # DB status/expiry is authoritative even for old close events.
+        if kind=='job' and self.include_condition_reviews and not remove:
+            from src.repositories.condition_reviews import ConditionReviewStore
+            review=ConditionReviewStore.load(self.db,row)
+            if review is not None:row=dict(row,condition_review=review)
         self.engine.apply(kind, row, remove=remove)
         with self.db.cursor() as cur:
             cur.execute('UPDATE search_outbox SET processed_at=UTC_TIMESTAMP(6),attempt_count=attempt_count+1,last_error=NULL WHERE event_id=%s AND processed_at IS NULL', (event['event_id'],))
@@ -167,7 +175,7 @@ def main():
         charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor, autocommit=True,
         init_command="SET time_zone='+00:00'", connect_timeout=5, read_timeout=20, write_timeout=20)
     try:
-        result = Consumer(connection, Engine(settings['jobs_alias'], settings['training_alias'])).run()
+        result = Consumer(connection, Engine(settings['jobs_alias'], settings['training_alias']),include_condition_reviews=settings.get('enable_condition_reviews') is True).run()
         print(json.dumps(result), flush=True)
         return 1 if result.get('failed') else 0
     finally:

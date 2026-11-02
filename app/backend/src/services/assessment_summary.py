@@ -43,7 +43,7 @@ def build_summary(state, *, partial=False):
             if check:
                 detail=check.get('detail') or ''
                 items.append({'condition_id':condition['id'],'type':kind,'assessment':check['assessment'],
-                    **display_condition(condition['quote']),**source_notice(condition),'detail':detail[:300],'detail_shortened':len(detail)>300})
+                    **display_condition(condition['quote'],condition.get('ai_review')),**source_notice(condition),'detail':detail[:300],'detail_shortened':len(detail)>300})
     total=len(conditions);answered=len(answers);unknown=sum(c['assessment']=='unknown' for c in answers.values())
     required=groups['required']['counts'];preferred=groups['preferred']['counts']
     partial=bool(partial or answered<total)
@@ -91,7 +91,7 @@ def build_summary(state, *, partial=False):
     return {'version':VERSION,'summary_id':sha256(json.dumps(snapshot,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest(),
         'kind':kind,'headline':headline,'basis':'explicit_user_self_assessment','not_a_hiring_decision':True,
         'source':{k:selected.get(k) for k in ('source_id','source_version','source_url','company_name','title')},
-        'total':total,'answered':answered,'unanswered':total-answered,'partial':partial,'groups':groups,'items':items,
+        'reference_count':len(state.get('reference_conditions',[])),'total':total,'answered':answered,'unanswered':total-answered,'partial':partial,'groups':groups,'items':items,
         'conflicts':conflicts,'next_actions':[{'id':i,'label':label,'message':message} for i,label,message in actions],
         'limitations':['사용자의 자기 평가이며 실무 역량 검증이나 합격 판정이 아닙니다.','미확인과 미답변은 미충족과 구분합니다.']}
 

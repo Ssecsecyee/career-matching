@@ -24,7 +24,7 @@ class ConditionReviewStore:
         try:
             connection.begin()
             with connection.cursor() as cur:
-                cur.execute('SELECT job_id,source_id,source_version,qualifications,preferred_requirements FROM job_postings WHERE job_id=%s FOR UPDATE',(job['job_id'],))
+                cur.execute('SELECT job_id,source_id,source_version,qualifications,preferred_requirements FROM job_postings WHERE job_id=%s FOR SHARE',(job['job_id'],))
                 current=cur.fetchone()
                 if not current or str(current['source_id'])!=str(job['source_id']) or condition_hash(current)!=checked['condition_hash']:
                     raise ValueError('Source changed during classification')

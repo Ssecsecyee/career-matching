@@ -94,6 +94,7 @@ class ContextRouter:
                 return state,self.flow.consult(state,dict(payload,task=d.task),invoke),[]
             self.flow.validate_selected(state)
             self.flow.ensure_conditions(state)
+            self.flow.apply_condition_review(state,state['selected'])
             if d.control=='preferred':
                 answered={c.get('condition_id') for c in state.get('checks',[])}
                 if any(c['type']=='required' and c['id'] not in answered for c in state.get('conditions',[])):

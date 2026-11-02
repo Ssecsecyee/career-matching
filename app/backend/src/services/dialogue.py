@@ -27,10 +27,11 @@ def ensure_selectable(job, include_unverified):
 
 
 class DialogueFlow:
-    def __init__(self, jobs, planner, questioner, *, include_unverified=False, training=None):
+    def __init__(self, jobs, planner, questioner, *, include_unverified=False, training=None, condition_reviews=None):
         self.jobs, self.planner, self.questioner = jobs, planner, questioner
         self.include_unverified = include_unverified
         self.training = training
+        self.condition_reviews=condition_reviews
 
     def advance(self, state, payload, invoke):
         action = payload['action']
@@ -71,6 +72,7 @@ class DialogueFlow:
 
         if action == 'select':
             state.pop('answer_summary', None)
+            for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
             if payload['source_id'] not in state.get('candidate_ids', []):
                 raise FlowError('job_not_in_session_candidates', 409)
             job = self.jobs.get(payload['source_id'])
@@ -94,7 +96,9 @@ class DialogueFlow:
                     for kind, section in (('required', 'qualifications'), ('preferred', 'preferred_requirements'))), [])
             except ValueError as exc:
                 raise FlowError('too_many_source_conditions', 413) from exc
+            state['original_conditions']=list(state['conditions'])
             state['checks'] = []
+            self.apply_condition_review(state,job)
             state['grouped'] = payload.get('grouped', False)
             state['assessment_checkpoint_enabled'] = payload.get('assessment_checkpoint', False)
             state['preferred_approved'] = False
@@ -168,6 +172,19 @@ class DialogueFlow:
             return state, result, evidence
         raise FlowError('unsupported_action')
 
+    def apply_condition_review(self,state,job):
+        if self.condition_reviews is None or state.get('condition_review') or state.get('checks'):return
+        try:
+            review=self.condition_reviews.get(job)
+            if review is not None:
+                from src.services.condition_review import question_selection
+                questions,references,originals=question_selection(job,review)
+                state.update(conditions=questions,original_conditions=originals,reference_conditions=references,
+                    condition_review={'status':'applied','policy_version':review['policy_version'],'condition_hash':review['condition_hash']})
+            else:state['condition_review']={'status':'unclassified_all_questions'}
+        except Exception as exc:
+            state['condition_review']={'status':'fallback_all_questions','error_type':type(exc).__name__}
+
     def consult(self,state,payload,invoke):
         if not state.get('selected'):
             raise FlowError('consultation_requires_selected_job',409)
@@ -199,6 +216,7 @@ class DialogueFlow:
         """Execute a validated plan without any free-text interpretation."""
         evidence = []
         state.pop('learning_context', None)
+        for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
         # Superseded review IDs must not reveal the new search's candidates.
         state.pop('search_context', None)
         total, jobs = self.jobs.search(plan)
@@ -280,6 +298,7 @@ class DialogueFlow:
     def ensure_conditions(state):
         # An already-open pre-upgrade session can finish its existing section question safely.
         if not state.get('conditions'):
+            if state.get('condition_review',{}).get('status')=='applied':return
             if not state.get('condition'):
                 selected=state['selected']
                 state['conditions']=sum((split_conditions(selected.get(section) or '',kind,selected['source_id'],selected['source_version'])
@@ -300,7 +319,7 @@ class DialogueFlow:
                        'unknown': '사용자가 판단하기 어렵다고 답변하여 미확인으로 남겼습니다.'}[status]
         return {'condition_id': condition['id'], 'type': condition['type'], 'assessment': status,
                 'detail': detail, 'quote': condition['quote'], 'explanation': explanation,
-                'reused': reused, **display_condition(condition['quote']), **source_binding(condition), **source_notice(condition)}
+                'reused': reused, **display_condition(condition['quote'],condition.get('ai_review')), **source_binding(condition), **source_notice(condition)}
 
     @staticmethod
     def batch_conditions(state):
@@ -313,7 +332,7 @@ class DialogueFlow:
     def batch_response(self, state):
         pending = self.batch_conditions(state)
         return {'stage':state['stage'], 'grouped':True,
-                'questions':[dict(question_id=c['id'], quote=c['quote'], **display_condition(c['quote']), **source_notice(c)) for c in pending],
+                'questions':[dict(question_id=c['id'], quote=c['quote'], **display_condition(c['quote'],c.get('ai_review')), **source_notice(c)) for c in pending],
                 'question':'각 원문 조건에 답해 주세요. 판단하기 어려운 조건은 미확인으로 남겨도 됩니다.',
                 'requirement_type':pending[0]['type'], 'source_url':state['selected']['source_url'],
                 'progress':{'answered':len(state['checks']), 'total':len(state['conditions'])},
@@ -345,6 +364,10 @@ class DialogueFlow:
         return DialogueFlow.attach_summary(state,result) if state.get('conditions') or state.get('checks') else result
 
     def next_question(self, state, invoke, evidence):
+        from src.services.condition_review import attach_selection
+        return attach_selection(state,self._next_question(state,invoke,evidence))
+
+    def _next_question(self, state, invoke, evidence):
         state.pop('answer_summary', None)
         if not preferences(state)['ask_assessment']:
             return self.paused_response(state)

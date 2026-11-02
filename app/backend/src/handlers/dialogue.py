@@ -99,7 +99,7 @@ def validate_payload(value):
     return value
 
 
-def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None, intent_store=None):
+def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None, intent_store=None, condition_reviews=None):
     headers = {key.lower(): value for key, value in event.get("headers", {}).items()}
     from src.services.admin_auth import authenticate
     identity=authenticate(headers,os.getenv('CHAT_API_TOKEN',''),os.getenv('ADMIN_API_TOKEN',''))
@@ -159,12 +159,18 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             store.finish_invocation(ticket, identity, usage=usage)
             return result
 
+        if condition_reviews is None and os.getenv('ENABLE_AI_CONDITION_SELECTION')=='true':
+            from src.repositories.condition_reviews import ConditionReviewStore
+            condition_reviews=ConditionReviewStore(connect_mysql)
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
+                            condition_reviews=condition_reviews,
                             training=training if training is not None else create_training_repository(connect_mysql))
         from src.services.context_router import ContextRouter
         def decided(raw, decision):
             if audit:audit.classified(ticket, decision_id, raw, decision)
         state, result, evidence = ContextRouter(flow).advance(ticket['state'], payload, invoke, decided)
+        from src.services.condition_review import attach_selection
+        result=attach_selection(state,result)
         if state.get("selected"):
             result["active_job"] = {k:state["selected"].get(k) for k in ("source_id","title","company_name","source_version")}
         if decision_id:result["intent_decision_id"] = decision_id

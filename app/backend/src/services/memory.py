@@ -116,6 +116,11 @@ def consultation_context(state):
         'total':len(state.get('conditions', [])), 'basis':'explicit_user_self_assessment',
         'stage':state.get('stage'), 'not_a_hiring_decision':True}
     result['condition_answers'] = [{k:c.get(k) for k in ('condition_id','type','assessment','quote','detail','source_notice','parse_status','parser_version')} for c in checks]
+    references=state.get('reference_conditions',[])
+    if references:
+        result['reference_conditions']=[{'type':c['type'],'quote':c['quote'][:400],'reason':c['ai_review']['reason'][:200]} for c in references[:20]]
+        result['reference_conditions_omitted']=len(references)>20
+        result['reference_policy']='질문에서 생략한 참고항목이며 사용자 충족·미충족 답변이 아닙니다.'
     if state.get('answer_summary'):
         from src.services.assessment_summary import summary_context
         result['answer_summary']=summary_context(state['answer_summary'])

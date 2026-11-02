@@ -4,7 +4,7 @@ from src.services.learning import topics_in
 from src.services.condition_structure import BULLET
 
 
-def display_condition(quote):
+def display_condition(quote, classification=None):
     lines = [BULLET.sub('', line.strip(), count=1) for line in quote.splitlines() if line.strip()]
     text = ' · '.join(lines)
     text = re.sub(r'\s+', ' ', text)
@@ -18,6 +18,8 @@ def display_condition(quote):
         category = '협업·업무 방식'
     else:
         category = '직무 조건'
+    if classification is not None:
+        category={'education':'학력','experience':'경력','skill':'직무 조건','certificate':'자격·면허','attitude':'협업·업무 방식','other':'직무 조건'}[classification['category']]
     # This is a compact excerpt, not a model rewrite. OR/AND clauses and
     # numbers remain in the original quote; no criteria are marked irrelevant.
     return {'summary': text[:180] + ('…' if len(text) > 180 else ''), 'category': category}
