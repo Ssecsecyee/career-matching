@@ -1,22 +1,9 @@
 """Server-authored, factual search explanations; no extra model call."""
-import re
 from datetime import datetime, timezone
 from uuid import uuid4
 from src.services.search_terms import POLICY_VERSION
 
 
-def is_confirmation(text):
-    return re.sub(r'[\s.!?。！？]', '', text).casefold() in {
-        '응', '네', '예', 'ㅇㅇ', '좋아', '보여줘', '공고보여줘', '공고보기', '이기준으로공고보기', '이기준으로보여줘'}
-
-
-def needs_review(plan, text, *, changing=False):
-    # A clear immediate request may bypass the checkpoint; hard constraints stay identical.
-    if re.search(r'바로\s*(?:보여|추천)|즉시\s*보여', text):
-        return False
-    return (changing or len(plan.regions) > 1 or len(plan.roles) > 1 or
-            len(plan.owned_skills) > 1 or bool(plan.required_skills) or bool(plan.career.levels) or
-            plan.career.max_years is not None)
 
 
 def execution_summary(plan, total, backend, degraded):
@@ -66,3 +53,6 @@ def review_response(state):
             'message': ('검색 기준을 확인해 주세요. 이 기준으로 공고를 보여드릴까요?' if data['total'] else
                         '이 검색 기준에 맞는 저장 공고를 찾지 못했습니다. 적용한 조건을 확인하고 변경할 항목을 말씀해 주세요.'),
             'search_backend': state.get('search_backend'), 'search_degraded': state.get('search_degraded', False)}
+
+# Compatibility imports; free-text v2 routing does not use these classifiers.
+from src.services.legacy_intent import is_confirmation, needs_review

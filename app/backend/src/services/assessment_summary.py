@@ -96,13 +96,9 @@ def build_summary(state, *, partial=False):
         'limitations':['사용자의 자기 평가이며 실무 역량 검증이나 합격 판정이 아닙니다.','미확인과 미답변은 미충족과 구분합니다.']}
 
 
-def summary_requested(text):
-    compact=re.sub(r'\s+','',text)
-    if re.search(r'학습|공부|교육|이력서|포트폴리오|면접|지원서',compact):return False
-    if re.search(r'(?:다른|새로운|새)공고.{0,12}(?:찾|검색)|교육.{0,10}(?:찾|추천)',compact):return False
-    return bool(re.search(r'(?:답변|문답|체크|부족|미확인|지금까지|내가|근거|왜).{0,28}(?:정리|요약|부족|모자|근거|판단|설명했|미확인)|왜.{0,20}(?:정리|부족|충족)',compact)) and '쉽게설명' not in compact
-
-
 def summary_context(summary):
     if not summary:return None
     return {k:summary[k] for k in ('version','summary_id','kind','headline','basis','not_a_hiring_decision','source','total','answered','unanswered','partial','groups','conflicts')}
+
+# Compatibility imports; free-text v2 routing does not use these classifiers.
+from src.services.legacy_intent import summary_requested

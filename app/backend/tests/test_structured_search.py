@@ -159,10 +159,11 @@ class SearchReviewTests(unittest.TestCase):
         self.assertIn('제주',result['search_summary']['filters'][0])
         self.assertEqual(result['candidate_jobs'],[])
 
-    def test_clear_immediate_request_can_bypass_review(self):
+    def test_immediate_wording_cannot_bypass_structured_review(self):
         self.start()
         _,result,_=self.flow.advance({}, {'action':'search','message':'부산 경남 공고 바로 보여줘','search_plan':COMPLEX_PLAN},invoke)
-        self.assertEqual(result['stage'],'choose_job')
+        self.assertEqual(result['stage'],'search_review')
+        self.assertEqual(result['candidate_jobs'],[])
 
     def test_context_keeps_preferences_and_hides_unconfirmed_candidates(self):
         self.start()
@@ -216,12 +217,16 @@ class PreferenceAndPersistenceTests(unittest.TestCase):
         self.assertEqual(cleared.regions,())
         self.assertEqual(cleared.roles,('백엔드','데이터 엔지니어링'))
         cleared=normalize_model_search(SearchPlan(regions=['부산']), '지역은 상관없어', old)
-        self.assertEqual(cleared.regions,())
+        self.assertEqual(cleared.regions,('부산',))
+        # Negated/unrelated region language must never override structured filters.
+        for message in ('지역은 상관없다는 뜻은 아니야', '전국에서 검색하는 방식은 원하지 않아'):
+            kept=normalize_model_search(SearchPlan(regions=['부산']), message, old)
+            self.assertEqual(kept.regions,('부산',))
 
     def test_modified_simple_search_still_has_review_checkpoint(self):
         from src.services.search_review import needs_review
         self.assertTrue(needs_review(SearchPlan(regions=['부산']), '부산으로 바꿔줘', changing=True))
-        self.assertFalse(needs_review(SearchPlan(regions=['부산']), '부산 공고 바로 보여줘', changing=True))
+        self.assertTrue(needs_review(SearchPlan(regions=['부산']), '부산 공고 바로 보여줘', changing=True))
 
     def test_search_record_is_transactional_and_not_returned_to_browser(self):
         from datetime import datetime, timedelta

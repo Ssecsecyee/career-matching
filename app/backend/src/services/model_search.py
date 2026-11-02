@@ -11,9 +11,6 @@ def normalize_model_search(plan,message,previous=None):
             for field in ('regions','roles','owned_skills','required_skills','preferred_skills','career'):
                 if field not in plan.model_fields_set and field in previous:
                     data[field]=previous[field]
-        compact=re.sub(r'\s+','',message)
-        if re.search(r'지역(?:은|는|이)?(?:상관없|무관)|전국(?:으로|에서)?(?:찾|검색)',compact):
-            data['regions']=[]
         return SearchPlan.parse(data)
     explicit={v.casefold() for v in topics_in(message)}
     represented=[skill for skill in plan.skills if skill.casefold() in explicit]

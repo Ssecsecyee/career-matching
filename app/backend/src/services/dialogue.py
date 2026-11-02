@@ -2,13 +2,14 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
-from src.services.search_continuation import is_more_request, mark_shown
-from src.services.consultation import legacy_task, counseling_context
-from src.services.search_review import is_confirmation, needs_review, remember_search, review_response
-from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
+from src.services.search_continuation import mark_shown
+from src.services.consultation import counseling_context
+from src.services.search_review import remember_search, review_response
+from src.services.conversation_policy import preferences, respect_preferences
 from src.services.condition_display import display_condition
 from src.services.condition_structure import source_binding, source_notice
-from src.services.assessment_summary import build_summary, summary_requested
+from src.services.assessment_summary import build_summary
+from src.services.legacy_intent import is_more_request, legacy_task, is_confirmation, needs_review, assessment_request, search_target, summary_requested
 from src.services.learning import retrieve as retrieve_learning, attach as attach_learning
 from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
 
