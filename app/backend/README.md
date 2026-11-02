@@ -58,10 +58,12 @@ BEDROCK_MOCK=0은 실제 호출 허용 설정이므로 요청에 따라 비용�
 현재 실행 중인 기존 서버를 Ctrl+C로 한 번 종료한 뒤 python dev.py로 실행한다. src/**/*.py, local_server.py, backend/.env 변경을 감지해 약 1초 내 API 프로세스를 재시작한다. .env는 새 자식 프로세스에서 읽어 변경값을 적용하며 CMD의 명시적 환경변수는 계속 우선한다. DB 데이터·SQL·tests·캐시 파일 변경은 자동 마이그레이션/재적재하지 않는다. React는 npm run dev의 HMR을 유지한다. 종료 시 watcher와 자식 API를 함께 정리한다. 별도 임시 서버에서 코드/.env 재시작·자식 종료를 검증했고 실제 모델 호출은 없었다.
 
 
-## 문맥 기반 의도 분류 (로컬 구현, 기본 비활성)
+## 문맥 기반 의도 분류 (설정 기본 false, 운영 v2 활성화 완료)
 
 설계·파일별 역할·활성화 순서: [CONTEXT_INTENT_ROUTING_PLAN.md](../../docs/CONTEXT_INTENT_ROUTING_PLAN.md).
 
 CONTEXT_ROUTING_ENABLED=true는 database/intent_migration.sql 적용 및 런타임 권한 검증 후 사용한다. .env.example은 false이며 이번 구현으로 운영 설정을 자동 변경하지 않는다. 새 버튼 action은 next_results(target=jobs/training), assessment_control(control=stop/resume/preferred)다. 자유 입력은 기존 search 요청을 유지하지만 활성화 시 ContextRouter가 선행한다. 명시적 검색 계획·문답 폼·버튼은 재분류하지 않는다.
 
 DBeaver에서 intent_debug_queries.sql로 세션·요청별 판단을 확인할 수 있다. 원본 분류 기록은 공개 API/웹 콘솔에 출력하지 않는다. 실제 모델 평가용 사례는 experiments/context_intent에 있고 현재 정확도 측정 결과는 아니다.
+
+2026-11-02 운영 배포·기록 테이블·실제 smoke 결과: [배포 결과](../../docs/CONTEXT_INTENT_DEPLOYMENT_20261102.md). 설정 기본값과 운영 활성화 상태는 구분한다.
