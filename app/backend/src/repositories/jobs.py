@@ -22,15 +22,32 @@ class JsonJobRepository:
         for row in self.rows:
             if row.get("recruitment_status") not in ({"active", "unknown"} if self.include_unverified else {"active"}):
                 continue
+            from src.services.deadlines import expired
+            if expired(row):
+                continue
             text = " ".join(str(row.get(k) or "") for k in
                             ("title", "company_name", "responsibilities", "qualifications",
                              "preferred_requirements")).casefold()
-            address = " ".join(row.get("addresses") or []).casefold()
+            address = (" ".join(row.get("addresses") or []) + " " + str(row.get("location_text") or "")).casefold()
             stacks = {s.casefold() for s in row.get("tech_stacks", [])}
             if plan.keyword.casefold() not in text or plan.region.casefold() not in address:
                 continue
             if not all(skill.casefold() in stacks for skill in plan.skills):
                 continue
+            if plan.schema_version == 2:
+                from src.services.search_terms import region_terms, role_terms, matches_skill
+                if plan.regions and not any(s.casefold() in address for s in region_terms(plan.regions)):
+                    continue
+                if plan.roles and not any(s.casefold() in text for s in role_terms(plan.roles)):
+                    continue
+                if not all(matches_skill(stacks, s) for s in plan.required_skills):
+                    continue
+                if plan.owned_skills and not plan.roles and not plan.required_skills and not any(matches_skill(stacks, s) for s in plan.owned_skills):
+                    continue
             results.append(row)
+        if plan.schema_version == 2:
+            from src.services.search_terms import matches_skill
+            results.sort(key=lambda row: sum(matches_skill(row.get('tech_stacks', []), s)
+                         for s in dict.fromkeys(plan.owned_skills + plan.preferred_skills)), reverse=True)
         return len(results), results[:plan.limit]
 

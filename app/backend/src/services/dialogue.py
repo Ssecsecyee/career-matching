@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 from src.schemas.search import SearchPlan
+from src.services.search_review import is_confirmation, needs_review, remember_search, review_response
 from src.services.conversation_policy import preferences, assessment_request, search_target, respect_preferences
 from src.services.condition_display import display_condition
 from src.services.assessment_summary import build_summary, summary_requested
@@ -33,6 +34,11 @@ class DialogueFlow:
         action = payload['action']
         evidence = []
         memory(state)
+        if action == 'confirm_search':
+            return state, self.confirm_search(state, payload), evidence
+        if action == 'search' and state.get('stage') == 'search_review' and is_confirmation(payload.get('message', '')):
+            record(state, payload['message'], 'search_confirmation')
+            return state, self.confirm_search(state, {'search_id': state['search_context']['search_id']}), evidence
         if action == 'remember' and assessment_request(payload.get('message','')) is False:
             preferences(state)['ask_assessment'] = False
             record(state, payload['message'], 'statement')
@@ -105,6 +111,8 @@ class DialogueFlow:
                             state['stage'] = 'conversation'
                         if state.get('stage') in {'checking_required', 'checking_preferred'}:
                             result = self.batch_response(state) if state.get('grouped') else self.question_response(state)
+                        elif state.get('stage') == 'search_review':
+                            result = review_response(state)
                         elif state.get('stage') in {'completed', 'gap_guidance'}:
                             result = {'stage':'conversation','memory':public_memory(state)}
                         result['message'] = reply
@@ -116,6 +124,9 @@ class DialogueFlow:
                 else:
                     plan = invoke('search_plan', self.planner.plan, text)
             state.pop('learning_context', None)
+            raw_plan = payload.get('search_plan') or (routed.get('raw_plan', routed['plan']) if 'routed' in locals() else plan.to_dict())
+            # Superseded review IDs must not reveal the new search's candidates.
+            previous_search = state.pop('search_context', None)
             total, jobs = self.jobs.search(plan)
             state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
             state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
@@ -125,6 +136,18 @@ class DialogueFlow:
             state.pop('answer_summary', None)
             state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
                          candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])
+            if plan.schema_version == 2:
+                remember_search(state, plan, raw_plan, payload, total, jobs)
+                state['pending_candidate_jobs'] = cards
+                state['candidate_ids'] = []
+                if not jobs:
+                    state['candidate_jobs'] = []
+                    return state, review_response(state), evidence
+                if needs_review(plan, text, changing=bool(previous_search)):
+                    state['stage'] = 'search_review'
+                    state['candidate_jobs'] = []
+                    return state, review_response(state), evidence
+                state['candidate_ids'] = [j['source_id'] for j in jobs]
             return state, self.search_response(state), evidence
 
         if action == 'select':
@@ -223,6 +246,28 @@ class DialogueFlow:
                 result['message'] = '이 조건은 미확인으로 남기고 다음 항목으로 넘어갑니다.'
             return state, result, evidence
         raise FlowError('unsupported_action')
+
+    def confirm_search(self, state, payload):
+        search = state.get('search_context') or {}
+        if state.get('stage') != 'search_review' or payload.get('search_id') != search.get('search_id'):
+            raise FlowError('search_confirmation_changed', 409)
+        cards = state.get('pending_candidate_jobs', [])
+        for card in cards:
+            current = self.jobs.get(card['source_id'])
+            try:
+                ensure_selectable(current, self.include_unverified)
+            except FlowError:
+                current = None
+            if not current or str(current['source_version']) != str(card['source_version']):
+                # Do not silently replace a reviewed snapshot with a new list.
+                state.update(stage='no_results', candidate_jobs=[], candidate_ids=[])
+                state.pop('pending_candidate_jobs', None)
+                return {'stage':'no_results', 'message':'검색 후 공고가 변경되거나 노출이 종료됐습니다. 같은 조건으로 다시 검색해 주세요.',
+                        'search_summary':search['summary'], 'search_changed':True, 'candidate_jobs':[]}
+        state.update(stage='choose_job', candidate_jobs=cards,
+                     candidate_ids=[c['source_id'] for c in cards])
+        search['confirmed_at'] = datetime.now(timezone.utc).isoformat()
+        return self.search_response(state)
 
     def validate_selected(self, state):
         current = self.jobs.get(state['selected']['source_id'])
@@ -337,7 +382,9 @@ class DialogueFlow:
         return {'stage': state.get('stage', 'no_results'), 'candidate_jobs': state.get('candidate_jobs', []),
                 'total': state.get('total', 0), 'memory': public_memory(state),
                 'search_backend':state.get('search_backend','mysql'), 'search_degraded':state.get('search_degraded',False),
-                'snapshot_warning': self.include_unverified}
+                'snapshot_warning': self.include_unverified,
+                **({'search_id':state['search_context']['search_id'], 'search_summary':state['search_context']['summary']}
+                   if state.get('search_context') else {})}
 
     @staticmethod
     def question_response(state):

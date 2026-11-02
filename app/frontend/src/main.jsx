@@ -6,14 +6,16 @@ import { Admin } from './Admin.jsx';
 import { TypingText } from './TypingText.jsx';
 import { AssessmentStepper } from './AssessmentStepper.jsx';
 import { AssessmentSummary } from './AssessmentSummary.jsx';
+import { SearchReview } from './SearchReview.jsx';
 
 const names = { met: '충족해요', unmet: '미충족이에요', unknown: '아직 모르겠어요' };
 const conditionPreview = text => text.split('\n').map(line => line.trim().replace(/^[-*•●▪·]\s*/, '')).filter(Boolean).join(' · ').slice(0, 180);
 const isQuestion = data => ['checking_required', 'checking_preferred'].includes(data?.stage);
 
-function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment }) {
+function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, onConfirm, onModify }) {
   return <>
     {data.message && !data.answer_summary && <TypingText text={data.message} animate={active && !data.cached} streaming={data.stage === 'streaming'} />}
+    {data.search_summary && ['search_review', 'no_results'].includes(data.stage) && <SearchReview data={data} active={active} busy={busy} onConfirm={onConfirm} onModify={onModify} />}
     {data.stage === 'choose_job' && <><p>조건에 맞는 공고가 총 {data.total}건 있습니다. 먼저 살펴볼 공고를 골라 주세요.</p><div className="job-list">{data.candidate_jobs.map(job => <article className="job" key={job.source_id}>
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
@@ -43,7 +45,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment }
         <a href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a>
       </article>)}
     </section>}
-    {data.stage === 'no_results' && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
+    {data.stage === 'no_results' && !data.message && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
     {data.cached && <span className="fine">저장된 응답</span>}
   </>;
 }
@@ -69,7 +71,9 @@ function App() {
   useEffect(() => {
     const stepper=conversation.current?.querySelector('.assessment-stepper');
     const summary=conversation.current?.querySelector('.message:last-of-type .assessment-summary');
-    if(stepper)stepper.scrollIntoView({behavior:'smooth',block:'start'});
+    const review=conversation.current?.querySelector('.message:last-of-type .search-review');
+    if(review)review.scrollIntoView({behavior:'smooth',block:'start'});
+    else if(stepper)stepper.scrollIntoView({behavior:'smooth',block:'start'});
     else if(summary)summary.scrollIntoView({behavior:'smooth',block:'start'});
     else bottom.current?.scrollIntoView({behavior:'smooth',block:'end'});
   }, [messages,busy,error]);
@@ -93,7 +97,7 @@ function App() {
       if (data.session_id) setSession(data.session_id);
       if (!response.ok) {
         setMessages(old => old.filter(m => m.id !== payload.request_id));
-        const hints = { unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
+        const hints = { unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
         setError(hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`);
         if (data.retryable) setPending({ payload: { ...payload, request_id: crypto.randomUUID(), ...(data.session_id ? { session_id: data.session_id } : {}) }, retryAt: Date.now() + 10000 });
         else if (data.status === 'session_busy_retry_later') setPending({ payload, retryAt: Date.now() + 10000 });
@@ -142,7 +146,7 @@ function App() {
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{window.location.hash === '#admin-chat' ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
         <main ref={conversation} className="conversation" aria-label="대화 내용" aria-live="polite">
           {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
-          {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={text => send(requestPayload('search', { message: text }, session), text)} />}</div></article>)}
+          {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={searchId => send(requestPayload('confirm_search', { search_id: searchId }, session), '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={text => send(requestPayload('search', { message: text }, session), text)} />}</div></article>)}
           {busy && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />

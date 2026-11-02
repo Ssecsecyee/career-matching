@@ -55,7 +55,7 @@ dnf install -y docker python3.11 python3.11-pip
 systemctl enable --now docker
 install -d -m 755 /opt/career /opt/career/app
 python3.11 -m venv /opt/career/venv
-/opt/career/venv/bin/pip install 'boto3>=1.36,<2' 'PyMySQL[rsa]>=1.1.1,<2'
+/opt/career/venv/bin/pip install 'boto3>=1.36,<2' 'PyMySQL[rsa]>=1.1.1,<2' 'pydantic==2.14.2'
 cat > /opt/career/config.json <<'CONFIG'
 '''+json.dumps(config)+'''
 CONFIG

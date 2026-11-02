@@ -47,6 +47,12 @@ class MySQLJobRepository:
         for skill in plan.skills:
             conditions.append("JSON_CONTAINS(LOWER(CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s)))")
             parameters.append(skill)
+        ranking, rank_parameters = '', []
+        if plan.schema_version == 2:
+            from src.services.search_sql import structured_clauses
+            extra, values, ranking, rank_parameters = structured_clauses(plan)
+            conditions.extend(extra)
+            parameters.extend(values)
         where = " AND ".join(conditions)
         connection = self.connection_factory()
         try:
@@ -54,7 +60,8 @@ class MySQLJobRepository:
                 cursor.execute("SELECT COUNT(*) AS total FROM job_postings WHERE " + where, parameters)
                 total = int(cursor.fetchone()["total"])
                 cursor.execute("SELECT " + ",".join(SUMMARY_FIELDS) + " FROM job_postings WHERE " + where +
-                               " ORDER BY published_at DESC,job_id DESC LIMIT %s", parameters + [plan.limit])
+                               " ORDER BY " + (ranking + " DESC," if ranking else "") +
+                               "published_at DESC,job_id DESC LIMIT %s", parameters + rank_parameters + [plan.limit])
                 rows = [decode_row(row) for row in cursor.fetchall()]
             return total, rows
         finally:

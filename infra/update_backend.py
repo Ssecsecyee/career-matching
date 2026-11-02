@@ -26,11 +26,16 @@ def build(args):
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     folder=ROOT/'infra/.build'/('code-'+stamp)
     folder.mkdir(parents=True)
+    from python_dependencies import vendor_validation, add_validation
+    dependencies = vendor_validation(folder)
     for name,worker in [('api.zip',False),('worker-code.zip',True)]:
         with ZipFile(folder/name,'w',ZIP_DEFLATED) as archive:
             for path in sorted((ROOT/'app/backend/src').rglob('*.py')):
                 archive.write(path,'src/'+path.relative_to(ROOT/'app/backend/src').as_posix())
+            if not worker:
+                add_validation(archive, dependencies)
             if worker:
+                archive.write(ROOT/'app/backend/requirements.validation.txt', 'requirements.validation.txt')
                 for filename in ('worker.py','server_admin.py'):
                     archive.write(ROOT/'app/backend'/filename,filename)
     value={'stamp':stamp,'folder':str(folder),'hashes':{name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in ('api.zip','worker-code.zip')}}
@@ -66,7 +71,7 @@ shutil.copytree(old,stage,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
 with zipfile.ZipFile(io.BytesIO(data)) as archive:
     for item in archive.infolist():
         name=item.filename
-        if item.file_size>1024*1024 or not (name in ('worker.py','server_admin.py') or (name.startswith('src/') and name.endswith('.py'))):
+        if item.file_size>1024*1024 or not (name in ('worker.py','server_admin.py','requirements.validation.txt') or (name.startswith('src/') and name.endswith('.py'))):
             raise RuntimeError('Unexpected release member')
         if '..' in pathlib.PurePosixPath(name).parts or name.startswith('/'):
             raise RuntimeError('Invalid release member')
@@ -75,6 +80,18 @@ with zipfile.ZipFile(io.BytesIO(data)) as archive:
     archive.extractall(stage)
 if not compileall.compile_dir(str(stage),quiet=2):
     raise RuntimeError('Compilation failed')
+# Install native ARM dependencies before stopping or switching the running app.
+requirements = stage/'requirements.validation.txt'
+if requirements.exists():
+    result = subprocess.run(['/opt/career/venv/bin/python','-m','pip','install','--only-binary=:all:',
+                             '-r',str(requirements)],capture_output=True,timeout=180)
+    if result.returncode:
+        raise RuntimeError('Worker validation dependency install failed; running code unchanged')
+    probe = subprocess.run(['/opt/career/venv/bin/python','-c',
+        'from src.schemas.search import SearchPlan; SearchPlan.parse({"schema_version":2,"regions":["부산","경남"]})'],
+        cwd=stage,capture_output=True,timeout=20)
+    if probe.returncode:
+        raise RuntimeError('Worker validation import check failed; running code unchanged')
 subprocess.run(['systemctl','stop','career-worker'],check=True)
 switched=False
 try:

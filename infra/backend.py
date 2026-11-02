@@ -29,10 +29,14 @@ def build(args):
     data=(ROOT/'app/backend/local-data/jumpit_all_v3/jobs.data.sql').read_bytes()
     if data.count(b'INSERT INTO job_postings (')!=len(rows) or not rows:raise ValueError('SQL snapshot count mismatch')
     src=ROOT/'app/backend/src'
+    from python_dependencies import vendor_validation, add_validation
+    dependencies = vendor_validation(folder)
     for target,worker in [('api.zip',False),('worker.zip',True)]:
         with ZipFile(folder/target,'w',ZIP_DEFLATED) as archive:
             for path in src.rglob('*.py'):
                 archive.write(path,'src/'+path.relative_to(src).as_posix())
+            if not worker:
+                add_validation(archive, dependencies)
             if worker:
                 for name in ['worker.py','install_worker.py','server_admin.py']:
                     archive.write(ROOT/'app/backend'/name,name)

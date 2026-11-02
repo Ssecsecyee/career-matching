@@ -65,3 +65,22 @@ class UpdateTests(unittest.TestCase):
             summary=safe_failure('RuntimeError: '+str(caught.exception))
             self.assertEqual(summary['s3_error_code'],'InvalidRequest')
             self.assertNotIn('hidden',str(summary))
+
+    def test_native_dependency_failure_never_stops_running_worker(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            (root/'app').mkdir()
+            (root/'app/worker.py').write_text('VERSION="old"')
+            payload=io.BytesIO()
+            with ZipFile(payload,'w') as archive:
+                archive.writestr('worker.py','VERSION="new"')
+                archive.writestr('requirements.validation.txt','pydantic==2.14.2')
+            data=payload.getvalue()
+            script=remote_script('https://example.invalid/release',hashlib.sha256(data).hexdigest(),'test')
+            script=script.replace("pathlib.Path('/opt/career')",'pathlib.Path('+repr(str(root))+')')
+            with patch('urllib.request.urlopen',return_value=io.BytesIO(data)), patch('subprocess.run',return_value=SimpleNamespace(returncode=1)) as run:
+                with self.assertRaisesRegex(RuntimeError,'running code unchanged'): exec(script,{})
+            self.assertEqual(run.call_args.args[0][1:4],['-m','pip','install'])
+            self.assertEqual((root/'app/worker.py').read_text(),'VERSION="old"')
+            self.assertFalse((root/'releases/test/previous-app').exists())

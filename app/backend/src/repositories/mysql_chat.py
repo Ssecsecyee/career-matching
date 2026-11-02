@@ -66,7 +66,7 @@ class MySQLChatStore:
                 state = unpacked(row["requirement_answers"])
                 if state.get("_lease", {}).get("until", 0) > time.time():
                     raise FlowError("session_busy_retry_later", 409)
-                if self.max_calls is not None and row["model_call_count"] >= self.max_calls:
+                if payload["action"] != "confirm_search" and self.max_calls is not None and row["model_call_count"] >= self.max_calls:
                     raise FlowError("session_model_budget_exceeded", 429)
                 if not memory(state).get('user_history_version'):
                     cur.execute("SELECT sequence_no, structured_content FROM chat_messages WHERE session_id=%s AND role='user' ORDER BY sequence_no DESC LIMIT 80", (session_id,))
@@ -142,6 +142,10 @@ class MySQLChatStore:
         state.pop("_lease", None)
         response = dict(response, session_id=ticket["session_id"], state_version=ticket["state_version"] + 1,
                         request_id=ticket["request_id"], cached=False)
+        persisted = dict(response)
+        if state.get('search_context') and response.get('search_id') == state['search_context']['search_id']:
+            # Keep historical executed plans after the next search replaces session state.
+            persisted['_search_record'] = dict(state['search_context'])
         connection = self.factory()
         try:
             connection.begin()
@@ -155,7 +159,7 @@ class MySQLChatStore:
                 delivered=dict(payload,_delivery={'status':'succeeded','fingerprint':ticket['fingerprint']})
                 cur.execute("UPDATE chat_messages SET structured_content=%s WHERE session_id=%s AND idempotency_key=%s AND role='user'",(packed(delivered),ticket['session_id'],ticket['request_id']))
                 cur.execute("INSERT INTO chat_messages(session_id,sequence_no,idempotency_key,role,content,structured_content,stage,expires_at) VALUES(%s,%s,%s,'assistant',%s,%s,%s,%s)",
-                            (ticket['session_id'],sequence+1,ticket['request_id'],packed(response),packed(response),state['stage'],ticket['expires_at']))
+                            (ticket['session_id'],sequence+1,ticket['request_id'],packed(response),packed(persisted),state['stage'],ticket['expires_at']))
                 message_id = cur.lastrowid
                 for item in evidence:
                     job, check = item["job"], item["check"]

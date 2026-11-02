@@ -9,6 +9,8 @@ def build_query(plan, *, include_unverified=False):
                    {'term': {'deadline_type': 'always_open'}},
                    {'bool': {'must_not': [{'exists': {'field': 'deadline_at'}}]}},
                    {'range': {'deadline_at': {'gt': 'now'}}}], 'minimum_should_match': 1}}]
+    if plan.schema_version == 2:
+        return structured_query(plan, filters)
     filters += [{'match': {'skills': {'query': s}}} for s in plan.skills]
     if plan.region:
         value = plan.region.replace('\\', '\\\\').replace('*', '\\*').replace('?', '\\?')
@@ -22,6 +24,34 @@ def build_query(plan, *, include_unverified=False):
             'query': {'bool': {'filter': filters, 'must': must}},
             'sort': ['_score', {'published_at': {'order': 'desc', 'missing': '_last'}},
                      {'document_key': 'asc'}]}
+
+
+def structured_query(plan, filters):
+    from src.services.search_terms import region_terms, role_terms, skill_terms
+
+    def skill(term):
+        return {'bool': {'should': [{'match': {'skills': {'query': s}}} for s in skill_terms(term)],
+                         'minimum_should_match': 1}}
+
+    if plan.regions:
+        clauses = []
+        for region in region_terms(plan.regions):
+            value = region.replace('\\', '\\\\').replace('*', '\\*').replace('?', '\\?')
+            clauses.append({'wildcard': {'location_search': {'value': '*' + value + '*'}}})
+        filters.append({'bool': {'should': clauses, 'minimum_should_match': 1}})
+    if plan.roles:
+        filters.append({'bool': {'should': [
+            {'multi_match': {'query': role, 'type': 'cross_fields', 'operator': 'and',
+              'fields': ['title^4', 'responsibilities', 'qualifications^2']}}
+            for role in role_terms(plan.roles)], 'minimum_should_match': 1}})
+    filters += [skill(s) for s in plan.required_skills]
+    # Without a role or required skill, at least one owned skill anchors the search.
+    if plan.owned_skills and not plan.roles and not plan.required_skills:
+        filters.append({'bool': {'should': [skill(s) for s in plan.owned_skills], 'minimum_should_match': 1}})
+    should = [skill(s) for s in dict.fromkeys(plan.owned_skills + plan.preferred_skills)]
+    return {'size': plan.limit, 'track_total_hits': True,
+            'query': {'bool': {'filter': filters, 'should': should, 'minimum_should_match': 0}},
+            'sort': ['_score', {'published_at': {'order': 'desc', 'missing': '_last'}}, {'document_key': 'asc'}]}
 
 
 class ElasticsearchJobRepository:

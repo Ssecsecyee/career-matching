@@ -125,6 +125,12 @@ def consultation_context(state):
     result = context(state)
     result['assistant_preferences'] = state.get('profile',{}).get('assistant_preferences', {'ask_assessment':True})
     result['conversation_target'] = state.get('conversation_target')
+    search = state.get('search_context') or {}
+    if search:
+        result['search_preferences'] = search['executed_plan']
+        result['last_search'] = {'search_id': search['search_id'], 'summary': search['summary'],
+                                 'total': search['total'], 'observed_at': search['observed_at']}
+        result['displayed_job_candidates'] = state.get('candidate_jobs', []) if state.get('stage') != 'search_review' else []
     # These are user statements, not model-generated facts or inferred eligibility.
     result['user_statements'] = value.get('user_statements', [s for s in value['statements']
         if s['kind'] in {'search','statement','correction','answer_detail'}])[-40:]
