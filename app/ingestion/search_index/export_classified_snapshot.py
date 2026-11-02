@@ -34,4 +34,7 @@ def main():
     a.output.parent.mkdir(parents=True,exist_ok=True)
     a.output.write_text(json.dumps(rows,ensure_ascii=False,default=str,indent=2),encoding='utf-8')
     print(json.dumps({'exported':len(rows),'classified':sum('condition_review' in r for r in rows)}))
-if __name__=='__main__':main()
+if __name__=='__main__':
+    try:main()
+    except Exception as exc:
+        print(json.dumps({'status':'failed','error_type':type(exc).__name__}));raise SystemExit(1)

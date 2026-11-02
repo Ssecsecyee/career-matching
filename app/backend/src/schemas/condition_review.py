@@ -12,7 +12,7 @@ class Logic(BaseModel):
     @model_validator(mode='after')
     def shape(self):
         if self.operator=='atom':
-            if not self.term or not self.evidence or self.children:raise ValueError('Invalid atom')
+            if not self.term or not self.evidence or not self.term.strip() or not self.evidence.strip() or self.children:raise ValueError('Invalid atom')
         elif self.term is not None or self.evidence is not None:raise ValueError('Only atoms have terms')
         elif self.operator=='unresolved' and self.children:raise ValueError('Unresolved has no children')
         elif self.operator in {'all','any'} and len(self.children)<2:raise ValueError('Two children required')
@@ -28,6 +28,7 @@ class ConditionDecision(BaseModel):
     logic:Logic
     @model_validator(mode='after')
     def reason_contract(self):
+        if not self.reason.strip():raise ValueError('Empty reason')
         allowed={'ask':{'verifiable_requirement'},'reference':{'no_restriction','subjective_trait','not_eligibility'},'review':{'ambiguous'}}
         if self.reason_code not in allowed[self.treatment]:raise ValueError('Reason does not match treatment')
         return self

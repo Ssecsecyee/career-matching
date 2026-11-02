@@ -58,6 +58,10 @@ class ConditionReviewTests(unittest.TestCase):
         for _ in range(6):node={'operator':'all','children':[node,{'operator':'atom','term':'Java','evidence':'Java'}]}
         p['conditions'][1]['logic']=node
         with self.assertRaises(ValueError):validate_review(job,p)
+    def test_fabricated_or_blank_search_term_is_rejected_even_with_real_quote(self):
+        for term in ('AWS',' '):
+            job,p=fixture();p['conditions'][2]['logic']['term']=term
+            with self.assertRaises(ValueError):validate_review(job,p)
     def test_model_call_opt_in_usage_and_explicit_budget(self):
         job,p=fixture();runtime=FakeRuntime(json.dumps(p,ensure_ascii=False))
         classifier=ConditionClassifier('fake','test',client=runtime)
