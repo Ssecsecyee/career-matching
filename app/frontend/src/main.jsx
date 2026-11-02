@@ -9,6 +9,8 @@ import { AssessmentSummary } from './AssessmentSummary.jsx';
 import { SearchReview } from './SearchReview.jsx';
 import { summaryActionRequest } from './consultationRequest.js';
 import { controlRequest } from './controlRequest.js';
+import { SavedAnswersPanel } from './SavedAnswersPanel.jsx';
+import { savedAnswersRequest } from './savedAnswers.js';
 
 const names = { met: '충족해요', unmet: '미충족이에요', unknown: '아직 모르겠어요' };
 const conditionPreview = text => text.split('\n').map(line => line.trim().replace(/^[-*•●▪·]\s*/, '')).filter(Boolean).join(' · ').slice(0, 180);
@@ -64,7 +66,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [result, setResult] = useState(null);
   const [draft, setDraft] = useState('');
-  const [memoryMode, setMemoryMode] = useState(false);
+  const [savedOpen,setSavedOpen]=useState(false),[savedData,setSavedData]=useState(null),[savedError,setSavedError]=useState('');
   const [busy, setBusy] = useState(false);
   const [busyAction, setBusyAction] = useState(null);
   const inFlight = useRef(false);
@@ -83,7 +85,7 @@ function App() {
   }, [messages,busy,error]);
 
   function reset() {
-    setSession(null); setMessages([]); setResult(null); setDraft(''); setMemoryMode(false); setError(null); setPending(null);
+    setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
   }
 
   async function send(payload, text) {
@@ -101,8 +103,10 @@ function App() {
       if (data.session_id) setSession(data.session_id);
       if (!response.ok) {
         setMessages(old => old.filter(m => m.id !== payload.request_id));
-        const hints = { unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', consultation_summary_changed: '답변 정리가 바뀌었습니다. 최신 요약에서 다시 선택해 주세요.', consultation_requires_selected_job: '상담할 공고를 먼저 선택해 주세요.', ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
-        setError(hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`);
+        const hints = { unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', consultation_summary_changed: '답변 정리가 바뀌었습니다. 최신 요약에서 다시 선택해 주세요.', consultation_requires_selected_job: '상담할 공고를 먼저 선택해 주세요.', saved_answers_changed_refresh:'다른 답변이 저장돼 내용이 바뀌었습니다. 다시 조회한 뒤 수정해 주세요.',saved_answer_not_found:'수정할 답변을 다시 조회해 주세요.',saved_answer_legacy_readonly:'이전 형식의 답변은 여기서 수정할 수 없습니다.',ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
+        const hint=hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`;
+        setError(hint);
+        if(['revise_answer','remember'].includes(payload.action))setSavedError(hint);
         if (data.retryable) setPending({ payload: { ...payload, request_id: crypto.randomUUID(), ...(data.session_id ? { session_id: data.session_id } : {}) }, retryAt: Date.now() + 10000 });
         else if (data.status === 'session_busy_retry_later') setPending({ payload, retryAt: Date.now() + 10000 });
         if (response.status === 401) setUnlocked(false);
@@ -113,20 +117,39 @@ function App() {
         const finished = { role: 'assistant', data, id: payload.request_id };
         return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? finished : m) : [...old, finished];
       });
+      return data;
     } catch {
+      if(['revise_answer','remember'].includes(payload.action))setSavedError('연결이 끊겼습니다. 저장 결과를 다시 확인해 주세요.');
       setMessages(old => old.filter(m => m.id !== payload.request_id));
       setError('연결이 끊겼습니다. 같은 요청의 처리 결과를 다시 확인할 수 있습니다.');
       setPending({ payload, retryAt: 0 });
     } finally { inFlight.current = false; setBusy(false); }
   }
 
+  async function loadSavedAnswers(offset=0) {
+    if(inFlight.current || !session || pending)return;
+    inFlight.current=true;setBusy(true);setBusyAction('review_answers');setSavedOpen(true);setSavedData(null);setSavedError('');
+    try{
+      const next=savedAnswersRequest(offset);
+      const response=await postChat({payload:requestPayload(next.action,next.values,session),accessCode:code,ownerToken:owner.current});
+      if(!response.ok)throw new Error(response.body.status==='session_not_found_or_expired'?'대화가 만료돼 저장 내용을 조회할 수 없습니다.': '저장 내용을 조회하지 못했습니다. 잠시 뒤 다시 확인해 주세요.');
+      setSavedData(response.body.saved_answers);
+    }catch(e){setSavedError(e.message);}finally{inFlight.current=false;setBusy(false);}
+  }
+  async function reviseSaved(next){
+    setSavedError('');
+    const data=await send(requestPayload(next.action,next.values,session),'저장한 조건 답변 하나를 수정할게요.');
+    if(data?.saved_answers){setSavedData(data.saved_answers);return true;}return false;
+  }
+  async function rememberAll(message){
+    setSavedError('');
+    const data=await send(requestPayload('remember',{message},session),'경험 전체를 정정할게요: '+message);
+    if(data){setSavedOpen(false);setSavedData(null);return true;}return false;
+  }
+
   function search(event) {
     event.preventDefault();
     if (!draft.trim() || busy || pending) return;
-    if (memoryMode && session) {
-      const text = draft.trim(); setDraft(''); setMemoryMode(false);
-      send(requestPayload('remember', { message: text }, session), text); return;
-    }
     const text = draft.trim(); setDraft('');
     send(requestPayload('search', { message: text, profile: {} }, session), text);
   }
@@ -153,6 +176,7 @@ function App() {
   const compactComposer = sequential || !!result?.answer_summary;
   const noteOnly = false; // Free conversation and stopping questions stay available during assessments.
   return <div className="app">
+    {savedOpen&&<SavedAnswersPanel data={savedData} busy={busy} error={savedError} onClose={()=>{if(!busy){setSavedOpen(false);setSavedData(null);}}} onRefresh={loadSavedAnswers} onRevise={reviseSaved} onRemember={rememberAll}/>}
     <aside className="sidebar"><a className="brand" href="/">ROUNDUP<span>CAREER</span></a><button disabled={busy} onClick={reset}>＋ 새 대화</button><div className="sidebar-bottom">내 조건에 맞는 다음 기회<p>공고 검색 · 지원 조건 확인</p></div></aside>
     <div className="workspace"><header><span>커리어 도우미 <span className="model">Sonnet</span></span>{unlocked && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{window.location.hash === '#admin-chat' ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
@@ -164,8 +188,8 @@ function App() {
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />
         </main>
-        <div className={`composer-area${compactComposer ? " assessment-mode" : ""}`}>{session && <div className="memory-tools"><button className="quiet" type="button" disabled={busy || !!pending} onClick={() => setMemoryMode(old => !old)}>{memoryMode ? '경험 수정 취소' : '기억한 경험 수정'}</button><span className="fine">현재 대화 안에서 기억합니다</span></div>}{result?.memory?.facts?.length > 0 && <details className="memory-summary"><summary>기억한 내용 {result.memory.facts.length}개</summary>{result.memory.facts.map((fact, i) => <p key={i}><strong>{fact.subject}</strong> · {fact.quote}</p>)}</details>}<form className="composer" onSubmit={search}><label className="sr-only" htmlFor="message">{memoryMode ? '경험 수정' : noteOnly ? '답변 보충 설명' : '찾고 싶은 공고'}</label><textarea id="message" value={draft} maxLength={question || memoryMode ? 2000 : 4000} disabled={busy || !!pending} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !noteOnly) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} placeholder={memoryMode ? '예: 앞서 말한 경험을 정정할게요. Linux는 아직 사용해 본 적 없어요.' : noteOnly ? '보충 설명을 적고 대화 속 답변 버튼을 눌러 주세요.' : '예: React 교육을 찾아줘. 또는 역량 질문은 그만해줘.'} rows={compactComposer ? 1 : 2} />
-          <div className="composer-bottom"><span>{memoryMode ? '수정 시 이전 조건 답변을 다시 확인합니다' : noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
+        <div className={`composer-area${compactComposer ? " assessment-mode" : ""}`}>{session && <div className="memory-tools"><button className="quiet" type="button" disabled={busy || !!pending} onClick={() => loadSavedAnswers(0)}>내 답변 보기·수정</button><span className="fine">현재 대화 안에서 기억합니다</span></div>}{result?.memory?.facts?.length > 0 && <details className="memory-summary"><summary>기억한 내용 {result.memory.facts.length}개</summary>{result.memory.facts.map((fact, i) => <p key={i}><strong>{fact.subject}</strong> · {fact.quote}</p>)}</details>}<form className="composer" onSubmit={search}><label className="sr-only" htmlFor="message">{noteOnly ? '답변 보충 설명' : '찾고 싶은 공고'}</label><textarea id="message" value={draft} maxLength={question ? 2000 : 4000} disabled={busy || !!pending} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !noteOnly) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} placeholder={noteOnly ? '보충 설명을 적고 대화 속 답변 버튼을 눌러 주세요.' : '예: React 교육을 찾아줘. 또는 역량 질문은 그만해줘.'} rows={compactComposer ? 1 : 2} />
+          <div className="composer-bottom"><span>{noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </>}
     </div>

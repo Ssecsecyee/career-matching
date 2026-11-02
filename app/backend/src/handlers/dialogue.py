@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -40,7 +40,15 @@ def validate_payload(value):
         UUID(value["session_id"])
     if action != "search" and not value.get("session_id"):
         raise ValueError("Session required")
-    if action == "search":
+    if action in {'review_answers','revise_answer'}:
+        if type(value.get('offset',0)) is not int or not 0<=value.get('offset',0)<=1000 or value.get('offset',0)%10:
+            raise ValueError('Invalid answer review page')
+        if action=='revise_answer':
+            if not isinstance(value.get('condition_id'),str) or not 1<=len(value['condition_id'])<=200:raise ValueError('Invalid saved condition')
+            if not isinstance(value.get('review_version'),str) or not re.fullmatch('[a-f0-9]{64}',value['review_version']):raise ValueError('Invalid saved answer revision')
+            if value.get('assessment') not in {'met','unmet','unknown'}:raise ValueError('Invalid revised assessment')
+            if not isinstance(value.get('detail',''),str) or len(value.get('detail',''))>2000:raise ValueError('Invalid revised detail')
+    elif action == "search":
         if value.get("search_plan") is not None:
             from src.schemas.search import SearchPlan
             SearchPlan.parse(value["search_plan"])

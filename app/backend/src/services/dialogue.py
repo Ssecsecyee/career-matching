@@ -61,6 +61,13 @@ class DialogueFlow:
             self.validate_selected(state)
             state['preferred_approved'] = True
             return state, self.next_question(state, invoke, evidence), evidence
+        if action == 'review_answers':
+            state.setdefault('stage','conversation')
+            from src.services.saved_answers import review
+            return state, {'stage':'saved_answers','saved_answers':review(state,payload.get('offset',0))}, evidence
+        if action == 'revise_answer':
+            from src.services.saved_answers import revise
+            return revise(self,state,payload)
         if action == 'consult':
             return state, self.consult(state,payload,invoke), evidence
         if (action == 'search' and payload.get('search_plan') is None and state.get('selected')

@@ -250,3 +250,31 @@ class MySQLDialogueIntegrationTests(unittest.TestCase):
             with conn.cursor() as cur:cur.execute('UPDATE intent_decisions SET expires_at=UTC_TIMESTAMP(6)-INTERVAL 1 SECOND WHERE decision_id=%s',(identity,))
         with self.assertRaises(FlowError) as error:execute(self.factory,dict(base,operation='intent_detail',decision_id=identity),'admin')
         self.assertEqual(error.exception.status,404)
+
+
+    def test_review_and_single_revision_preserve_history_and_do_not_call_model(self):
+        self.store=MySQLChatStore(self.factory,retention_hours=1,max_calls=0)
+        _,initial=self.start()
+        sid=initial['session_id']
+        result=self.request({'action':'select','session_id':sid,'request_id':str(uuid4()),'source_id':initial['candidate_jobs'][0]['source_id'],'grouped':True,'assessment_checkpoint':True})
+        selected=json.loads(result['body'])
+        answers=[{'question_id':q['question_id'],'assessment':'met','detail':'합성 QA 실습 경험'} for q in selected['questions']]
+        self.assertEqual(self.request({'action':'answer_batch','session_id':sid,'request_id':str(uuid4()),'answers':answers})['statusCode'],200)
+        response=self.request({'action':'review_answers','session_id':sid,'request_id':str(uuid4())})
+        self.assertEqual(response['statusCode'],200,response)
+        saved=json.loads(response['body'])['saved_answers'];item=next(v for v in saved['items'] if v['editable'])
+        payload={'action':'revise_answer','session_id':sid,'request_id':str(uuid4()),'condition_id':item['condition_id'],'assessment':'unknown','detail':'실무 경험은 미확인','review_version':saved['review_version']}
+        response=self.request(payload);self.assertEqual(response['statusCode'],200,response)
+        revised=json.loads(response['body']);self.assertEqual(revised['answer_revision']['before']['assessment'],'met')
+        self.assertEqual(revised['answer_revision']['after']['assessment'],'unknown')
+        replay=self.request(payload);self.assertTrue(json.loads(replay['body'])['cached'])
+        stale=self.request(dict(payload,request_id=str(uuid4())));self.assertEqual(stale['statusCode'],409)
+        other=self.request({'action':'review_answers','session_id':sid,'request_id':str(uuid4())},token=secrets.token_hex(32));self.assertEqual(other['statusCode'],404)
+        with self.factory() as conn:
+            with conn.cursor() as cur:
+                cur.execute('SELECT model_call_count,requirement_answers FROM chat_sessions WHERE session_id=%s',(sid,))
+                row=cur.fetchone();self.assertEqual(row['model_call_count'],0)
+                state=json.loads(row['requirement_answers']);self.assertEqual(state['checks'][0]['assessment'],'unknown')
+                cur.execute('SELECT e.assessment_status,e.evidence_quote FROM recommendation_evidence e JOIN chat_messages m ON m.message_id=e.message_id WHERE m.session_id=%s ORDER BY e.evidence_record_id',(sid,))
+                evidence=cur.fetchall();self.assertEqual([v['assessment_status'] for v in evidence],['met','unknown'])
+                self.assertEqual(evidence[0]['evidence_quote'],evidence[1]['evidence_quote'])

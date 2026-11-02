@@ -1,5 +1,7 @@
 # 남은 과업과 진행 순서
 
+> 2026-11-02 저장 답변 조회·선택 정정 로컬 구현: [범위·검증](SAVED_ANSWERS_REVIEW_PLAN.md). 현재 세션·공고의 답변/보충 설명 조회와 단일 조건 수정. AWS 미반영.
+
 > 2026-11-02 관리자 의도 기록 조회 로컬 구현: [계획·구현·검증](ADMIN_INTENT_VIEW_PLAN.md). 목록/필터/선택 상세/명시적 출력 조회 완료. AWS 배포·관리자 DB SELECT 권한 및 실제 API 검증 완료. [연동 결과](ADMIN_INTENT_VIEW_DEPLOYMENT_20261102.md).
 
 > 2026-11-02 문맥 기반 통합 분류·디버깅 기록 로컬 구현: [설계·구현·전환 절차](CONTEXT_INTENT_ROUTING_PLAN.md). v2 운영 테이블 적용·AWS 활성화 및 실제 검색/다음 목록 smoke 완료. [배포 검증](CONTEXT_INTENT_DEPLOYMENT_20261102.md). 정식 120건 모델 평가는 아직 수행하지 않았다.
