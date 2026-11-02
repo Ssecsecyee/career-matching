@@ -52,7 +52,7 @@ class ContextRouter:
                 if not plan:return self.clarify(state,'바꿀 기존 검색이 없습니다. 어떤 공고를 찾으시나요?')
                 try:plan=merge_search(plan,d.changes)
                 except ValueError:return self.clarify(state,'이전 검색 형식과 바로 합칠 수 없습니다. 새 검색 조건을 알려주세요.')
-            else:plan=d.plan
+            else:plan=d.plan.as_search_plan()
             state['conversation_target']='jobs'
             # A schema-validated plan enters the existing search executor, never legacy classification.
             record(state,text,'search')

@@ -137,7 +137,9 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             from src.bedrock.prompts import CONVERSATION_PROMPT_VERSION, SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
             version = CONVERSATION_PROMPT_VERSION if purpose == "conversation" else (SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2")
             if purpose == 'consultation':version = CONSULTATION_PROMPT_VERSION
-            if purpose == 'intent_classification':version = 'context-intent-v1'
+            if purpose == 'intent_classification':
+                from src.schemas.intent import INTENT_VERSION
+                version = INTENT_VERSION
             if purpose == 'context_response':version = 'context-response-v1'
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             if purpose == 'intent_classification':ticket['_intent_invocation_id'] = identity

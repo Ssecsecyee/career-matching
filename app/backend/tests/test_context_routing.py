@@ -133,7 +133,7 @@ class IntentAdapterTests(unittest.TestCase):
             result,usage=BedrockPlanner('m','r',client=runtime,on_partial=partial).classify('딴거',{})
         self.assertEqual(result['decision']['action'],'next_results')
         self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1536)
-        self.assertEqual(usage['prompt_version'],'context-intent-v1');partial.assert_not_called()
+        self.assertEqual(usage['prompt_version'],'context-intent-v2');partial.assert_not_called()
 
     def test_invalid_output_is_available_for_private_audit_only(self):
         runtime=FakeRuntime('not JSON')
@@ -150,7 +150,7 @@ class IntentAuditTests(unittest.TestCase):
         store=IntentDecisionStore(lambda:connection)
         identity=store.start(ticket,'model',{'stage':'conversation'})
         params=cur.execute.call_args.args[1]
-        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v1')
+        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v2')
         cur.fetchone.side_effect=[{'state_version':2,'requirement_answers':{'_lease':{'request':'r'}}}]
         store.classified(ticket,identity,'token=private-value a@example.com',{'action':'chat'})
         params=cur.execute.call_args.args[1]
@@ -255,3 +255,22 @@ class FixedIntentCaseTests(unittest.TestCase):
         for row in rows:IntentDecision.model_validate(row['expected'])
         same=[r for r in rows if r['message']=='딴거']
         self.assertEqual({r['expected']['target'] for r in same},{'jobs','training','unspecified'})
+
+
+class IntentV2BoundaryTests(unittest.TestCase):
+    def test_model_schema_contains_no_legacy_search_fields(self):
+        schema=IntentDecision.model_json_schema()
+        definition=schema['$defs']['IntentJobPlan']
+        self.assertFalse({'keyword','region','skills'} & set(definition['properties']))
+        self.assertEqual(definition['properties']['schema_version']['const'],2)
+        self.assertFalse(definition['additionalProperties'])
+        self.assertNotIn('SearchPlan',schema['$defs'])
+
+    def test_valid_v2_executes_but_mixed_real_failure_shape_is_rejected(self):
+        plan={'schema_version':2,'target':'jobs','roles':['백엔드'],'owned_skills':['Python','Docker']}
+        value=IntentDecision.model_validate({'target':'jobs','action':'search','reason':'Synthetic QA','plan':plan})
+        execution=value.plan.as_search_plan()
+        self.assertEqual(execution.keyword,'')
+        self.assertEqual(execution.roles,('백엔드',))
+        with self.assertRaises(ValueError):
+            IntentDecision.model_validate({'target':'jobs','action':'search','reason':'Synthetic QA','plan':dict(plan,keyword='백엔드')})

@@ -188,7 +188,7 @@ class BedrockPlanner:
             '교육을 본 뒤 다른 것을 요청하면 training이며 선택 공고가 있다는 이유로 jobs로 바꾸지 마세요. '
             '확인 대기 상태에서 단순 다음 목록 요청은 next_results로 분류하고 서버가 확인 절차를 유지합니다. '
             '대상이 모호하면 clarify와 한 가지 확인 질문을 반환하세요. reason은 짧은 관측 근거이며 내부 사고 과정이 아닙니다. '
-            '공고 search는 schema_version=2의 완전한 plan을 반환하세요. refine_search는 사용자가 명시적으로 바꾼 changes만 반환하세요. '
+            '공고 search는 schema_version=2의 완전한 plan을 반환하세요. keyword/region/skills 같은 구형 필드는 금지하며 직무는 roles, 기술은 owned_skills/required_skills로 구분하세요. refine_search는 사용자가 명시적으로 바꾼 changes만 반환하세요. '
             '지역/직무 배열은 OR, required_skills만 AND, 보유 기술은 owned_skills로 순위 반영합니다. '
             '지역 무관은 changes.regions=[]입니다. 변경 없는 필드는 생략하고 null을 넣지 마세요. '
             '교육 검색은 topics와 delivery_mode(online/offline/any)를 사용하세요. 모집 여부·교육 이름을 만들지 마세요. '

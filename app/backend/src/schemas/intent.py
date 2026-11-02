@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v1'
+INTENT_VERSION = 'context-intent-v2'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -26,12 +26,38 @@ class SearchChanges(BaseModel):
             raise ValueError('A patch requires explicit non-null fields')
         return self
 
+class IntentJobPlan(BaseModel):
+    """Version-2-only model boundary; legacy fields never appear in the router schema."""
+    model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
+    schema_version: Literal[2] = 2
+    target: Literal['jobs'] = 'jobs'
+    regions: Terms = ()
+    roles: Terms = ()
+    owned_skills: Terms = ()
+    required_skills: Terms = ()
+    preferred_skills: Terms = ()
+    career: CareerPreference = Field(default_factory=CareerPreference)
+    limit: Annotated[int, Field(ge=1, le=30)] = 5
+
+    @field_validator('regions','roles','owned_skills','required_skills','preferred_skills',mode='before')
+    @classmethod
+    def terms(cls,value):return SearchPlan.bounded_terms(value)
+
+    @field_validator('schema_version',mode='before')
+    @classmethod
+    def version(cls,value):
+        if type(value) is not int:raise ValueError('Invalid intent search version')
+        return value
+
+    def as_search_plan(self):return SearchPlan.parse(self.model_dump(mode='json'))
+
+
 class IntentDecision(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
     target: Literal['jobs','training','selected','general','unspecified']
     action: Literal['chat','search','refine_search','next_results','consult','assessment_control','clarify','confirm_search','summary']
     reason: Annotated[str, Field(min_length=1, max_length=500)]
-    plan: SearchPlan | None = None
+    plan: IntentJobPlan | None = None
     changes: SearchChanges | None = None
     topics: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
     delivery_mode: Literal['online','offline','any'] | None = None
