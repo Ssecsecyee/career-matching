@@ -22,6 +22,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>
       <div className="job-bottom"><a href={safeSourceUrl(job.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a><button disabled={!active || busy} onClick={() => onSelect(job)}>이 공고 확인하기 →</button></div>
     </article>)}</div></>}
+    {data.stage === 'assessment_checkpoint' && active && <div className="choices"><button disabled={busy} onClick={() => onAssessment('우대조건도 계속 확인해줘')}>우대조건 확인</button><button disabled={busy} onClick={() => onAssessment('현재 답변으로 보완 방향을 정리해줘.')}>현재 답변으로 상담</button><button disabled={busy} onClick={() => onAssessment('다른 공고 추천해줘')}>다른 공고 보기</button></div>}
     {data.assessment_paused && active && <button className="quiet" disabled={busy} onClick={() => onAssessment('다시 역량 조건을 확인해줘')}>원할 때 역량 확인 재개</button>}
     {data.job_overview && <section className="source"><h3>{data.job_overview.title}</h3><details><summary>자격요건·우대조건 원문 보기</summary><h4>자격요건</h4><pre>{data.job_overview.qualifications}</pre><h4>우대조건</h4><pre>{data.job_overview.preferred_requirements}</pre></details><a href={safeSourceUrl(data.job_overview.source_url)} target="_blank" rel="noreferrer">공고 원문 ↗</a></section>}
     {isQuestion(data) && data.grouped && <AssessmentStepper key={data.questions.map(q => q.question_id).join("|")} data={data} active={active} busy={busy} onBatch={onBatch} onAssessment={onAssessment} />}
@@ -34,7 +35,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
       {data.checks.map((check, i) => <div className="check" key={i}><strong>{check.type === 'required' ? '자격요건' : '우대조건'} · {names[check.assessment]}</strong><p>{check.summary || conditionPreview(check.quote)}</p><details className="source"><summary>조건 원문 보기</summary><pre>{check.quote}</pre></details><p>{check.explanation}</p>{check.detail && <p>남긴 설명: {check.detail}</p>}</div>)}
       <p className="fine">사용자가 확인한 답변에 따른 결과입니다. 교육은 학습 참고 자료와 신청 후보를 구분하며, 모집 여부와 지원 자격은 원문에서 다시 확인해 주세요.</p></>}
     {data.learning_search && <section className="source"><h3>학습 루트 참고 교육</h3>
-      {data.learning_search.status === 'no_match' && <p>관련 교육이 현재 DB에 없습니다. 학습 방향은 대화로 이어갈 수 있어요.</p>}
+      {data.learning_search.status === 'no_match' && <p>저장된 자료에서 해당 주제·수강 방식에 맞는 과정을 찾지 못했습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.</p>}
       {data.learning_search.status === 'need_topic' && <p>배우고 싶은 기술이나 분야를 알려주세요.</p>}
       {(data.learning_opportunities || []).map(course => <article className="check" key={`${course.source}:${course.source_id}`}>
         <span className="pill">{course.recommendation_eligible ? '신청 후보 · 원문 재확인 필요' : '학습 참고용 · 모집 미확인/과거 회차'}</span>
@@ -132,7 +133,7 @@ function App() {
     send(requestPayload(next.action, next.values, session), message);
   }
   function select(job) {
-    send(requestPayload('select', { source_id: job.source_id, grouped: true }, session), `${job.company_name} · ${job.title} 공고를 확인할게요.`);
+    send(requestPayload('select', { source_id: job.source_id, grouped: true, assessment_checkpoint: true }, session), `${job.company_name} · ${job.title} 공고를 확인할게요.`);
   }
   function answer(value) {
     const detail = draft.trim(); setDraft('');
@@ -151,6 +152,7 @@ function App() {
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{window.location.hash === '#admin-chat' ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
         <main ref={conversation} className="conversation" aria-label="대화 내용" aria-live="polite">
           {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
+          {result?.active_job && <aside className="source" aria-label="현재 상담 공고"><strong>현재 상담 공고</strong><p>{result.active_job.company_name} · {result.active_job.title}</p><small>확인한 버전 {result.active_job.source_version} · 다른 목록을 보아도 새 공고 선택 전까지 이 공고의 답변을 유지합니다.</small></aside>}
           {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={searchId => send(requestPayload('confirm_search', { search_id: searchId }, session), '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={text => send(requestPayload('search', { message: text }, session), text)} />}</div></article>)}
           {busy && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}

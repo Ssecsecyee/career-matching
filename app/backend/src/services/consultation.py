@@ -35,6 +35,7 @@ def counseling_context(state,task):
     result=consultation_context(state)
     result['consultation_task']=task
     result['basis']='saved_job_version_and_user_self_assessments'
+    result['evidence_policy']='충족 선택은 사용자 자기평가이며 실무 검증이 아니다. 충족한다고 답한 경험으로 표현하고 합격·탈락을 단정하지 않는다.'
     # Existing answers already include source quotes; never load current/new jobs here.
     answered={c.get('condition_id') for c in state.get('checks',[])}
     pending=[c for c in state.get('conditions',[]) if c['id'] not in answered]

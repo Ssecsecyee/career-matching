@@ -40,7 +40,7 @@ def search_target(state, text):
     if strong_job or generic_job:
         return 'jobs'
     previous = state.get('learning_context') or {}
-    if (state.get('conversation_target') == 'training' or previous) and topics_in(text) and len(text) <= 80:
+    if (state.get('conversation_target') == 'training' or previous) and (topics_in(text) or re.search(r'온라인|오프라인|다른\s*(?:거|것|과정)|더\s*(?:보여|추천)', text)) and len(text) <= 80:
         return 'training'
     return None
 

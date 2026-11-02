@@ -9,8 +9,8 @@ from src.schemas.search import SearchPlan
 class EducationFollowupTests(unittest.TestCase):
     def context(self):
         return {'status':'found','topics':['React'],'courses':[
-            {'source_id':'first','source_version':1,'title':'실제 교육 A','recommendation_eligible':False},
-            {'source_id':'second','source_version':2,'title':'실제 교육 B','recommendation_eligible':False}],
+            {'source_id':'first','source_version':1,'title':'실제 교육 A','delivery_mode':'online','recommendation_eligible':False},
+            {'source_id':'second','source_version':2,'title':'실제 교육 B','delivery_mode':'offline','recommendation_eligible':False}],
             'basis':'explicit_learning_topic_and_self_assessed_gaps','limitations':[]}
 
     def test_pronoun_and_recommendation_retain_exact_displayed_list_without_new_query(self):
@@ -18,7 +18,7 @@ class EducationFollowupTests(unittest.TestCase):
             with self.subTest(text=text):
                 previous=self.context();repo=MagicMock();repo.search.side_effect=AssertionError('Must retain displayed candidates')
                 result=retrieve({'learning_context':previous},text,repo)
-                self.assertEqual(result['courses'],previous['courses'])
+                self.assertEqual(result['courses'],previous['courses'][:1] if '온라인' in text else previous['courses'])
                 self.assertEqual(result['reference_resolution'],'previously_displayed_training_courses')
                 self.assertIsNot(result,previous)
 

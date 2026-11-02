@@ -49,6 +49,11 @@ class DialogueFlow:
                 and is_more_request(payload.get('message', ''))):
             record(state, payload['message'], 'search_continuation')
             return state, self.more_jobs(state), evidence
+        if (action == 'search' and state.get('assessment_checkpoint_enabled') and state.get('selected')
+                and not state.get('preferred_approved') and payload.get('message','').strip() == '우대조건도 계속 확인해줘'):
+            self.validate_selected(state)
+            state['preferred_approved'] = True
+            return state, self.next_question(state, invoke, evidence), evidence
         if action == 'consult':
             return state, self.consult(state,payload,invoke), evidence
         if (action == 'search' and payload.get('search_plan') is None and state.get('selected')
@@ -201,6 +206,8 @@ class DialogueFlow:
                 raise FlowError('too_many_source_conditions', 413) from exc
             state['checks'] = []
             state['grouped'] = payload.get('grouped', False)
+            state['assessment_checkpoint_enabled'] = payload.get('assessment_checkpoint', False)
+            state['preferred_approved'] = False
             record(state, f"선택한 공고: {job['company_name']} / {job['title']}", 'selection')
             result = self.next_question(state, invoke, evidence)
             return state, result, evidence
@@ -417,6 +424,14 @@ class DialogueFlow:
         state.pop('answer_summary', None)
         if not preferences(state)['ask_assessment']:
             return self.paused_response(state)
+        answered_ids = {c.get('condition_id') for c in state['checks']}
+        required = [c for c in state['conditions'] if c['type'] == 'required']
+        preferred_pending = any(c['type'] == 'preferred' and c['id'] not in answered_ids for c in state['conditions'])
+        if (state.get('assessment_checkpoint_enabled') and not state.get('preferred_approved')
+                and required and all(c['id'] in answered_ids for c in required) and preferred_pending):
+            state['stage'] = 'assessment_checkpoint'
+            return {'stage':'assessment_checkpoint', 'message':'필수조건 답변을 저장했습니다. 우대조건도 확인하거나, 현재 답변으로 상담하거나 다른 공고를 볼 수 있습니다. 미답변 우대조건은 미충족으로 처리하지 않습니다.',
+                    'memory':public_memory(state)}
         if state.get('grouped'):
             pending = self.batch_conditions(state)
             if pending:

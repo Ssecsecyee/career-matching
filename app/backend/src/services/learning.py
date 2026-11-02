@@ -3,6 +3,8 @@ import re
 from copy import deepcopy
 
 ALIASES={
+ 'ROS 2':['ros 2','ros2','로스2'],
+ '센서 보정':['extrinsic calibration','센서 보정','외부 파라미터 보정'],
  'UI/UX':['ui/ux','ui ux','uiux','ui 디자인','ux 디자인','ui/ux 디자인','사용자 경험 디자인'],
  'Figma':['figma','피그마'],
  'React':['react','리액트','리엑트'], 'Git':['git','깃'], 'JavaScript':['javascript','자바스크립트'],
@@ -38,9 +40,17 @@ def retrieve(state,message,repository,*,target=None):
     if target=='training' and previous:followup=True
     if repository is None or not (requested(message) or followup or target=='training'):return None
     explicit=topics_in(message)
-    if followup and previous.get('courses') and (not explicit or set(explicit).issubset(previous.get('topics',[]))):
+    modes = re.findall(r'온라인|오프라인', message)
+    mode = ({'온라인':'online','오프라인':'offline'}[modes[-1]] if modes else
+            (previous.get('delivery_mode') if followup and previous else None))
+    def filtered(items):
+        return [c for c in items if not mode or c.get('delivery_mode') == mode]
+    if followup and previous.get('courses') and (not modes or previous.get('delivery_mode') is None or mode == previous.get('delivery_mode')) and (not explicit or set(explicit).issubset(previous.get('topics',[]))):
         # Compare the exact displayed snapshot, retaining order and source versions.
         result=deepcopy(previous)
+        result['courses'] = filtered(result['courses'])
+        result['delivery_mode'] = mode
+        result['status'] = 'found' if result['courses'] else 'no_match'
         result['reference_resolution']='previously_displayed_training_courses'
         return result
     gaps=[]
@@ -55,9 +65,9 @@ def retrieve(state,message,repository,*,target=None):
         statements=state.get('profile',{}).get('memory',{}).get('user_statements',[])
         topics=list(dict.fromkeys(topic for item in reversed(statements[-6:]) for topic in topics_in(item.get('text',''))))[:8]
         basis='user_mentioned_topics_not_verified_deficits'
-    courses=repository.search(topics) if topics else []
+    courses=filtered(repository.search(topics)) if topics else []
     return {'status':'found' if courses else ('no_match' if topics else 'need_topic'),
-            'topics':topics,'basis':basis,'courses':courses,
+            'topics':topics,'basis':basis,'courses':courses,'delivery_mode':mode,
             'limitations':['현재 모집 여부와 지원 자격을 실시간 확인한 결과가 아닙니다.',
                             '과거·미검증 과정은 학습 내용 참고용이며 신청 가능한 과정으로 추천하지 않습니다.',
                             '경력 연수·학위·실무 경험은 교육 수료로 대체할 수 없습니다.']}

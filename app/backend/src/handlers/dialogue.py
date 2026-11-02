@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped"},
+    fields = {"search": {"message", "search_plan", "profile"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -63,6 +63,8 @@ def validate_payload(value):
         if not isinstance(value.get("message"), str) or not 1 <= len(value["message"].strip()) <= 2000:
             raise ValueError("Memory statement required")
     elif action == "select":
+        if "assessment_checkpoint" in value and type(value["assessment_checkpoint"]) is not bool:
+            raise ValueError("Invalid assessment checkpoint")
         if "grouped" in value and type(value["grouped"]) is not bool:
             raise ValueError("Invalid grouped choice")
         if not isinstance(value.get("source_id"), str) or not re.fullmatch(r"\d{1,128}", value["source_id"]):
@@ -134,6 +136,8 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
                             training=training if training is not None else create_training_repository(connect_mysql))
         state, result, evidence = flow.advance(ticket["state"], payload, invoke)
+        if state.get("selected"):
+            result["active_job"] = {k:state["selected"].get(k) for k in ("source_id","title","company_name","source_version")}
         result["snapshot_warning"] = include_unverified
         return response(200, store.finish(ticket, payload, state, result, evidence))
     except Exception as exc:
