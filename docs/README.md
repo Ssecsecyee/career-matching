@@ -14,7 +14,7 @@
 
 - [검색 동기화 운영](SEARCH_SYNC.md)
 - [저장 답변 조회·수정](SAVED_ANSWERS_REVIEW_PLAN.md)
-- [문맥 판단 단일화: 구현 완료·배포 대기](UNIFIED_CONTEXT_ROUTING.md)
+- [문맥 판단 단일화: AWS 배포 완료](UNIFIED_CONTEXT_ROUTING.md)
 - [정규식 유지·정리 판단](REGEX_REVIEW.md)
 - [보안·운영 후속 작업](SECURITY_OPERATIONS_ROADMAP.md)
 - [남은 과업](REMAINING_TASKS.md)
