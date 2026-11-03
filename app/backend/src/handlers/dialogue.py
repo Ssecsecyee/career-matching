@@ -99,7 +99,7 @@ def validate_payload(value):
     return value
 
 
-def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None, intent_store=None, condition_reviews=None):
+def handle_request(event, *, jobs=None, store=None, planner=None, questioner=None, training=None, on_progress=None, intent_store=None, condition_reviews=None, condition_classifier=None, condition_question_cache=None):
     headers = {key.lower(): value for key, value in event.get("headers", {}).items()}
     from src.services.admin_auth import authenticate
     identity=authenticate(headers,os.getenv('CHAT_API_TOKEN',''),os.getenv('ADMIN_API_TOKEN',''))
@@ -140,8 +140,15 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             source = "model" if payload["action"] == "search" and payload.get("search_plan") is None else "direct"
             decision_id = audit.start(ticket, source, routing_context(ticket["state"]))
 
+        on_demand=os.getenv('ENABLE_ON_DEMAND_CONDITIONS')=='true'
+        selected_classifier=condition_classifier
+        if on_demand and selected_classifier is None:
+            from src.bedrock.question_reviewer import QuestionConditionReviewer
+            selected_classifier=QuestionConditionReviewer(model,region)
+
         def invoke(purpose, function, *args):
             adapter = planner if purpose in {"search_plan", "consultation", "intent_classification", "context_response"} else questioner
+            if purpose=='condition_review':adapter=selected_classifier
             from src.bedrock.prompts import SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
             version = SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2"
             if purpose == 'consultation':version = CONSULTATION_PROMPT_VERSION
@@ -149,6 +156,9 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
                 from src.schemas.intent import INTENT_VERSION
                 version = INTENT_VERSION
             if purpose == 'context_response':version = 'context-response-v1'
+            if purpose == 'condition_review':
+                from src.schemas.condition_review import POLICY_VERSION
+                version=getattr(adapter,'prompt_version',POLICY_VERSION)
             identity = store.begin_invocation(ticket, purpose, adapter.model_id, adapter.region, version, args)
             if purpose == 'intent_classification':ticket['_intent_invocation_id'] = identity
             try:
@@ -159,11 +169,17 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             store.finish_invocation(ticket, identity, usage=usage)
             return result
 
-        if condition_reviews is None and os.getenv('ENABLE_AI_CONDITION_SELECTION')=='true':
+        condition_resolver=None
+        if on_demand:
+            from src.repositories.condition_question_cache import ConditionQuestionCache
+            from src.repositories.condition_reviews import ConditionReviewStore
+            from src.services.selected_condition_review import SelectedConditionReview
+            condition_resolver=SelectedConditionReview(jobs,condition_question_cache or ConditionQuestionCache(connect_mysql),selected_classifier,approved=condition_reviews or ConditionReviewStore(connect_mysql))
+        if condition_reviews is None and not on_demand and os.getenv('ENABLE_AI_CONDITION_SELECTION')=='true':
             from src.repositories.condition_reviews import ConditionReviewStore
             condition_reviews=ConditionReviewStore(connect_mysql)
         flow = DialogueFlow(jobs, planner, questioner, include_unverified=include_unverified,
-                            condition_reviews=condition_reviews,
+                            condition_reviews=condition_reviews,condition_resolver=condition_resolver,
                             training=training if training is not None else create_training_repository(connect_mysql))
         from src.services.context_router import ContextRouter
         def decided(raw, decision):

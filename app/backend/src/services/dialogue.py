@@ -27,11 +27,12 @@ def ensure_selectable(job, include_unverified):
 
 
 class DialogueFlow:
-    def __init__(self, jobs, planner, questioner, *, include_unverified=False, training=None, condition_reviews=None):
+    def __init__(self, jobs, planner, questioner, *, include_unverified=False, training=None, condition_reviews=None, condition_resolver=None):
         self.jobs, self.planner, self.questioner = jobs, planner, questioner
         self.include_unverified = include_unverified
         self.training = training
         self.condition_reviews=condition_reviews
+        self.condition_resolver=condition_resolver
 
     def advance(self, state, payload, invoke):
         action = payload['action']
@@ -98,7 +99,8 @@ class DialogueFlow:
                 raise FlowError('too_many_source_conditions', 413) from exc
             state['original_conditions']=list(state['conditions'])
             state['checks'] = []
-            self.apply_condition_review(state,job)
+            self.apply_condition_review(state,job,invoke)
+            if self.condition_resolver is not None:self.validate_selected(state)
             state['grouped'] = payload.get('grouped', False)
             state['assessment_checkpoint_enabled'] = payload.get('assessment_checkpoint', False)
             state['preferred_approved'] = False
@@ -172,17 +174,21 @@ class DialogueFlow:
             return state, result, evidence
         raise FlowError('unsupported_action')
 
-    def apply_condition_review(self,state,job):
-        if self.condition_reviews is None or state.get('condition_review') or state.get('checks'):return
+    def apply_condition_review(self,state,job,invoke=None):
+        if (self.condition_reviews is None and self.condition_resolver is None) or state.get('condition_review') or state.get('checks'):return
         try:
-            review=self.condition_reviews.get(job)
+            resolution=self.condition_resolver.resolve(job,invoke) if self.condition_resolver is not None else {}
+            review=resolution.get('review') if self.condition_resolver is not None else self.condition_reviews.get(job)
             if review is not None:
                 from src.services.condition_review import question_selection
                 questions,references,originals=question_selection(job,review)
                 state.update(conditions=questions,original_conditions=originals,reference_conditions=references,
-                    condition_review={'status':'applied','policy_version':review['policy_version'],'condition_hash':review['condition_hash']})
-            else:state['condition_review']={'status':'unclassified_all_questions'}
+                    condition_review={'status':'applied','policy_version':review['policy_version'],'condition_hash':review['condition_hash'],
+                        **{k:resolution[k] for k in ('source','validation_level') if k in resolution}})
+            else:state['condition_review']={k:v for k,v in resolution.items() if k!='review'} or {'status':'unclassified_all_questions'}
         except Exception as exc:
+            from src.repositories.condition_question_cache import QuestionCacheSourceChanged
+            if isinstance(exc,QuestionCacheSourceChanged):raise FlowError('source_changed_reselect_job',409) from None
             state['condition_review']={'status':'fallback_all_questions','error_type':type(exc).__name__}
 
     def consult(self,state,payload,invoke):

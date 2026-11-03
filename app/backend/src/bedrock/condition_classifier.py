@@ -21,50 +21,68 @@ SYSTEM=('공고 조건을 검토해 submit_condition_review 도구로만 반환�
  '경력/학위/면허는 교육 수료로 대체하지 않습니다. 사용자 능력/합격은 판단하지 말고 이유는 짧은 관측 근거만 적으세요.')
 
 class ConditionClassifier:
+    prompt_version=POLICY_VERSION
     def __init__(self,model_id,region,*,client=None):
         if not model_id or not region:raise ValueError('Configure model and region')
         self.model_id,self.region,self.client=model_id,region,client
-    def classify(self,job):
-        if os.getenv('ENABLE_LIVE_BEDROCK')!='true':raise RuntimeError('Live model disabled')
+    @staticmethod
+    def plan(job,mode='bounded'):
+        if mode not in {'bounded','adaptive'}:raise ValueError('Invalid review mode')
         conditions=[{'condition_id':review_key(c),'requirement_type':c['type'],'quote':c['quote'],'parts':source_parts(c)} for c in source_conditions(job)]
         if len(conditions)>80:raise ValueError('Condition budget exceeded')
+        if mode=='adaptive' and len(conditions)<=12 and sum(len(x['parts']) for x in conditions)<=30:
+            return [conditions] if conditions else []
         batches=[];batch=[];parts=0
         for item in conditions:
             if batch and (len(batch)>=3 or parts+len(item['parts'])>20):batches.append(batch);batch=[];parts=0
             batch.append(item);parts+=len(item['parts'])
         if batch:batches.append(batch)
-        client=self.client or runtime_client(self.region)
+        return batches
+    def _call_batch(self,batch):
+        # Each provider call is separately auditable by the dialogue invoke adapter.
+        if os.getenv('ENABLE_LIVE_BEDROCK')!='true':raise RuntimeError('Live model disabled')
+        began=perf_counter()
+        result=(self.client or runtime_client(self.region)).converse(modelId=self.model_id,system=[{'text':SYSTEM}],
+            messages=[{'role':'user','content':[{'text':json.dumps({'conditions':batch},ensure_ascii=False)}]}],
+            toolConfig={'tools':[{'toolSpec':{'name':'submit_condition_review','description':'Return source-bound condition extraction','inputSchema':{'json':ConditionReview.model_json_schema()}}}],
+                        'toolChoice':{'tool':{'name':'submit_condition_review'}}},
+            inferenceConfig={'maxTokens':4096})
+        usage=usage_metadata(result,model_id=self.model_id,region=self.region,prompt_version=self.prompt_version,started=began)
+        if result.get('stopReason')=='max_tokens':raise ModelOutputTruncatedError(usage)
+        try:
+            if result.get('stopReason')!='tool_use':raise ValueError('Expected structured tool output')
+            tools=[b['toolUse'] for b in result['output']['message']['content'] if 'toolUse' in b]
+            if len(tools)!=1 or tools[0]['name']!='submit_condition_review':raise ValueError('Unexpected tool result')
+            model=ConditionReview.model_validate(tools[0]['input'])
+            expected={x['condition_id'] for x in batch};ids=[x.condition_id for x in model.conditions]
+            if len(ids)!=len(set(ids)) or set(ids)!=expected:raise ValueError('Batch source identity mismatch')
+        except (ValueError,KeyError,TypeError) as exc:
+            error=ModelOutputFormatError(usage);error.validation_code=type(exc).__name__
+            if hasattr(exc,'errors'):error.validation_details=[{'loc':x['loc'],'type':x['type']} for x in exc.errors()]
+            raise error from None
+        return {'conditions':model.model_dump(mode='json')['conditions'],'usage':usage},usage
+    def classify(self,job,*,mode='bounded',invoke=None,max_calls=None,max_seconds=None):
+        if os.getenv('ENABLE_LIVE_BEDROCK')!='true':raise RuntimeError('Live model disabled')
+        batches=self.plan(job,mode)
+        if max_calls is not None and len(batches)>max_calls:raise ValueError('Selected condition call budget exceeded')
         started=perf_counter();all_conditions=[];usages=[]
         def aggregate():
-            value={'model_id':self.model_id,'region':self.region,'prompt_version':POLICY_VERSION,'latency_ms':int((perf_counter()-started)*1000),'calls':len(usages),'batches':usages}
+            value={'model_id':self.model_id,'region':self.region,'prompt_version':self.prompt_version,'latency_ms':int((perf_counter()-started)*1000),'calls':len(usages),'batches':list(usages)}
             for key in ('input_tokens','output_tokens','cache_read_input_tokens','cache_write_input_tokens'):
                 value[key]=None if any(u.get(key) is None for u in usages) else sum(u.get(key,0) for u in usages)
             return value
         for batch in batches:
+            if max_seconds is not None and perf_counter()-started>=max_seconds:
+                error=TimeoutError('Selected condition time budget exceeded');error.usage=aggregate();raise error
             try:
-                began=perf_counter()
-                result=client.converse(modelId=self.model_id,system=[{'text':SYSTEM}],
-                    messages=[{'role':'user','content':[{'text':json.dumps({'conditions':batch},ensure_ascii=False)}]}],
-                    toolConfig={'tools':[{'toolSpec':{'name':'submit_condition_review','description':'Return source-bound condition extraction','inputSchema':{'json':ConditionReview.model_json_schema()}}}],
-                                'toolChoice':{'tool':{'name':'submit_condition_review'}}},
-                    inferenceConfig={'maxTokens':4096})
-                usages.append(usage_metadata(result,model_id=self.model_id,region=self.region,prompt_version=POLICY_VERSION,started=began))
-                if result.get('stopReason')=='max_tokens':raise ModelOutputTruncatedError(aggregate())
-                if result.get('stopReason')!='tool_use':raise ValueError('Expected structured tool output')
-                blocks=result['output']['message']['content'];tools=[b['toolUse'] for b in blocks if 'toolUse' in b]
-                if len(tools)!=1 or tools[0]['name']!='submit_condition_review':raise ValueError('Unexpected tool result')
-                model=ConditionReview.model_validate(tools[0]['input'])
-                expected={x['condition_id'] for x in batch};ids=[x.condition_id for x in model.conditions]
-                if len(ids)!=len(set(ids)) or set(ids)!=expected:raise ValueError('Batch source identity mismatch')
-                all_conditions.extend(model.model_dump(mode='json')['conditions'])
-            except ModelOutputTruncatedError:raise
+                value=invoke('condition_review',self._call_batch,batch) if invoke is not None else self._call_batch(batch)[0]
+                usages.append(value['usage']);all_conditions.extend(value['conditions'])
             except Exception as exc:
-                error=ModelOutputFormatError(aggregate());error.validation_code=type(exc).__name__
-                if hasattr(exc,'errors'):error.validation_details=[{'loc':x['loc'],'type':x['type']} for x in exc.errors()]
-                raise error from None
+                failed=getattr(exc,'usage',None)
+                if isinstance(failed,dict):usages.append(failed)
+                exc.usage=aggregate();raise
         try:review=validate_review(job,{'conditions':all_conditions})
         except (ValueError,KeyError,TypeError) as exc:
             error=ModelOutputFormatError(aggregate());error.validation_code=type(exc).__name__
-            if hasattr(exc,'errors'):error.validation_details=[{'loc':x['loc'],'type':x['type']} for x in exc.errors()]
             raise error from None
         return review,aggregate()
