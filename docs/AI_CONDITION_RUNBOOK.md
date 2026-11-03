@@ -1,58 +1,41 @@
-# AI 조건 추출·검증·색인 운영
+# 선택한 공고의 조건 질문 정리 운영
 
-상태: AWS v2 연결·검토한 3건 반영 완료 / 사용자 질문 선정·순위 보강 비활성
+상태: 로컬 구현·검증 완료 / AWS 캐시 테이블·권한·플래그 미반영
 기준일: 2026-11-03
 
-## 대상과 비용 경계
+## 기본 흐름
 
-MySQL의 모집 상태가 active/unknown이고 마감일 노출 정책을 통과하는 공고만 새 실제 추출 대상이다. 최초 배치 조회와 모델 호출 직전에 재확인한다. ES 문서 부재만으로 마감이라고 판단하지 않는다. 동기화 지연·검색 장애로 빠진 유효 공고는 복구 대상이며, 마감 공고는 새 모델 호출을 하지 않는다. 마감 판정은 원본 recruitment_status를 임의로 변경하는 것이 아니다.
+신규 적재는 원문과 ES 본문 동기화까지만 수행한다. 공고 선택 → SQL 원문 파싱 → 승인 결과/질문 캐시 확인 → 필요 시 질문 라벨 모델 호출 → 원문 계약 검증 → SQL 질문 캐시 저장 → 문답으로 진행한다. 질문 캐시를 ES에 발행하지 않는다. 대량 분류 작업은 보류한다.
 
-현재 자료는 모집 미확인이 많으므로 노출 가능과 실제 모집 중을 구분한다. 추출 중 마감되는 경합을 완전히 예측할 수는 없으며 소비자가 최신 상태로 최종 노출을 막는다. 이번 고정 회귀 표본에 마감 공고가 포함됐던 비효율을 반복하지 않는다. 이미 저장한 과거 분류는 이력으로 보관하며 마감 시험은 오프라인 fixture로 수행한다.
+모델은 질문 분류와 짧은 이유만 반환한다. 작은 공고는 한 묶음, 긴 공고는 제한 분할이며 실제 호출마다 model_invocations와 기존 세션 예산을 사용한다. 일반 사용자도 공유하는 캐시에는 공고 원문/정리만 있고 사용자 프로필이나 자기평가가 없다.
 
-## 실행 흐름
+## 배포 준비
 
-원문 → Bedrock 강제 도구 출력 → 전체 항목·원문 조각·정확한 인용 검증 → job_condition_review_drafts pending → 별도 원문/의미 검토 → verified → job_condition_reviews와 Outbox 원자 저장 → published → 소비자 → ES 대조.
+기존 원본·사용자 답변은 유지한다. 백업 후 app/backend/database/condition_question_cache_migration.sql로 새 캐시 테이블을 만든다. 런타임에는 해당 테이블 SELECT/INSERT만 필요하고 기존 job_postings·job_condition_reviews 조회 권한을 사용한다. 원본 쓰기·Outbox 쓰기 권한을 새로 부여하지 않는다.
 
-조건은 최대 3개씩, 원문 조각 총량을 고려해 분할 호출한다. 호출당 출력 상한은 4096토큰이다. 모든 묶음이 성공해야 공고 결과를 반환하고 일부만 저장하지 않는다. 각 원문은 줄/위치별 조각으로 전부 보존한다. 평면 terms와 논리 트리는 별개이며 13개 기술 목록을 8개 자식 트리에 맞춰 자르지 않는다. 불명확한 관계는 unresolved로 보존한다. 의미 완전성까지 자동 입증되는 것은 아니므로 별도 검토가 필요하다.
+관리자가 적절한 DB 환경과 런타임 계정을 확인한 뒤 적용할 SQL 예시:
 
-## 최소 권한과 설정
-
-| 주체 | 범위 |
-|---|---|
-| 추출 계정 | 원본 SELECT, 기존 분류 SELECT, 대기 테이블 SELECT/INSERT |
-| 승인 계정 | 원본 SELECT, 대기 SELECT/INSERT/UPDATE, 승인 결과 SELECT/INSERT, Outbox INSERT |
-| 검색 소비자 | 기존 동기화 권한과 승인 분류 SELECT |
-| 대화 작업자 | 기존 권한과 승인 분류 SELECT |
-
-추출 계정의 과거 호환 권한이 존재하더라도 공개 CLI의 직접 --apply 발행은 차단한다. 원본 UPDATE/DELETE 권한은 필요 없다. 승인용 자격증명은 서버 보호 파일에만 두며 출력·프롬프트·Git에 넣지 않는다. 호스트 live_calls_allowed=false, ENABLE_AI_CONDITION_SELECTION=false, ENABLE_AI_CONDITION_RANKING=false를 유지한다. 모델 재호출과 기능 활성화는 별도 opt-in이다.
-
-## CMD 예시
-
-```cmd
-cd /d C:/AWS_project/career_matching
-python app/ingestion/classify_job_conditions.py --limit 2 --output workspace/ingestion-reports/condition_plan_01.json
+```sql
+GRANT SELECT, INSERT ON career_matching.job_condition_question_cache TO 'career_runtime'@'%';
 ```
 
-인증·원본 읽기·대기 적재 설정과 ENABLE_LIVE_BEDROCK=true가 준비됐을 때만 실제 추출을 실행한다. 매번 새 출력 경로를 사용한다.
+이 문서의 SQL과 신규 DDL은 AWS에서 아직 실행하지 않았다. 로컬 격리 MySQL의 별도 테스트 계정으로 최소 권한 동작을 확인했다. 비밀 설정·원본 데이터를 Git에 넣지 않는다.
 
-```cmd
-python app/ingestion/classify_job_conditions.py --live --stage --limit 2 --output workspace/ingestion-reports/condition_stage_01.json
-python app/ingestion/condition_draft_actions.py inspect --draft-id 3 --output workspace/ingestion-reports/draft_3.json
-```
+## 설정
 
-승인 manifest는 정확한 후보 해시, 검토자, 각 조건의 source_complete/logic_preserved/label_confirmed와 실제 원문 대조 메모가 필요하다. 모델이 일괄 true로 채우는 것을 검토로 인정하지 않는다. 승인 작업은 승인 전용 계정으로 실행한다.
+- ENABLE_ON_DEMAND_CONDITIONS=false 기본값. true로 명시해야 선택 시 처리를 연결한다.
+- ENABLE_LIVE_BEDROCK=true도 있어야 실제 모델 호출이 가능하다. 캐시 적중은 새 모델 호출이 없다.
+- ENABLE_AI_CONDITION_SELECTION은 과거 승인 분류 조회 전용 경로다. on-demand가 켜지면 새 서비스가 승인 조회도 담당한다.
+- ENABLE_AI_CONDITION_RANKING은 비활성을 유지한다. 질문 캐시와 검색 순위는 별개다.
 
-```cmd
-python app/ingestion/condition_draft_actions.py verify --draft-id 3 --approval 검토한_파일.json --output workspace/ingestion-reports/verify_3.json
-python app/ingestion/condition_draft_actions.py publish --draft-id 3 --output workspace/ingestion-reports/publish_3.json
-```
+코드 배포와 DB 준비를 마친 뒤 유효 공고 1개로 첫 선택·재선택·질문 중단·원문 변경·캐시 장애를 확인한다. 실제 모델 검증은 별도 opt-in 후에만 수행한다. 이번 구현 작업의 유료 호출은 0회다.
 
-이미 published인 후보를 반복 발행하지 않는다. publish 성공은 DB+이벤트 저장이며 ES 수신 성공과 다르다. 마감된 공고는 ES 문서 미존재가 정상이다. 유효 공고는 ES 분류/원문/조건 해시를 읽어 대조한다. 현재 예시 draft 3~5는 이미 발행된 이력으로 실행 연습에 쓰지 않는다.
+## 확인 위치
 
-## 배포와 복구
+model_invocations의 purpose=condition_review에서 각 실제 호출의 성공·실패·토큰을 확인한다. job_condition_question_cache에서는 source_snapshot, classification, model_usage와 validation_level=source_contract_only를 확인한다. 이 표시는 원문 연결 검증이며 독립적인 의미 검증이 아니다. 새 캐시의 관리자 UI 전용 조회는 이번 범위에 포함하지 않으며 SQL 도구로 확인할 수 있다.
 
-infra/build_condition_review_bundle.py는 코드·매핑·마이그레이션만 묶는다. infra/publish_condition_pilot.py는 별도 원문 대조를 마친 정확히 3개 표본에 한정한 배포 도구이며 일반 대량 배치가 아니다. 설치 전 같은 서버의 MySQL 압축 백업·검증을 수행한다. 서버 밖 백업을 대체하지 않는다.
+같은 조건 동시 선택에서 잠금이 사용 중이면 기다리며 모델을 중복 호출하지 않고 원문으로 복귀한다. 실패 결과를 캐시로 저장해 질문을 생략하지 않는다. 기존 답변이 있는 세션은 새 캐시로 자동 재편집하지 않는다.
 
-이미 발행된 v2 이벤트가 있으면 구형 v1 소비자로 단순 복귀하지 않는다. 부분 발행 실패는 새 소비자를 유지해 처리 상태를 대조한다. 검증 실패를 이유로 원문이나 과거 분류를 삭제하지 않는다. 질문 선정/순위 플래그 false로 사용자 적용을 차단할 수 있다.
+## 복귀와 과거 경로
 
-현재 결과와 실제 사용량: [v2 표본 검증](AI_CONDITION_V2_VERIFICATION_20261103.md). 저장 상태 계약: [추출 대기와 승인](CONDITION_EXTRACTION_STAGING.md). 독립적인 사람 정답 평가: [평가 계획](AI_QUESTION_SELECTION_EVALUATION.md).
+ENABLE_ON_DEMAND_CONDITIONS=false로 기존 문답으로 복귀한다. 캐시와 과거 답변을 지우지 않는다. 기존 오프라인 승인 분류/Outbox 소비자는 별도 경로이며 이미 발행된 v2 이벤트가 있는 서버를 구형 v1 소비자로 되돌리지 않는다. 과거 표본은 [v2 기록](AI_CONDITION_V2_VERIFICATION_20261103.md), 질문 캐시 계약은 [선택 시 정리](ON_DEMAND_CONDITION_REVIEW.md)를 따른다.

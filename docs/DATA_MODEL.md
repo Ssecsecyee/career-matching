@@ -149,7 +149,11 @@ answer_summary 필드로 필수·우대별 충족/미충족/미확인/미답변�
 
 ## AI 조건 분류 이력
 
-job_condition_reviews의 별도 이력·원문 해시·정책 버전·usage와 r: Outbox 연결을 로컬 구현했다. 운영 마이그레이션은 미실행이다. 현재 계약은 [AI 조건 분류](AI_CONDITION_CLASSIFICATION.md), 활성화와 권한은 [운영 준비](AI_CONDITION_RUNBOOK.md)를 따른다.
+job_condition_reviews의 별도 이력·원문 해시·정책 버전·usage와 r: Outbox 연결은 AWS 표본 3건에 반영됐다. 이후 전량 백필은 보류했으며 새로운 선택 시 질문 캐시와 구분한다. 현재 계약은 [AI 조건 분류](AI_CONDITION_CLASSIFICATION.md), 활성화와 권한은 [운영 준비](AI_CONDITION_RUNBOOK.md)를 따른다.
 
 ## 조건 추출 검증 대기
 job_condition_review_drafts는 원문 스냅샷·후보·해시·사용량과 pending/verified/published/rejected 상태를 보관한다. job_condition_reviews는 검증 후 발행되는 결과이며 기존 ES 소비자는 대기 테이블을 읽지 않는다. 상세: [조건 추출과 검증](CONDITION_EXTRACTION_STAGING.md).
+
+## 선택 공고 질문 캐시 (로컬 구현·AWS 미반영)
+
+job_condition_question_cache는 공개 공고 기반의 재사용 캐시다. cache_id, job_id, source_version, condition_hash, review_policy, source_snapshot, classification, model_usage, validation_level, created_at을 보관한다. (job_id, condition_hash, review_policy)가 고유 키다. 캐시는 원문 계약 검증 수준인 source_contract_only이며 기존의 검토·승인 분류와 다르다. 원본 UPDATE, 사용자 답변 변경, Outbox 발행은 하지 않는다. [선택 시 처리](ON_DEMAND_CONDITION_REVIEW.md).

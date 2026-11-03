@@ -15,6 +15,7 @@
 - [검색 동기화 운영](SEARCH_SYNC.md)
 - [저장 답변 조회·수정](SAVED_ANSWERS_REVIEW_PLAN.md)
 - [문맥 판단 단일화: AWS 배포 완료](UNIFIED_CONTEXT_ROUTING.md)
+- [선택한 공고의 SQL 조건 정리·공유 캐시](ON_DEMAND_CONDITION_REVIEW.md)
 - [AI 공고 조건 구조화·검색 반영](AI_CONDITION_CLASSIFICATION.md)
 - [AI 조건 분류 실행·운영 준비](AI_CONDITION_RUNBOOK.md)
 - [AI 질문 선정 평가 계획](AI_QUESTION_SELECTION_EVALUATION.md)
