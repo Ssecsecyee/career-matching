@@ -96,7 +96,7 @@ def main():
             protected(CONFIG,config,config_stat);changed_config=True
             command(['systemctl','restart','career-worker']);time.sleep(5)
             command(['systemctl','is-active','--quiet','career-worker'])
-            report.update(status='enabled',cache_rows=cache_rows,feature_enabled=True,sql_only_cache=True,es_events_created=0,live_setting=config.get('ENABLE_LIVE_BEDROCK','unset'),release=str(RELEASE))
+            report.update(status='enabled',cache_rows=cache_rows,feature_enabled=True,sql_only_cache=True,es_events_created=0,configured_live_setting=config.get('ENABLE_LIVE_BEDROCK','unset'),release=str(RELEASE))
             protected(MARKER,dict(marker,activation=report))
     except Exception as exc:
         if changed_config:

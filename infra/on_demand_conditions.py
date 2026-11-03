@@ -21,7 +21,7 @@ def main():
         report={'status':value['Status'],'result':parsed,'stderr_present':bool(value.get('StandardErrorContent'))}
         if value['Status'] in ('Success','Failed'):(Path(state['folder'])/(a.action+'.json')).write_text(json.dumps(report,indent=2),encoding='utf-8')
         print(json.dumps(report));return 0 if value['Status'] in ('Success','Pending','InProgress','Delayed') else 1
-    if not a.confirm_maintenance:p.error('Use --confirm-maintenance for the brief sync service update')
+    if not a.confirm_maintenance:p.error('Use --confirm-maintenance for cache preparation or worker activation')
     if a.action=='enable':
         state=json.loads(STATE.read_text())
         if state.get('enable_command_id'):raise ValueError('Enable already submitted; inspect result')

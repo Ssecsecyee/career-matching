@@ -154,6 +154,6 @@ job_condition_reviews의 별도 이력·원문 해시·정책 버전·usage와 r
 ## 조건 추출 검증 대기
 job_condition_review_drafts는 원문 스냅샷·후보·해시·사용량과 pending/verified/published/rejected 상태를 보관한다. job_condition_reviews는 검증 후 발행되는 결과이며 기존 ES 소비자는 대기 테이블을 읽지 않는다. 상세: [조건 추출과 검증](CONDITION_EXTRACTION_STAGING.md).
 
-## 선택 공고 질문 캐시 (로컬 구현·AWS 미반영)
+## 선택 공고 질문 캐시 (AWS 배포 완료)
 
 job_condition_question_cache는 공개 공고 기반의 재사용 캐시다. cache_id, job_id, source_version, condition_hash, review_policy, source_snapshot, classification, model_usage, validation_level, created_at을 보관한다. (job_id, condition_hash, review_policy)가 고유 키다. 캐시는 원문 계약 검증 수준인 source_contract_only이며 기존의 검토·승인 분류와 다르다. 원본 UPDATE, 사용자 답변 변경, Outbox 발행은 하지 않는다. [선택 시 처리](ON_DEMAND_CONDITION_REVIEW.md).

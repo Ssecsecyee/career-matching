@@ -1,6 +1,6 @@
 # 공고 선택 시 조건 정리
 
-상태: 로컬 구현·격리 MySQL 검증 완료 / AWS 미배포·유료 호출 없음
+상태: AWS 배포·선택 시 처리 활성화 완료 / 배포 검증 유료 호출 0회
 기준일: 2026-11-03
 
 ## 고정 방향
@@ -16,7 +16,7 @@ job_condition_question_cache는 공고 ID·조건 해시·질문 정리 정책 �
 동일 공고·동일 조건의 동시 선택은 MySQL 이름 잠금으로 중복 모델 호출을 막는다. 잠금 대기 때문에 사용자 요청을 길게 묶지 않고 원문으로 복귀한다. 조건이 바뀌면 새 해시로 처리하며 과거 캐시와 이미 저장한 사용자 답변은 유지한다. 호출 전후와 저장 시 최신 원문·모집 상태·마감 여부를 확인한다.
 
 ## 설정과 운영
-ENABLE_ON_DEMAND_CONDITIONS=false가 기본이며 true일 때 선택 시 처리를 연결한다. 실제 호출에는 기존 ENABLE_LIVE_BEDROCK=true도 필요하다. 승인된 기존 분류만 읽는 ENABLE_AI_CONDITION_SELECTION과 선택 시 생성은 역할이 다르다. ENABLE_AI_CONDITION_RANKING은 비활성을 유지한다.
+코드 기본값은 ENABLE_ON_DEMAND_CONDITIONS=false이며, 현재 AWS 작업자에는 true로 설정해 선택 시 처리를 연결했다. 실제 호출에는 기존 ENABLE_LIVE_BEDROCK=true도 필요하다. 승인된 기존 분류만 읽는 ENABLE_AI_CONDITION_SELECTION과 선택 시 생성은 역할이 다르다. ENABLE_AI_CONDITION_RANKING은 비활성을 유지한다.
 
 캐시 테이블 마이그레이션과 runtime의 SELECT/INSERT 권한을 배포 전에 준비한다. 캐시 원본을 UPDATE/DELETE하거나 Outbox INSERT 권한을 새로 줄 필요는 없다. 캐시 저장 실패 시 정리 결과로 질문을 생략하지 않고 원문으로 복귀한다. 모델 호출 기록은 model_invocations, 재사용 원문 정리는 질문 캐시에서 확인한다.
 
@@ -30,6 +30,12 @@ ENABLE_ON_DEMAND_CONDITIONS=false가 기본이며 true일 때 선택 시 처리�
 - 재사용/동시 호출 제어: services/selected_condition_review.py, repositories/condition_question_cache.py.
 - 신규 캐시 DDL: database/condition_question_cache_migration.sql과 전체 schema.sql.
 
-전체 로컬 회귀와 격리 MySQL에서 공유 캐시·고유 키·원문 보존·마감 차단·동시 이름 잠금·최소 SELECT/INSERT 권한·Outbox 이벤트 0개를 확인했다. 실제 Bedrock 출력 품질과 지연·비용은 이번에 측정하지 않았으며 새 AWS DB 테이블/권한·기능 플래그도 아직 반영하지 않았다. 초기 테스트는 test_selected_condition_review.py, test_question_reviewer.py, test_condition_question_cache_mysql.py에 있다.
+전체 로컬 회귀와 격리 MySQL에서 공유 캐시·고유 키·원문 보존·마감 차단·동시 이름 잠금·최소 SELECT/INSERT 권한·Outbox 이벤트 0개를 확인했다. 실제 Bedrock 출력 품질과 지연·비용은 이번에 측정하지 않았으며 AWS DB 테이블·최소 권한·기능 플래그를 반영했다. 실제 모델 새 생성은 이번 배포 검증에서 호출하지 않았다. 초기 테스트는 test_selected_condition_review.py, test_question_reviewer.py, test_condition_question_cache_mysql.py에 있다.
 
 최종 실행: 446개 중 436개 통과·10개 외부 환경 조건 생략. 조건 정리 외의 기존 자연어 의도/검색·상담 모델 호출은 유지한다. 이번 변경으로 일반 검색의 전체 모델 호출이 0회가 되는 것은 아니다. 새 질문 전용 모델은 모의 응답으로만 검증했으며 실제 의미 품질·비용은 미측정이다.
+
+## AWS 배포 확인
+
+백엔드 20261103T020923Z 배포 후 기능을 활성화했다. MySQL 백업 압축·해시 검증, 원본 채용 1020건·교육 7건 보존, 캐시 테이블 SELECT/INSERT 및 실제 동시 잠금 동작을 확인했다. 서로 다른 사용자 세션 2개에서 기존 승인 결과 재사용과 답변 분리를 API로 확인했고 해당 세션의 model_call_count와 model_invocations는 모두 0이었다.
+
+배포 검증은 기존 job_condition_reviews의 승인 결과를 사용했다. 새 질문 캐시의 운영 데이터는 검증 종료 시 0건이며, 신규 공고의 첫 실모델 생성 품질·비용을 검증했다는 뜻은 아니다. 새 캐시 저장과 동시성은 격리 MySQL에서 검증했다. 전체 공고 일괄 추출은 계속 보류한다. [배포 기록](deployments/20261103_on_demand_conditions.md).
