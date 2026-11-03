@@ -3,6 +3,7 @@ import json
 from uuid import UUID
 from src.services.dialogue import FlowError
 from src.services.intent_context import redact
+from src.services.admin_time import kst_projection
 
 VALIDATION={'pending','validated','invalid'}
 EXECUTION={'pending','succeeded','failed'}
@@ -53,17 +54,17 @@ def query(connection,payload):
         where=' WHERE '+' AND '.join(conditions)
         with connection.cursor() as cur:
             cur.execute('SELECT COUNT(*) AS n FROM intent_decisions i'+where,params);total=int(cur.fetchone()['n'])
-            columns=','.join('i.'+field for field in META)
+            columns=','.join(kst_projection(field,'i.') for field in META)
             cur.execute('SELECT '+columns+",JSON_UNQUOTE(JSON_EXTRACT(i.validated_decision,'$.target')) AS target,JSON_UNQUOTE(JSON_EXTRACT(i.validated_decision,'$.action')) AS decision_action,JSON_UNQUOTE(JSON_EXTRACT(i.validated_decision,'$.reason')) AS decision_reason,"+MODEL+' FROM intent_decisions i'+JOIN+where+' ORDER BY i.created_at DESC,i.decision_id DESC LIMIT %s OFFSET %s',params+[25,payload.get('offset',0)])
             rows=cur.fetchall()
         for row in rows:
             if isinstance(row.get('decision_reason'),str):row['decision_reason']=redact(row['decision_reason'])[:500]
-        return {'status':'ok','rows':rows,'total':total,'offset':payload.get('offset',0),'page_size':25,'unexpired_only':True}
+        return {'status':'ok','rows':rows,'total':total,'offset':payload.get('offset',0),'page_size':25,'unexpired_only':True,'display_timezone':'Asia/Seoul'}
     include_raw=payload.get('include_raw',False)
     fields=list(META)+['context_snapshot','validated_decision','result_summary']
     if include_raw:fields.append('raw_output')
     with connection.cursor() as cur:
-        cur.execute('SELECT '+','.join('i.'+field for field in fields)+','+MODEL+",(SELECT JSON_EXTRACT(cm.structured_content,'$._search_record') FROM chat_messages cm WHERE cm.session_id=i.session_id AND cm.idempotency_key=i.request_id AND cm.role='assistant' AND cm.expires_at>UTC_TIMESTAMP(6) ORDER BY cm.message_id DESC LIMIT 1) AS search_record FROM intent_decisions i"+JOIN+' WHERE i.decision_id=%s AND i.expires_at>UTC_TIMESTAMP(6)',(str(UUID(payload['decision_id'])),))
+        cur.execute('SELECT '+','.join(kst_projection(field,'i.') for field in fields)+','+MODEL+",(SELECT JSON_EXTRACT(cm.structured_content,'$._search_record') FROM chat_messages cm WHERE cm.session_id=i.session_id AND cm.idempotency_key=i.request_id AND cm.role='assistant' AND cm.expires_at>UTC_TIMESTAMP(6) ORDER BY cm.message_id DESC LIMIT 1) AS search_record FROM intent_decisions i"+JOIN+' WHERE i.decision_id=%s AND i.expires_at>UTC_TIMESTAMP(6)',(str(UUID(payload['decision_id'])),))
         row=cur.fetchone()
     if not row:raise FlowError('admin_intent_not_found_or_expired',404)
     truncated=[]
@@ -71,4 +72,4 @@ def query(connection,payload):
         if field in row:
             row[field],cut=bounded(row[field],budget)
             if cut:truncated.append(field)
-    return {'status':'ok','record':row,'raw_included':include_raw,'truncated_fields':truncated,'unexpired_only':True}
+    return {'status':'ok','record':row,'raw_included':include_raw,'truncated_fields':truncated,'unexpired_only':True,'display_timezone':'Asia/Seoul'}

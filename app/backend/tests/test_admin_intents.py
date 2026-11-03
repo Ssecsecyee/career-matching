@@ -69,3 +69,12 @@ class AdminIntentTests(unittest.TestCase):
   self.assertNotIn('a@example.com',json.dumps(result))
   self.assertEqual(result['record']['search_record']['constraint_guard']['basis'],'assessment')
   conn.commit.assert_not_called()
+
+ def test_kst_projection_keeps_utc_predicates_and_ordering(self):
+  conn,cur=self.database({'n':0},[])
+  result=execute(lambda:conn,self.payload(operation='intent_rows'),'actor')
+  sql=cur.execute.call_args.args[0]
+  self.assertIn('DATE_ADD(i.created_at, INTERVAL 9 HOUR) AS created_at',sql)
+  self.assertIn('ORDER BY i.created_at DESC',sql)
+  self.assertIn('i.expires_at>UTC_TIMESTAMP(6)',sql)
+  self.assertEqual(result['display_timezone'],'Asia/Seoul')

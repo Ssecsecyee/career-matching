@@ -5,6 +5,7 @@ import hashlib
 import json
 from uuid import UUID
 from src.services.dialogue import FlowError
+from src.services.admin_time import kst_projection
 
 TABLES={
  'job_postings':('채용공고 원본', 'job_id', 'job_id source source_id source_version title company_name recruitment_status deadline_type deadline_at fetched_at last_seen_at updated_at qualifications preferred_requirements application_notes tech_stacks additional_sections'),
@@ -66,7 +67,7 @@ def execute(factory,payload,actor):
                 for table in TABLES:
                     cur.execute('SELECT COUNT(*) AS n FROM '+table);counts[table]=cur.fetchone()['n']
                 cur.execute('SELECT model_id,status,COUNT(*) AS calls,COALESCE(SUM(input_tokens),0) AS input_tokens,COALESCE(SUM(output_tokens),0) AS output_tokens,COALESCE(SUM(cache_read_input_tokens),0) AS cache_read_input_tokens,COALESCE(SUM(cache_write_input_tokens),0) AS cache_write_input_tokens FROM model_invocations GROUP BY model_id,status');usage=cur.fetchall()
-                cur.execute('SELECT COUNT(*) AS pending,COALESCE(MAX(attempt_count),0) AS max_attempts,MIN(created_at) AS oldest FROM search_outbox WHERE processed_at IS NULL');sync=cur.fetchone()
+                cur.execute('SELECT COUNT(*) AS pending,COALESCE(MAX(attempt_count),0) AS max_attempts,DATE_ADD(MIN(created_at), INTERVAL 9 HOUR) AS oldest FROM search_outbox WHERE processed_at IS NULL');sync=cur.fetchone()
                 cur.execute('SELECT recruitment_status,COUNT(*) AS n FROM job_postings GROUP BY recruitment_status');status=cur.fetchall()
                 cur.execute('SELECT COUNT(*) AS n FROM job_postings WHERE recruitment_status IN (\'active\',\'unknown\') AND '+__import__('src.services.deadlines',fromlist=['VISIBLE_SQL']).VISIBLE_SQL);visible=cur.fetchone()['n']
             return {'status':'ok','role':'admin','chat_limit':'unlimited_session_calls','counts':counts,'tables':[{'name':k,'description':v[0]} for k,v in TABLES.items()],'model_usage':usage,'sync':sync,'job_status_counts':status,'visible_jobs':visible,'billing_note':'앱 호출 기록이며 AWS 청구 금액은 아닙니다.'}
@@ -79,7 +80,7 @@ def execute(factory,payload,actor):
                 where=' WHERE session_id=%s';params.append(payload['session_id'])
             with c.cursor() as cur:
                 cur.execute('SELECT COUNT(*) AS n FROM '+table+where,params);total=cur.fetchone()['n']
-                cur.execute('SELECT '+','.join(columns.split())+' FROM '+table+where+' ORDER BY '+order+' DESC LIMIT %s OFFSET %s',params+[25,payload.get('offset',0)]);rows=cur.fetchall()
+                cur.execute('SELECT '+','.join(kst_projection(column) for column in columns.split())+' FROM '+table+where+' ORDER BY '+order+' DESC LIMIT %s OFFSET %s',params+[25,payload.get('offset',0)]);rows=cur.fetchall()
                 cur.execute('SELECT COLUMN_NAME AS name,COLUMN_TYPE AS type,COLUMN_COMMENT AS description FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=%s ORDER BY ORDINAL_POSITION',(table,));metadata=[x for x in cur.fetchall() if x['name'] in columns.split()]
             # Bound results below DynamoDB's per-item size; show explicit previews.
             previews=[]
@@ -95,7 +96,7 @@ def execute(factory,payload,actor):
                     item[key]=text;remaining-=len(text.encode('utf-8'))
                 if truncated:item['_truncated_columns']=truncated
                 previews.append(item)
-            return {'status':'ok','table':table,'rows':previews,'columns':metadata,'total':total,'offset':payload.get('offset',0),'page_size':25}
+            return {'status':'ok','table':table,'rows':previews,'columns':metadata,'total':total,'offset':payload.get('offset',0),'page_size':25,'display_timezone':'Asia/Seoul'}
         c.begin()
         with c.cursor() as cur:
             cur.execute('SELECT * FROM job_postings WHERE job_id=%s FOR UPDATE',(payload['job_id'],));row=cur.fetchone()
