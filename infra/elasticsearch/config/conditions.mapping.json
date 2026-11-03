@@ -59,6 +59,10 @@
               "index": false
             }
           }
+        },
+        "source_parts": {
+          "type": "object",
+          "enabled": false
         }
       }
     },

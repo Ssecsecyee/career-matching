@@ -1,10 +1,19 @@
 import copy,json,os,unittest
 from unittest.mock import Mock,MagicMock,patch
-from src.services.condition_review import source_conditions,review_key,condition_hash,validate_review,validated_envelope,question_selection,projection
+from src.services.condition_review import source_conditions,source_parts,review_key,condition_hash,validate_review,validated_envelope,question_selection,projection
 from src.repositories.condition_reviews import ConditionReviewStore
 from src.bedrock.condition_classifier import ConditionClassifier
 from src.bedrock.model_json import ModelOutputFormatError,ModelOutputTruncatedError
-from test_backend import FakeRuntime
+from test_backend import FakeRuntime as TextRuntime
+
+class FakeRuntime(TextRuntime):
+    def converse(self,**kwargs):
+        result=super().converse(**kwargs)
+        if result['stopReason']=='end_turn':
+            raw=result['output']['message']['content'][0]['text']
+            result['stopReason']='tool_use'
+            result['output']['message']['content']=[{'toolUse':{'name':'submit_condition_review','input':json.loads(raw),'toolUseId':'qa'}}]
+        return result
 
 def fixture():
     job={'job_id':1,'source':'jumpit','source_id':'42','source_version':1,
@@ -17,6 +26,13 @@ def fixture():
           'logic':{'operator':'unresolved'} if i==0 else ({'operator':'any','children':[
              {'operator':'atom','term':'Python','evidence':'Python'},{'operator':'atom','term':'Java','evidence':'Java'}]} if i==1 else
              {'operator':'atom','term':'Docker','evidence':'Docker'})})
+    for condition,item in zip(source_conditions(job),proposal['conditions']):
+        terms=[]
+        def collect(node):
+            if node['operator']=='atom':terms.append(node['term'])
+            for child in node.get('children',[]):collect(child)
+        collect(item['logic'])
+        item['parts']=[{'part_id':p['part_id'],'terms':[t for t in terms if t in p['quote']]} for p in source_parts(condition)]
     return job,proposal
 
 class ConditionReviewTests(unittest.TestCase):
@@ -68,7 +84,7 @@ class ConditionReviewTests(unittest.TestCase):
         with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'false'}),self.assertRaises(RuntimeError):classifier.classify(job)
         self.assertEqual(runtime.calls,[])
         with patch.dict(os.environ,{'ENABLE_LIVE_BEDROCK':'true'}):result,usage=classifier.classify(job)
-        self.assertEqual(len(result['conditions']),3);self.assertEqual(usage['prompt_version'],'condition-review-v1')
+        self.assertEqual(len(result['conditions']),3);self.assertEqual(usage['prompt_version'],'condition-review-v2')
         self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],4096)
     def test_model_truncation_and_invalid_output_never_become_empty_review(self):
         job,_=fixture()

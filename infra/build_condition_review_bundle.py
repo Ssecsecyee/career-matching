@@ -9,7 +9,7 @@ def build():
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+secrets.token_hex(3)
     folder=ROOT/'infra/.build'/('condition-review-'+stamp);folder.mkdir(parents=True,exist_ok=False)
     files=list((ROOT/'app/backend/src').rglob('*.py'))
-    names=['app/ingestion/condition_draft_actions.py','app/backend/database/condition_draft_migration.sql','infra/elasticsearch/install_condition_reviews.py','app/ingestion/run_condition_reviews_host.py','app/backend/database/condition_review_migration.sql','app/backend/requirements.validation.txt',
+    names=['infra/elasticsearch/install_condition_review_v2.py','app/ingestion/condition_draft_actions.py','app/backend/database/condition_draft_migration.sql','infra/elasticsearch/install_condition_reviews.py','app/ingestion/run_condition_reviews_host.py','app/backend/database/condition_review_migration.sql','app/backend/requirements.validation.txt',
       'app/ingestion/classify_job_conditions.py','app/ingestion/incremental_jumpit.py','app/ingestion/normalize_jumpit.py',
       'app/ingestion/normalize_all_jumpit.py','app/ingestion/export_mysql_data.py','app/ingestion/page_extraction.py',
       'app/ingestion/search_index/sync_outbox.py','app/ingestion/search_index/index_snapshot.py',

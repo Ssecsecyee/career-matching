@@ -145,3 +145,33 @@ class ReviewSearchIntegrationTests(ReviewDatabaseTests):
             self.assertNotIn('classified_conditions',current);self.assertEqual(current['source_version'],'2')
         finally:
             if name.startswith('career-condition-qa-'):self.request('DELETE','/'+name)
+
+    def test_thirteen_terms_and_original_parts_reach_actual_es(self):
+        from src.services.condition_review import source_conditions,source_parts,review_key
+        terms=['R','PostgreSQL','PL/SQL','Pandas','OracleDB','Node.js','Kotlin','Objective-C','jQuery','ECMAScript','iOS','HTML5','AWS']
+        self.job.update(qualifications='',preferred_requirements='* 추가 기술스택\n'+'\n'.join(terms))
+        with self.factory() as db:
+            with db.cursor() as c:c.execute('UPDATE job_postings SET qualifications=%s,preferred_requirements=%s WHERE job_id=%s',('',self.job['preferred_requirements'],self.job['job_id']))
+        original=source_conditions(self.job)[0]
+        proposal={'conditions':[{'condition_id':review_key(original),'treatment':'review','category':'skill','reason_code':'ambiguous','reason':'List relation unspecified','logic':{'operator':'unresolved'},'parts':[
+            {'part_id':part['part_id'],'terms':[t for t in terms if part['quote'].strip()==t]} for part in source_parts(original)]}]}
+        self.review=validate_review(self.job,proposal)
+        name='career-condition-qa-'+secrets.token_hex(5);alias=name+'-read'
+        try:
+            self.request('PUT','/'+name,snapshot_mapping())
+            self.request('POST','/_aliases',{'actions':[{'add':{'index':name,'alias':alias}}]})
+            saved=self.save()
+            with self.factory() as db:
+                with db.cursor() as c:
+                    c.execute('SELECT * FROM search_outbox WHERE entity_id=%s AND operation=%s',(self.job['job_id'],'r:'+str(saved['review_id'])))
+                    event=c.fetchone()
+                engine=Engine(alias,alias);engine.request=self.request
+                Consumer(db,engine,include_condition_reviews=True).process(event)
+            self.request('POST','/'+alias+'/_refresh')
+            doc=self.request('POST','/'+alias+'/_search',{'query':{'match_all':{}}})['hits']['hits'][0]['_source']
+            self.assertEqual(doc['preferred_condition_terms'],terms)
+            entry=doc['classified_conditions'][0]
+            self.assertEqual(entry['logic']['operator'],'unresolved')
+            self.assertEqual(''.join(p['quote'] for p in entry['source_parts']),original['quote'])
+            self.assertEqual(len(entry['atoms']),13)
+        finally:self.request('DELETE','/'+name)
