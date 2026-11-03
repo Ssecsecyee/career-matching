@@ -3,6 +3,10 @@
 상태: condition-review-v2 구현·AWS 표본 반영 완료 / 사용자 질문 선정·순위 보강은 비활성
 기준일: 2026-11-03
 
+## 현재 변경 방향
+
+전체 공고 AI 백필은 보류하고 SQL 기준의 공고 선택 시 질문 정리·공유 캐시로 전환한다. 과거 표본 결과를 삭제하지 않는다. [선택 시 처리 계약](ON_DEMAND_CONDITION_REVIEW.md)을 따른다. 현재 구현/배포 상태는 해당 문서에서 구분한다.
+
 ## 데이터 경계
 
 job_postings는 원문 기준 데이터다. 원문이 있는 SQL을 AI 결과로 덮어쓰지 않는다. Bedrock 후보는 job_condition_review_drafts에 격리하고, 원문·의미 검토를 거쳐 승인된 결과만 job_condition_reviews와 search_outbox에 기록한다. ES는 승인 분류의 검색 사본이며 원본이나 사용자 역량 판정 기준 DB를 대체하지 않는다.
