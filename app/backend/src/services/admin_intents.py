@@ -63,11 +63,11 @@ def query(connection,payload):
     fields=list(META)+['context_snapshot','validated_decision','result_summary']
     if include_raw:fields.append('raw_output')
     with connection.cursor() as cur:
-        cur.execute('SELECT '+','.join('i.'+field for field in fields)+','+MODEL+' FROM intent_decisions i'+JOIN+' WHERE i.decision_id=%s AND i.expires_at>UTC_TIMESTAMP(6)',(str(UUID(payload['decision_id'])),))
+        cur.execute('SELECT '+','.join('i.'+field for field in fields)+','+MODEL+",(SELECT JSON_EXTRACT(cm.structured_content,'$._search_record') FROM chat_messages cm WHERE cm.session_id=i.session_id AND cm.idempotency_key=i.request_id AND cm.role='assistant' AND cm.expires_at>UTC_TIMESTAMP(6) ORDER BY cm.message_id DESC LIMIT 1) AS search_record FROM intent_decisions i"+JOIN+' WHERE i.decision_id=%s AND i.expires_at>UTC_TIMESTAMP(6)',(str(UUID(payload['decision_id'])),))
         row=cur.fetchone()
     if not row:raise FlowError('admin_intent_not_found_or_expired',404)
     truncated=[]
-    for field,budget in [('context_snapshot',24000),('validated_decision',16000),('result_summary',8000),('raw_output',16000)]:
+    for field,budget in [('context_snapshot',24000),('validated_decision',16000),('result_summary',8000),('search_record',24000),('raw_output',16000)]:
         if field in row:
             row[field],cut=bounded(row[field],budget)
             if cut:truncated.append(field)

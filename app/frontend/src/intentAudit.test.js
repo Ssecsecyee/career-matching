@@ -40,3 +40,15 @@ test('initial panel requests no private rows and busy paging is disabled',()=>{
  assert.equal((html.match(/disabled=""/g)||[]).length,2);
  assert.equal(helpers.intentTokens(null),'미기록');assert.equal(helpers.intentLabel('source','direct'),'버튼·폼');
 });
+
+test('search debug compares stored plans and self reports with safe old-record fallback',()=>{
+ const base={record:{decision_id:id},raw_included:false,truncated_fields:[]};
+ let html=render(IntentAuditDetail,{data:base,busy:false});
+ assert.match(html,/검색 실행 기록이 없습니다/);
+ const search_record={total:18,raw_plan:{required_skills:['commerce']},executed_plan:{required_skills:[],preferred_skills:['commerce']},
+ constraint_guard:{basis:'assessment',unsupported_required_skills:['commerce'],evidence:[]},
+ assessment_basis:{source_id:'42',source_version:2,items:[{type:'required',assessment:'unknown',quote:'<script>private</script>'}]}};
+ html=render(IntentAuditDetail,{data:{...base,record:{...base.record,search_record}},busy:false});
+ assert.match(html,/AI 제안/);assert.match(html,/실제 실행/);assert.match(html,/필수에서 선호로 전환/);
+ assert.match(html,/미확인/);assert.match(html,/18건/);assert.doesNotMatch(html,/<script>/);
+});

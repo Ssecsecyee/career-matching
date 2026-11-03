@@ -58,3 +58,14 @@ class AdminIntentTests(unittest.TestCase):
   event={'headers':{'Authorization':'Bearer '+ADMIN,'X-Client-Token':CLIENT},'body':json.dumps(self.payload(operation='intent_rows'))}
   with patch.dict(os.environ,{'CHAT_API_TOKEN':USER,'ADMIN_API_TOKEN':ADMIN}):result=handle_admin(event,factory=lambda:conn)
   self.assertEqual(result['statusCode'],200);self.assertEqual(json.loads(result['body'])['rows'],[])
+
+ def test_search_detail_is_exact_request_scoped_readonly_and_masked(self):
+  record={'raw_plan':{'required_skills':['Python']},'executed_plan':{'required_skills':[]},'constraint_guard':{'basis':'assessment','evidence':[{'quote':'a@example.com'}]}}
+  conn,cur=self.database({'decision_id':str(uuid4()),'search_record':json.dumps(record)})
+  result=execute(lambda:conn,self.payload(operation='intent_detail',decision_id=str(uuid4())),'actor')
+  sql=cur.execute.call_args.args[0]
+  self.assertIn('cm.session_id=i.session_id',sql);self.assertIn('cm.idempotency_key=i.request_id',sql)
+  self.assertIn("cm.role='assistant'",sql);self.assertIn('cm.expires_at>UTC_TIMESTAMP(6)',sql)
+  self.assertNotIn('a@example.com',json.dumps(result))
+  self.assertEqual(result['record']['search_record']['constraint_guard']['basis'],'assessment')
+  conn.commit.assert_not_called()
