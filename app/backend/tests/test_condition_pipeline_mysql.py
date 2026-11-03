@@ -78,6 +78,17 @@ class ReviewDatabaseTests(unittest.TestCase):
         result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,stage=True)
         self.assertEqual(result['staged'],1);model.classify.assert_called_once()
         self.assertIsNone(self.store.get(self.job))
+    def test_expiry_after_batch_selection_skips_paid_model_call(self):
+        model=Mock()
+        def expire(*args):
+            with self.factory() as db:
+                with db.cursor() as c:c.execute("UPDATE job_postings SET deadline_type='fixed_date',deadline_at=UTC_TIMESTAMP()-INTERVAL 1 DAY WHERE job_id=%s",(self.job['job_id'],))
+            return None
+        with patch('classify_job_conditions.ConditionReviewStore.get',side_effect=expire):
+            result=run(self.factory,model,after_job_id=self.job['job_id']-1,limit=1,live=True,stage=True)
+        model.classify.assert_not_called()
+        self.assertEqual(result['skipped_ineligible'],1);self.assertEqual(result['failed'],0)
+
     def test_draft_stays_out_of_search_until_complete_approval(self):
         from src.repositories.condition_drafts import ConditionDraftStore,candidate_hash
         drafts=ConditionDraftStore(self.factory)

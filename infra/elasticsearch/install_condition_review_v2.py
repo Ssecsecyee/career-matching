@@ -8,7 +8,7 @@ MARKER=BASE/'condition-review-v2-install.json'
 def command(args):return subprocess.run(args,check=True,capture_output=True,text=True,timeout=120)
 def main():
     os.umask(0o077);report={'status':'starting','stage':'preflight','model_calls':0}
-    root=None;paused=False;switched=False;publishing=False;account_created=False;account=None;old=None
+    root=None;paused=False;switched=False;publishing=False;account_created=False;account=None;old=None;old_writer=None
     try:
         if MARKER.exists():raise ValueError('V2 publication already installed; inspect marker before retry')
         if not compileall.compile_dir(str(RELEASE/'app'),quiet=2):raise ValueError('Package compile failed')
@@ -16,6 +16,7 @@ def main():
         from src.repositories.condition_drafts import ConditionDraftStore,validate_approval
         from src.services.condition_review import validated_envelope,condition_hash,projection
         from sync_outbox import Engine
+        from src.services.deadlines import expired
         cfg=json.loads((BASE/'config.json').read_text())
         if any(str(cfg.get(k,'false')).lower()=='true' for k in ('ENABLE_AI_CONDITION_SELECTION','ENABLE_AI_CONDITION_RANKING')):raise ValueError('Pilot requires user-facing features off')
         sync=json.loads((BASE/'search-sync.json').read_text())
@@ -65,6 +66,10 @@ def main():
         approver_path=BASE/'condition-review-approver.json'
         if approver_path.exists():raise ValueError('Existing approver settings require inspection')
         approver_path.write_text(json.dumps({'user':account,'password':password,'database':'career_matching','port':3308}));approver_path.chmod(0o600)
+        writer_path=BASE/'condition-review-db.json'
+        old_writer=writer_path.read_bytes();(RELEASE/'previous-writer-settings.json').write_bytes(old_writer)
+        writer=json.loads(old_writer);writer['release']=str(RELEASE)
+        temporary=BASE/'condition-review-db.next.json';temporary.write_text(json.dumps(writer));temporary.chmod(0o600);temporary.replace(writer_path)
         report['stage']='mapping_and_consumer'
         engine.request('PUT','/'+sync['jobs_alias']+'/_mapping',json.loads((RELEASE/'infra/elasticsearch/config/conditions.mapping.json').read_text()))
         lines=old.decode().splitlines()
@@ -83,11 +88,18 @@ def main():
         command(['systemctl','start','career-search-sync.service'])
         command(['systemctl','start','career-search-sync.timer'])
         report['stage']='es_readback'
-        checked_count=0
+        checked_count=0;excluded=[]
         for item in payload:
             row=current[item['job']['job_id']]
             identity=json.dumps([row['source'],row['source_id']],ensure_ascii=False,separators=(',',':'))
             key=hashlib.sha256(identity.encode()).hexdigest()
+            if row['recruitment_status'] in {'closed','unavailable'} or expired(row):
+                from urllib.error import HTTPError
+                try:engine.request('GET','/'+sync['jobs_alias']+'/_doc/'+key)
+                except HTTPError as exc:
+                    if exc.code!=404:raise
+                else:raise ValueError('Excluded source unexpectedly indexed')
+                excluded.append(str(row['source_id']));continue
             actual=engine.request('GET','/'+sync['jobs_alias']+'/_doc/'+key)['_source']
             expected=projection(row,item['review'])
             for field,value in expected.items():
@@ -96,11 +108,13 @@ def main():
             checked_count+=len(actual['classified_conditions'])
         after=fingerprint()
         if after!=before:raise ValueError('Original source fingerprint changed')
-        report.update(status='published_and_verified',published=published,conditions=checked_count,source_unchanged=before,consumer_release=str(RELEASE),question_selection_enabled=False,ranking_enabled=False,independent_human_evaluation=False)
+        report.update(status='published_and_verified',published=published,conditions=sum(len(x['review']['conditions']) for x in payload),indexed_conditions=checked_count,excluded_source_ids=excluded,source_unchanged=before,consumer_release=str(RELEASE),question_selection_enabled=False,ranking_enabled=False,independent_human_evaluation=False)
         MARKER.write_text(json.dumps(report,indent=2));MARKER.chmod(0o600)
     except Exception as exc:
         if switched and not publishing:
             UNIT.write_bytes(old);subprocess.run(['systemctl','daemon-reload'],capture_output=True)
+        if old_writer is not None and not publishing:
+            (BASE/'condition-review-db.json').write_bytes(old_writer);(BASE/'condition-review-db.json').chmod(0o600)
         if account_created and not publishing:
             with root.cursor() as c:c.execute("DROP USER IF EXISTS %s@'%%'",(account,))
             path=BASE/'condition-review-approver.json'

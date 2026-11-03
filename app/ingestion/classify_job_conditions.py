@@ -17,7 +17,7 @@ def run(connection_factory,classifier,*,limit=5,after_job_id=0,live=False,apply=
             cur.execute("SELECT job_id,source,source_id,source_version,qualifications,preferred_requirements FROM job_postings WHERE job_id>%s AND recruitment_status IN ('active','unknown') AND "+VISIBLE_SQL+" ORDER BY job_id LIMIT 500",(after_job_id,))
             rows=cur.fetchall()
     finally:connection.close()
-    result={'scanned':0,'reused':0,'planned':0,'saved':0,'staged':0,'reviewed':0,'failed':0,'next_after_job_id':after_job_id,'items':[]}
+    result={'scanned':0,'reused':0,'planned':0,'saved':0,'staged':0,'skipped_ineligible':0,'reviewed':0,'failed':0,'next_after_job_id':after_job_id,'items':[]}
     work=0
     for job in rows:
         if work>=limit:break
@@ -31,6 +31,18 @@ def run(connection_factory,classifier,*,limit=5,after_job_id=0,live=False,apply=
             result['planned']+=1;item['status']='model_not_called'
         else:
             try:
+                # A queued candidate can expire or close after the initial batch query.
+                # Recheck source eligibility immediately before incurring model cost.
+                fresh=connection_factory()
+                try:
+                    with fresh.cursor() as cur:
+                        cur.execute("SELECT job_id,source,source_id,source_version,qualifications,preferred_requirements FROM job_postings WHERE job_id=%s AND recruitment_status IN ('active','unknown') AND "+VISIBLE_SQL,(job['job_id'],))
+                        current=cur.fetchone()
+                finally:fresh.close()
+                if not current:
+                    result['skipped_ineligible']+=1;item['status']='skipped_not_visible'
+                    result['items'].append(item);continue
+                job=current;item['condition_hash']=condition_hash(job)
                 review,usage=classifier.classify(job)
                 item.update(review=review,usage=usage)
                 if stage:
