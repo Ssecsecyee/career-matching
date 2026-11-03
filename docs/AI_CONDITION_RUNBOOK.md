@@ -1,91 +1,58 @@
-# AI 조건 분류 실행·운영 준비
+# AI 조건 추출·검증·색인 운영
 
-상태: 로컬 구현·검증 / 운영 미활성
+상태: AWS v2 연결·검토한 3건 반영 완료 / 사용자 질문 선정·순위 보강 비활성
+기준일: 2026-11-03
 
-## 먼저 구분할 것
+## 대상과 비용 경계
 
-기존 웹/API 배포와 이 기능 활성화는 별개다. 새 DB 테이블, 소비자 코드, ES 매핑, 계정 권한이 준비되기 전에는 실제 분류 결과를 운영 DB에 저장하지 않는다. 이번 작업은 이를 AWS에 실행하지 않았다. 실모델 정확도 평가는 [평가 계획](AI_QUESTION_SELECTION_EVALUATION.md)을 따른다.
+MySQL의 모집 상태가 active/unknown이고 마감일 노출 정책을 통과하는 공고만 새 실제 추출 대상이다. 최초 배치 조회와 모델 호출 직전에 재확인한다. ES 문서 부재만으로 마감이라고 판단하지 않는다. 동기화 지연·검색 장애로 빠진 유효 공고는 복구 대상이며, 마감 공고는 새 모델 호출을 하지 않는다. 마감 판정은 원본 recruitment_status를 임의로 변경하는 것이 아니다.
 
-## 준비 순서
+현재 자료는 모집 미확인이 많으므로 노출 가능과 실제 모집 중을 구분한다. 추출 중 마감되는 경합을 완전히 예측할 수는 없으며 소비자가 최신 상태로 최종 노출을 막는다. 이번 고정 회귀 표본에 마감 공고가 포함됐던 비효율을 반복하지 않는다. 이미 저장한 과거 분류는 이력으로 보관하며 마감 시험은 오프라인 fixture로 수행한다.
 
-1. 별도 검증 DB에서 app/backend/database/condition_review_migration.sql 적용 후 원본·분류·Outbox 권한 시험.
-2. ES 별칭의 새 매핑 적용. configure_condition_index.py는 기본 계획만 출력하며 --apply를 지정해야 수정한다.
-3. 새 소비자 배포와 보호된 소비자 설정의 enable_condition_reviews=true(JSON boolean) 준비.
-4. 실제 모델 소량 호출은 사용자 opt-in 뒤 --live로 수행한다. 먼저 --apply 없이 결과와 이유를 확인한다.
-5. 새 소비자·매핑·권한을 확인한 뒤 --apply --confirm-index-ready로 분류와 r: 이벤트를 저장한다.
-6. Outbox 대기·실패, 원본/색인 버전·조건 해시, 미분류 자료 검색을 확인한다.
-7. 사람 정답 평가와 비교 운영 후 질문 선정/순위 기능을 소량 활성화한다.
+## 실행 흐름
 
-## 최소 권한
+원문 → Bedrock 강제 도구 출력 → 전체 항목·원문 조각·정확한 인용 검증 → job_condition_review_drafts pending → 별도 원문/의미 검토 → verified → job_condition_reviews와 Outbox 원자 저장 → published → 소비자 → ES 대조.
 
-| 주체 | 필요한 범위 |
+조건은 최대 3개씩, 원문 조각 총량을 고려해 분할 호출한다. 호출당 출력 상한은 4096토큰이다. 모든 묶음이 성공해야 공고 결과를 반환하고 일부만 저장하지 않는다. 각 원문은 줄/위치별 조각으로 전부 보존한다. 평면 terms와 논리 트리는 별개이며 13개 기술 목록을 8개 자식 트리에 맞춰 자르지 않는다. 불명확한 관계는 unresolved로 보존한다. 의미 완전성까지 자동 입증되는 것은 아니므로 별도 검토가 필요하다.
+
+## 최소 권한과 설정
+
+| 주체 | 범위 |
 |---|---|
-| 분류 작업자 | job_postings SELECT, job_condition_reviews SELECT/INSERT, search_outbox INSERT |
-| 검색 소비자 | 기존 권한 + job_condition_reviews SELECT |
-| 대화 작업자 | 기존 권한 + job_condition_reviews SELECT (질문 선정 활성 시) |
-| 마이그레이션 관리자 | 새 테이블 CREATE·참조 권한, 계정 권한 부여 |
+| 추출 계정 | 원본 SELECT, 기존 분류 SELECT, 대기 테이블 SELECT/INSERT |
+| 승인 계정 | 원본 SELECT, 대기 SELECT/INSERT/UPDATE, 승인 결과 SELECT/INSERT, Outbox INSERT |
+| 검색 소비자 | 기존 동기화 권한과 승인 분류 SELECT |
+| 대화 작업자 | 기존 권한과 승인 분류 SELECT |
 
-분류 작업자는 원본 UPDATE/DELETE, 대화 테이블 권한이 필요 없다. FOR SHARE와 위 권한 조합은 실제 로컬 MySQL 8.4에서 시험했다. 자격증명을 명령 인수·Git·프롬프트·출력에 넣지 않는다. 모델 설정은 backend/.env 또는 실행 환경, ingestion/.env에는 기존 INGEST_MYSQL_ 키만 사용한다.
+추출 계정의 과거 호환 권한이 존재하더라도 공개 CLI의 직접 --apply 발행은 차단한다. 원본 UPDATE/DELETE 권한은 필요 없다. 승인용 자격증명은 서버 보호 파일에만 두며 출력·프롬프트·Git에 넣지 않는다. 호스트 live_calls_allowed=false, ENABLE_AI_CONDITION_SELECTION=false, ENABLE_AI_CONDITION_RANKING=false를 유지한다. 모델 재호출과 기능 활성화는 별도 opt-in이다.
 
-## CMD: 계획과 소량 검토
-
-프로젝트 최상단에서 실행한다. 아래 파일 경로는 매 실행 새 이름으로 바꾼다. DB 조회에는 해당 환경의 접속·테이블 준비가 필요하다.
+## CMD 예시
 
 ```cmd
-cd /d C:AWS_projectcareer_matching
-python appingestionsearch_indexconfigure_condition_index.py
-python appingestionclassify_job_conditions.py --limit 2 --output workspaceingestion-reportscondition_plan_01.json
+cd /d C:/AWS_project/career_matching
+python app/ingestion/classify_job_conditions.py --limit 2 --output workspace/ingestion-reports/condition_plan_01.json
 ```
 
-실제 모델 검토는 비용이 발생한다. 계정·모델·리전과 ENABLE_LIVE_BEDROCK=true opt-in이 준비된 뒤 아래를 사용한다. --apply가 없으므로 분류·Outbox를 쓰지 않는다.
+인증·원본 읽기·대기 적재 설정과 ENABLE_LIVE_BEDROCK=true가 준비됐을 때만 실제 추출을 실행한다. 매번 새 출력 경로를 사용한다.
 
 ```cmd
-python appingestionclassify_job_conditions.py --live --limit 2 --output workspaceingestion-reportscondition_review_01.json
+python app/ingestion/classify_job_conditions.py --live --stage --limit 2 --output workspace/ingestion-reports/condition_stage_01.json
+python app/ingestion/condition_draft_actions.py inspect --draft-id 3 --output workspace/ingestion-reports/draft_3.json
 ```
 
-결과 검토와 환경 준비 뒤 적용 예시:
+승인 manifest는 정확한 후보 해시, 검토자, 각 조건의 source_complete/logic_preserved/label_confirmed와 실제 원문 대조 메모가 필요하다. 모델이 일괄 true로 채우는 것을 검토로 인정하지 않는다. 승인 작업은 승인 전용 계정으로 실행한다.
 
 ```cmd
-python appingestionclassify_job_conditions.py --live --apply --confirm-index-ready --limit 2 --output workspaceingestion-reportscondition_apply_01.json
+python app/ingestion/condition_draft_actions.py verify --draft-id 3 --approval 검토한_파일.json --output workspace/ingestion-reports/verify_3.json
+python app/ingestion/condition_draft_actions.py publish --draft-id 3 --output workspace/ingestion-reports/publish_3.json
 ```
 
-검토와 적용 실행 사이 캐시가 없으면 실제 호출이 다시 발생한다. 검토 보고서를 신뢰된 입력으로 바로 import하는 기능은 제공하지 않는다. 저장된 동일 해시·정책은 후속 실행에서 재호출 없이 재사용한다. 실패 사용량은 보고서에, 저장 성공 사용량은 분류 테이블의 model_usage에도 남는다. 이 배치 비용은 기존 대화 model_invocations 집계와 별개이며 기존 관리자 대시보드에 자동 합산되지 않는다.
+이미 published인 후보를 반복 발행하지 않는다. publish 성공은 DB+이벤트 저장이며 ES 수신 성공과 다르다. 마감된 공고는 ES 문서 미존재가 정상이다. 유효 공고는 ES 분류/원문/조건 해시를 읽어 대조한다. 현재 예시 draft 3~5는 이미 발행된 이력으로 실행 연습에 쓰지 않는다.
 
-## 배치 재개·신규·수정 감지
+## 배포와 복구
 
---limit는 미분류 검토 시도 수(기본 5, 최대 20), 한 실행의 읽기 창은 최대 500행이다. 보고서 next_after_job_id를 다음 실행의 --after-job-id에 사용한다. 실패가 있으면 실패 ID를 확인하고 이전 커서 또는 0부터 재실행한다. 새 수집/수정 반영 후에는 새 순회를 0부터 시작해야 낮은 ID의 수정 공고도 다시 검사한다. 동일 해시·정책은 건너뛰므로 모델을 다시 부르지 않는다. 자동 주기 실행 스케줄은 아직 설치하지 않았다.
+infra/build_condition_review_bundle.py는 코드·매핑·마이그레이션만 묶는다. infra/publish_condition_pilot.py는 별도 원문 대조를 마친 정확히 3개 표본에 한정한 배포 도구이며 일반 대량 배치가 아니다. 설치 전 같은 서버의 MySQL 압축 백업·검증을 수행한다. 서버 밖 백업을 대체하지 않는다.
 
-## 기능 설정
+이미 발행된 v2 이벤트가 있으면 구형 v1 소비자로 단순 복귀하지 않는다. 부분 발행 실패는 새 소비자를 유지해 처리 상태를 대조한다. 검증 실패를 이유로 원문이나 과거 분류를 삭제하지 않는다. 질문 선정/순위 플래그 false로 사용자 적용을 차단할 수 있다.
 
-- 작업자 환경 ENABLE_AI_CONDITION_SELECTION=false: 기본은 기존 전체 원문 문답. true일 때 유효한 저장 분류만 적용한다.
-- 작업자 환경 ENABLE_AI_CONDITION_RANKING=false: 기본 검색 유지. true일 때 분류 기술의 후보·순위 보강.
-- 소비자 보호 JSON의 enable_condition_reviews: true: 새 분류 이벤트와 DB 조회를 사용한다. 환경 문자열 설정과 JSON boolean을 혼동하지 않는다.
-
-전체 원문·참고사항은 세션에 보존한다. AI 실패·검증 실패·미분류는 기존 전체 질문으로 복귀한다. 주소/마감일 변경만으로 재분류하지 않고 조건 해시가 달라진 경우 재분류한다. 기존 답변이 있는 세션을 새 분류로 자동 재편집하지 않는다.
-
-## 전체 재색인과 배포 묶음
-
-export_classified_snapshot.py --output 새경로는 원본과 현재 유효 분류를 함께 읽는다. index_snapshot.py는 그 스냅샷의 분류와 논리를 새 색인에 보존한다. 운영 전체 재색인은 소비 중지·변경 경계 보존·소비 재개 절차를 유지한다.
-
-```cmd
-python infrauild_condition_review_bundle.py
-```
-
-이 명령은 코드·마이그레이션·매핑·해시 manifest만 infra/.build에 묶으며 AWS/SQL을 실행하지 않는다. 비밀 설정·원문 데이터는 포함하지 않는다. 자동 설치기는 아니다. 운영 소비자는 기존 배포 폴더의 코드를 실행하므로 백엔드 코드만 업데이트해서는 새 소비자가 반영되지 않는다. 기존 infra/connect_search.py apply는 최초 설치용이므로 이미 설치된 서버에서 다시 실행하지 않는다. AWS 단계에서 소비자 경로·설정 소유권·권한·매핑을 함께 갱신해야 한다.
-
-## 복귀
-
-질문 선정/순위 플래그를 false로 돌리면 기존 질문·검색으로 복귀한다. DB 분류 이력과 원문은 지우지 않는다. 이미 발행한 r: 이벤트가 있다면 새 소비자를 유지해 처리해야 한다. 구형 소비자는 해당 이벤트를 해석하지 못하므로 단순 코드 복귀로 처리 성공을 주장하면 안 된다. 아직 처리되지 않은 이벤트·실패·별칭·버전을 확인한다.
-
-## 한계
-
-이 구조의 실행·데이터 무결성을 검증한 것과 AI 선정 정확도를 입증한 것은 다르다. 복합 조건의 의미·성향 분류·중요 조건 오생략을 사람 정답과 실제 모델로 평가해야 한다. 4096 출력 토큰 안에 긴 조건 전체를 완결하지 못하면 실패하며 자동으로 조건을 없애지 않는다. 사용자 역량 프로필 기반 최종 재추천과 추천 이유 A3 확장은 별도 과업이다.
-
-## AWS 연결 배포 상태 (2026-11-03)
-분류 테이블·최소 권한 계정·조회 권한·ES 매핑과 새 소비자 연결을 완료했다. 소비자의 enable_condition_reviews=true이며 작업자와 타이머 정상 실행을 확인했다. 백엔드 릴리스 20261102T232151Z와 웹을 배포했다.
-설치 전 MySQL 압축 백업과 해시 검증을 완료했고, 채용 1020건·교육 7건의 원본 버전과 내용 해시는 동일했다. 백업은 같은 서버에 있어 서버 밖 백업을 대체하지 않는다.
-분류 결과 0건, 이번 연결의 실제 모델 호출 0회다. 질문 선정과 순위 보강 플래그는 false를 유지한다. 소량 실제 분류와 사람 평가 후 별도로 활성화한다. 연결 완료가 AI 정확도 검증 완료를 뜻하지 않는다.
-infra/condition_connection.py는 submit --confirm-maintenance 후 result로 확인한다. 설치 완료 서버에 submit을 반복하지 않는다. 분류 계정의 live_calls_allowed=false를 유지하며 비밀 설정은 출력·커밋하지 않는다.
-
-## 추출과 색인 분리
-2026-11-03부터 직접 --apply 발행을 차단하고 --stage 대기 적재 → 별도 verify → publish로 분리한다. 기존 위의 직접 발행 예시는 폐기한다. 현재 절차와 AWS 상태는 [조건 추출 대기와 검증 후 색인](CONDITION_EXTRACTION_STAGING.md)을 따른다.
+현재 결과와 실제 사용량: [v2 표본 검증](AI_CONDITION_V2_VERIFICATION_20261103.md). 저장 상태 계약: [추출 대기와 승인](CONDITION_EXTRACTION_STAGING.md). 독립적인 사람 정답 평가: [평가 계획](AI_QUESTION_SELECTION_EVALUATION.md).
