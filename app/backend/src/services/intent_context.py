@@ -22,6 +22,19 @@ def redact(value):
     return value
 
 
+def assessment_facts(state):
+    conditions={c.get('id'):c for c in state.get('conditions',[]) if c.get('id')}
+    facts=[]
+    for check in state.get('checks',[]):
+        condition=conditions.get(check.get('condition_id'))
+        if condition and check.get('assessment') in {'met','unmet','unknown'}:
+            facts.append({'condition_id':condition['id'],'type':condition.get('type'),
+                          'quote':condition.get('quote','')[:400], 'assessment':check['assessment']})
+    selected=state.get('selected') or {}
+    return {'source_id':selected.get('source_id'),'source_version':selected.get('source_version'),
+            'basis':'user_self_reported','items':facts[:12],'omitted_count':max(0,len(facts)-12)}
+
+
 def routing_context(state):
     selected=state.get('selected') or {}
     search=state.get('search_context') or {}
@@ -38,6 +51,7 @@ def routing_context(state):
         'training':{'status':learning.get('status'),'topics':learning.get('topics',[]),
                     'delivery_mode':learning.get('delivery_mode'),
                     'displayed_courses':[{k:c.get(k) for k in ('source','source_id','title')} for c in learning.get('courses',[])][:10]},
+        'assessment_facts':assessment_facts(state),
         'assessment':{'ask_assessment':state.get('profile',{}).get('assistant_preferences',{}).get('ask_assessment',True),
                       'answered':len(state.get('checks',[])),'total':len(state.get('conditions',[])),
                       'preferred_approved':bool(state.get('preferred_approved')),

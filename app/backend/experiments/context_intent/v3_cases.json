@@ -225,7 +225,13 @@
         "required_skills": [
           "Python"
         ]
-      }
+      },
+      "required_skill_evidence": [
+        {
+          "skill": "Python",
+          "quote": "Python을 반드시 써야 해"
+        }
+      ]
     }
   },
   {

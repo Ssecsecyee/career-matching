@@ -1,6 +1,7 @@
 """A single free-text intent gateway. Models propose, server state authorizes execution."""
 from src.schemas.intent import IntentDecision, merge_search
-from src.services.intent_context import routing_context
+from src.services.intent_context import routing_context, assessment_facts
+from src.services.search_constraints import guard_required_skills
 from src.services.dialogue import FlowError
 from src.services.memory import record, consultation_context, public_memory
 from src.services.conversation_policy import preferences, respect_preferences
@@ -54,10 +55,28 @@ class ContextRouter:
                 try:plan=merge_search(plan,d.changes)
                 except ValueError:return self.clarify(state,'이전 검색 형식과 바로 합칠 수 없습니다. 새 검색 조건을 알려주세요.')
             else:plan=d.plan.as_search_plan()
+            raw_plan=plan.to_dict()
+            facts=assessment_facts(state)
+            previous=(state.get('search_navigation') or {}).get('plan') or (state.get('search_context') or {}).get('executed_plan')
+            plan,guard=guard_required_skills(plan,previous,d,text)
+            if plan is None:
+                return self.clarify(state,'모두 필요한 기술로 제안된 조건의 요청 근거를 확인하지 못했습니다. 반드시 포함할 기술과 참고할 경험을 구분해서 알려주세요.')
+            if d.search_basis=='assessment' and not any(c['assessment']=='met' for c in facts['items']):
+                return self.clarify(state,'추천에 사용할 충족 답변을 확인하지 못했습니다. 기준으로 삼을 경험을 알려주세요.')
+            excluded=[state['selected']['source_id']] if d.search_basis=='assessment' and state.get('selected') else []
             state['conversation_target']='jobs'
             # A schema-validated plan enters the existing search executor, never legacy classification.
             record(state,text,'search')
-            return self.flow.execute_search(state,plan,plan.to_dict(),payload,require_review=True)
+            result=self.flow.execute_search(state,plan,raw_plan,payload,require_review=True,exclude_ids=excluded)
+            context=state.get('search_context')
+            if context:
+                context['constraint_guard']=guard
+                context['assessment_basis']=facts if d.search_basis=='assessment' else None
+                if d.search_basis=='assessment':
+                    context['summary']['limitations'].append('문답 결과는 자기보고 경험으로 참고했습니다. 선택했던 공고는 제외하며, 지원 자격 충족을 보장하지 않습니다.')
+                if guard['unsupported_required_skills']:
+                    context['summary']['limitations'].append('문답에서 추론한 조건은 필수 제외 조건으로 쓰지 않고 선호 순위에 반영했습니다: '+', '.join(guard['unsupported_required_skills']))
+            return result
         if action=='next_results':
             if target=='training':return self.training(state,d,reset=False)
             if not state.get('search_navigation') and (state.get('search_context') or {}).get('confirmed_at'):

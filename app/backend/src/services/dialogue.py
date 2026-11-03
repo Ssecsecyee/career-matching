@@ -218,20 +218,20 @@ class DialogueFlow:
                 'consultation':{'task':task,'generation':'text_model',
                     'source_id':state['selected']['source_id'],'source_version':state['selected']['source_version']}}
 
-    def execute_search(self, state, plan, raw_plan, payload, *, require_review=False):
+    def execute_search(self, state, plan, raw_plan, payload, *, require_review=False, exclude_ids=()):
         """Execute a validated plan without any free-text interpretation."""
         evidence = []
         state.pop('learning_context', None)
         for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
         # Superseded review IDs must not reveal the new search's candidates.
         state.pop('search_context', None)
-        total, jobs = self.jobs.search(plan)
+        total, jobs = self.jobs.search(plan, exclude_ids=exclude_ids) if exclude_ids else self.jobs.search(plan)
         state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
         state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
         cards = [{key: row.get(key) for key in
                   ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
                    'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
-        state['search_navigation'] = {'plan': plan.to_dict(), 'shown_ids': []}
+        state['search_navigation'] = {'plan': plan.to_dict(), 'shown_ids': list(exclude_ids)}
         state.pop('answer_summary', None)
         state.update(stage='choose_job' if jobs else 'no_results', candidate_ids=[j['source_id'] for j in jobs],
                      candidate_jobs=cards, total=total, selected=None, checks=[], conditions=[])

@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v3'
+INTENT_VERSION = 'context-intent-v4'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -52,12 +52,20 @@ class IntentJobPlan(BaseModel):
     def as_search_plan(self):return SearchPlan.parse(self.model_dump(mode='json'))
 
 
+class RequiredSkillEvidence(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
+    skill: Annotated[str, Field(min_length=1, max_length=60)]
+    quote: Annotated[str, Field(min_length=1, max_length=500)]
+
+
 class IntentDecision(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
     target: Literal['jobs','training','selected','general','unspecified']
     action: Literal['chat','search','refine_search','next_results','consult','assessment_control','clarify','confirm_search','summary','remember']
     reason: Annotated[str, Field(min_length=1, max_length=500)]
     ask_assessment: bool | None = None
+    search_basis: Literal['user_request','assessment'] = 'user_request'
+    required_skill_evidence: Annotated[list[RequiredSkillEvidence], Field(max_length=20)] = Field(default_factory=list)
     plan: IntentJobPlan | None = None
     changes: SearchChanges | None = None
     topics: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
@@ -82,7 +90,7 @@ class IntentDecision(BaseModel):
         if self.action in {'search','refine_search'}:
             if self.target=='jobs':
                 key='plan' if self.action=='search' else 'changes'
-                allowed={key}
+                allowed={key,'search_basis','required_skill_evidence'}
                 if getattr(self,key) is None:raise ValueError('Missing job search contract')
                 if self.plan is not None and self.plan.schema_version!=2:raise ValueError('Version 2 required')
             elif self.target=='training':allowed={'topics','delivery_mode'}

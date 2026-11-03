@@ -43,3 +43,11 @@ CONTEXT_ROUTING_RULES = (
     '안녕 같은 인사를 검색하지 마세요. 확인 대기 중 동의와 단순 다음 요청을 구분하세요. '
     '대상·수정 범위가 불명확하면 clarify, 임의 검색/조건 해제/답변 초기화는 금지합니다. '
 )
+
+CONTEXT_ROUTING_RULES += (
+    " 채용 search/refine_search는 search_basis를 user_request 또는 assessment로 지정한다."
+    " 저장된 문답을 바탕으로 다른 공고 추천을 요청하면 assessment를 쓴다."
+    " assessment_facts는 자기보고이며 met만 추천 참고 경험이다. 원본 공고의 필수조건을 다음 공고의 필수 검색 조건으로 복사하지 않는다."
+    " 새 required_skills는 사용자가 현재 발화에서 반드시 포함하라고 명시한 경우만 사용하고,"
+    " required_skill_evidence에 skill과 현재 발화의 정확한 인용 quote를 함께 제공한다. 보유 경험은 필수 검색 조건이 아니다."
+)
