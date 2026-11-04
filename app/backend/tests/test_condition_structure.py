@@ -106,6 +106,27 @@ class ConditionStructureTests(unittest.TestCase):
         with patch('src.services.condition_structure.PARSER_VERSION','future-parser'):
             self.assertNotEqual(first[0]['id'],self.split('ㆍ조건 A')[0]['id'])
 
+    def test_numbered_conditions_without_spaces_are_individual_and_lossless(self):
+        items=['1.프런트엔드 실무 경력 3~4년','2.React 기반 개발 경험',
+               '3.Next.js(12~13+) 기반 SSR/CSR 개발 경험','4.Typescript 기반 개발 능력',
+               '5.REST API 연동 및 상태관리(Recoil/Redux/React-Query 중 1개 이상)',
+               '6.MUI 또는 styled-components 기반 UI 개발 경험','7.HTML/CSS/반응형 UI 구현 능력',
+               '8.Git 기반 협업 경험','9.WebView 기반 모바일 앱 화면 구현 경험',
+               '10.모바일 UI/UX 및 반응형 구조 설계 경험']
+        for separator in ('\n','\r\n',' '):
+            text=separator.join(items);rows=self.split(text)
+            self.assertEqual(len(rows),10)
+            self.assertEqual([r['quote'].strip() for r in rows],items)
+            self.assertTrue(validate_conditions(text,rows))
+
+    def test_inline_numbers_do_not_split_versions_or_parenthesized_choices(self):
+        for text in ('Python 3.12 및 Node 20.1 경험',
+                     '1.React 경험 (예: 1.웹 2.앱) 2.Git 경험',
+                     '1.Python 개발 2.또는 Java 개발'):
+            rows=self.split(text)
+            self.assertTrue(validate_conditions(text,rows))
+            self.assertEqual(len(rows),2 if '2.Git' in text else 1)
+
     def test_empty_and_guarded_large_source(self):
         self.assertEqual(self.split(' \r\n'),[])
         with self.assertRaises(ValueError):self.split('\n'.join('ㆍ조건 '+str(i) for i in range(41)))
@@ -194,7 +215,7 @@ class ConditionAnswerBindingTests(unittest.TestCase):
             store.finish(ticket,{'action':'answer_batch'},state,result,evidence)
         args=next(c.args[1] for c in cursor.execute.call_args_list if c.args[0].startswith('INSERT INTO recommendation_evidence'))
         snapshot=json.loads(args[5])
-        self.assertEqual(snapshot['source_binding']['parser_version'],'condition-split-v2')
+        self.assertEqual(snapshot['source_binding']['parser_version'],'condition-split-v3')
         self.assertTrue(snapshot['source_binding']['source_spans'])
         self.assertEqual(snapshot['quote'],evidence[0]['check']['quote'])
         connection.commit.assert_called_once()

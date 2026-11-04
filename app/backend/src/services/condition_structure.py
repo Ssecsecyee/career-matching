@@ -2,8 +2,8 @@
 import hashlib
 import re
 
-PARSER_VERSION='condition-split-v2'
-BULLET=re.compile(r'^(?:[-*•●▪·ㆍ‧◦○]\s*|\d{1,3}[.)](?:\s+|$))')
+PARSER_VERSION='condition-split-v3'
+BULLET=re.compile(r'^(?:[-*•●▪·ㆍ‧◦○]\s*|\d{1,3}[.)](?!\d))')
 CONTINUATION=re.compile(r'^(?:또는|혹은|및(?:\s|$)|그리고(?:\s|$)|AND\b|OR\b|\(|（|※)',re.I)
 HEADINGS={'학력','경력','자격요건','자격조건','필수조건','우대사항','우대조건','필수','우대'}
 COLLECTIONS={'추가 기술스택','기술스택','추가 기술 스택','추가 스킬','추가 역량'}
@@ -31,18 +31,40 @@ def _depth(text):
     return depth
 
 
+def _numbered_ranges(content):
+    """Split only explicit consecutive inline numbering outside parentheses.
+
+    Offsets refer to the untouched source. Decimal/version numbers and OR
+    alternatives are not semantic condition boundaries.
+    """
+    matches=list(re.finditer(r'(?<!\S)([1-9][0-9]{0,2})[.)](?![0-9])',content))
+    if not matches or content[:matches[0].start()].strip():return [(0,len(content))]
+    selected=[]
+    for match in matches:
+        if _depth(content[:match.start()]):continue
+        selected.append(match)
+    if len(selected)<2 or [int(m.group(1)) for m in selected]!=list(range(1,len(selected)+1)):
+        return [(0,len(content))]
+    if any(CONTINUATION.match(content[m.end():].lstrip()) for m in selected[1:]):
+        return [(0,len(content))]
+    starts=[0]+[m.start() for m in selected[1:]]
+    return list(zip(starts,starts[1:]+[len(content)]))
+
+
 def _lines(text):
     offset=0
     for raw in text.splitlines(keepends=True):
         content=raw.rstrip('\r\n\v\f\x1c\x1d\x1e\x85\u2028\u2029')
-        stripped=content.strip()
-        match=BULLET.match(stripped)
-        body=BULLET.sub('',stripped,count=1)
-        label=body.rstrip(':：').strip().strip('[]【】').strip()
-        yield {'start':offset,'end':offset+len(content),'after':offset+len(raw),
-               'text':stripped,'body':body,'marked':bool(match),
-               'indent':len(content[:len(content)-len(content.lstrip())].expandtabs(4)),
-               'heading':label if label in HEADINGS or label in COLLECTIONS else None}
+        for begin,end in _numbered_ranges(content):
+            piece=content[begin:end]
+            stripped=piece.strip()
+            match=BULLET.match(stripped)
+            body=BULLET.sub('',stripped,count=1)
+            label=body.rstrip(':：').strip().strip('[]【】').strip()
+            yield {'start':offset+begin,'end':offset+end,'after':offset+end if end<len(content) else offset+len(raw),
+                   'text':stripped,'body':body,'marked':bool(match),
+                   'indent':len(content[:len(content)-len(content.lstrip())].expandtabs(4)),
+                   'heading':label if label in HEADINGS or label in COLLECTIONS else None}
         offset+=len(raw)
 
 
