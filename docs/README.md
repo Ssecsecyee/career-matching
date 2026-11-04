@@ -1,6 +1,6 @@
 # 채용·교육 매칭 서비스 문서
 
-기준일: 2026-11-02
+기준일: 2026-11-04
 
 사용자 대화에서 채용·교육 탐색 의도를 파악하고, 저장 공고 검색과 조건 자기평가·근거 기반 상담을 연결한다. React/CloudFront → API Gateway/Lambda → SQS → EC2 작업자 구조이며 MySQL이 기준 저장소, Elasticsearch가 검색 사본이다. 현재 서버는 MySQL·ES·작업자를 함께 운영하는 t4g.medium이다. 고용24 교육의 초회 적재·검색 연결은 완료했고 매일 자동 수집·적재 예약은 후속 계획이다.
 
@@ -27,9 +27,11 @@
 
 ## 검토 중인 전환·실험
 
+- [후속 우선순위와 전체 품질 평가](plans/NEXT_PRIORITIES_AND_EVALUATION.md): 일일 자동화·교육 보완·단계별 평가·사람인 승인 후 전환.
+
 - [고용24 수집·설정·일일 운영 절차](plans/WORK24_BULK_INCREMENTAL_PIPELINE.md): .env 분리, 계획 확인과 실제 실행 구분, 증분 및 운영 연결 경계.
 - [고용24 훈련·NCS 저장 구조](plans/WORK24_TRAINING_NCS_MODEL.md): 통합 교육과 분류 연결 설계, DB 마이그레이션 전.
-- [고용24 개인 권한 중심 범위](plans/WORK24_PERSONAL_SCOPE.md): 채용 API 전환 보류, 훈련·분류·직업/직무 정보 우선. 목록·훈련 상세 표본 및 대량 목록 조회 완료, 운영 적재·예약 연결 전.
+- [고용24 개인 권한 중심 범위](plans/WORK24_PERSONAL_SCOPE.md): 채용 API 전환 보류, 훈련·분류·직업/직무 정보 우선. 교육 초회 운영 적재·검색 연결 완료, 일일 자동 수집·적재 예약 전.
 
 - [AgentCore Harness 전환 계획](plans/AGENTCORE_HARNESS_ADOPTION.md): 제안 단계. 기존 검색·DB·검증을 도구로 재사용하고 문맥/도구 선택만 비교한다.
 - [Harness 비교 실험](plans/AGENTCORE_HARNESS_EXPERIMENT.md): 별도 smoke 5개 + 고정 50개 시나리오 설계. 평가셋/실행기·AWS 리소스·실측 결과는 아직 없다.
