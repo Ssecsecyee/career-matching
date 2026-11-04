@@ -25,6 +25,8 @@
 
 ## 검토 중인 전환·실험
 
+- [고용24 개인 권한 중심 범위](plans/WORK24_PERSONAL_SCOPE.md): 채용 API 전환 보류, 훈련·분류·직업/직무 정보 우선. 실제 승인·호출은 확인 전.
+
 - [AgentCore Harness 전환 계획](plans/AGENTCORE_HARNESS_ADOPTION.md): 제안 단계. 기존 검색·DB·검증을 도구로 재사용하고 문맥/도구 선택만 비교한다.
 - [Harness 비교 실험](plans/AGENTCORE_HARNESS_EXPERIMENT.md): 별도 smoke 5개 + 고정 50개 시나리오 설계. 평가셋/실행기·AWS 리소스·실측 결과는 아직 없다.
 
