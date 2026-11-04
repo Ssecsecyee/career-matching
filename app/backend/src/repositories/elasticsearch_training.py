@@ -33,7 +33,7 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidat
         extra.extend([{'range': {'training_start_at': {'gt': 'now'}}},
                       {'bool': {'must_not': [{'term': {'recruitment_status': 'closed'}}]}}])
     if delivery_mode:extra.append({'term':{'delivery_mode':delivery_mode}})
-    return {'size': 1000, 'track_total_hits': True, 'timeout': '5s',
+    return {'size': 100, 'track_total_hits': True, 'timeout': '5s',
             '_source': ['source', 'source_id', 'source_version'],
             'query': {'bool': {'filter': [{'terms': {'source': ['boottent', 'goyong24_training']}},
                                           {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}]+extra,
@@ -48,46 +48,60 @@ class ElasticsearchTrainingRepository:
         self.factory, self.request, self.index = connection_factory, request, index
 
     def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
-        result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics, exclude_ids=exclude_ids, delivery_mode=delivery_mode, candidates_only=candidates_only))
-        if result.get('timed_out'):
-            raise SearchUnavailable('elasticsearch_query_timeout')
-        if result.get('_shards', {}).get('failed', 0):
-            raise RuntimeError('incomplete_training_search')
-        hits = result['hits']
-        if hits['total'].get('relation') != 'eq' or hits['total']['value'] > 1000 or len(hits['hits']) != hits['total']['value']:
-            raise RuntimeError('training_verification_budget_exceeded')
-        candidates = [h['_source'] for h in hits['hits']]
-        if not candidates:
-            return []
-        if any(c.get('source') not in ('boottent', 'goyong24_training') or
-               not isinstance(c.get('source_id'), str) or not 1 <= len(c['source_id']) <= 128 for c in candidates):
-            raise RuntimeError('invalid_training_identity')
-        current = {}
-        conn = self.factory()
-        try:
-            with conn.cursor() as cursor:
-                for start in range(0, len(candidates), 100):
-                    batch = candidates[start:start + 100]
-                    params = [v for c in batch for v in (c['source'], c['source_id'])]
+        query = build_training_query(topics, exclude_ids=exclude_ids,
+                                     delivery_mode=delivery_mode, candidates_only=candidates_only)
+        self.search_limited = False
+        courses, seen = [], set()
+        rank = 0
+        for page in range(10):
+            result = self.request('POST', '/' + self.index + '/_search', query)
+            if result.get('timed_out'):
+                raise SearchUnavailable('elasticsearch_query_timeout')
+            if result.get('_shards', {}).get('failed', 0):
+                raise RuntimeError('incomplete_training_search')
+            hits = result['hits']
+            if hits['total'].get('relation') != 'eq':
+                raise RuntimeError('incomplete_training_search')
+            page_hits = hits['hits']
+            if len(page_hits) != min(query['size'], max(0, hits['total']['value'] - rank)):
+                raise RuntimeError('invalid_training_page')
+            candidates = [hit['_source'] for hit in page_hits]
+            if any(c.get('source') not in ('boottent', 'goyong24_training') or
+                   not isinstance(c.get('source_id'), str) or not 1 <= len(c['source_id']) <= 128 for c in candidates):
+                raise RuntimeError('invalid_training_identity')
+            identities = [(c['source'], c['source_id']) for c in candidates]
+            if len(set(identities)) != len(identities) or seen.intersection(identities):
+                raise RuntimeError('repeated_training_page')
+            seen.update(identities)
+            if not candidates:
+                break
+            current = {}
+            conn = self.factory()
+            try:
+                with conn.cursor() as cursor:
+                    params = [v for pair in identities for v in pair]
                     cursor.execute('SELECT ' + TRAINING_FIELDS + ' FROM training_offerings WHERE (' +
-                                   ' OR '.join(['(source=%s AND source_id=%s)'] * len(batch)) +
+                                   ' OR '.join(['(source=%s AND source_id=%s)'] * len(candidates)) +
                                    ") AND recruitment_status IN ('active','unknown','closed')", params)
-                    for row in cursor.fetchall():
-                        current[row['source'], row['source_id']] = row
-        finally:
-            conn.close()
-        courses = []
-        for rank, candidate in enumerate(candidates):
-            row = current.get((candidate['source'], candidate['source_id']))
-            if row is None or str(row['source_version']) != str(candidate['source_version']):
-                continue
-            value = card(row, topics)
-            if candidates_only and (not value['start_window_eligible'] or value['recruitment_status']=='closed'):
-                continue
-            value['retrieval_basis'] = 'elasticsearch_fulltext_and_topics_db_verified'
-            courses.append((not value['recommendation_eligible'], rank, value))
+                    for row in cursor.fetchall():current[row['source'], row['source_id']] = row
+            finally:conn.close()
+            for offset, candidate in enumerate(candidates):
+                row = current.get((candidate['source'], candidate['source_id']))
+                if row is None or str(row['source_version']) != str(candidate['source_version']):continue
+                value = card(row, topics)
+                if candidates_only and (not value['start_window_eligible'] or value['recruitment_status']=='closed'):continue
+                value['retrieval_basis'] = 'elasticsearch_fulltext_and_topics_db_verified'
+                courses.append((not value['recommendation_eligible'], rank + offset, value))
+            rank += len(candidates)
+            if len(courses) >= 3 or len(page_hits) < query['size'] or rank >= hits['total']['value']:break
+            after = page_hits[-1].get('sort')
+            if not isinstance(after, list) or len(after)!=2 or after==query.get('search_after'):raise RuntimeError('invalid_training_cursor')
+            query = dict(query, search_after=after)
+        else:
+            self.search_limited = True
         courses.sort(key=lambda value: value[:2])
         return [value[2] for value in courses[:3]]
+
 
 
 def create_training_repository(connection_factory):

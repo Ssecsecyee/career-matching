@@ -19,7 +19,7 @@ from index_snapshot import document
 
 def training_document(row):
     names = ('source', 'source_id', 'source_version', 'title', 'provider_name', 'curriculum',
-             'eligibility', 'preferred_conditions', 'benefits', 'selection_process', 'application_notes', 'recruitment_status')
+             'eligibility', 'preferred_conditions', 'benefits', 'selection_process', 'application_notes', 'recruitment_status', 'delivery_mode')
     doc = {key: str(row.get(key) or '') for key in names}
     for key in ('learning_topics', 'tech_stacks'):
         value = row.get(key) or []

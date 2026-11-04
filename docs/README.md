@@ -2,7 +2,7 @@
 
 기준일: 2026-11-02
 
-사용자 대화에서 채용·교육 탐색 의도를 파악하고, 저장 공고 검색과 조건 자기평가·근거 기반 상담을 연결한다. React/CloudFront → API Gateway/Lambda → SQS → EC2 작업자 구조이며 MySQL이 기준 저장소, Elasticsearch가 검색 사본이다. 현재 서버는 MySQL·ES·작업자를 함께 운영하는 t4g.medium이다. 고용24 자동 수집은 후속 계획이다.
+사용자 대화에서 채용·교육 탐색 의도를 파악하고, 저장 공고 검색과 조건 자기평가·근거 기반 상담을 연결한다. React/CloudFront → API Gateway/Lambda → SQS → EC2 작업자 구조이며 MySQL이 기준 저장소, Elasticsearch가 검색 사본이다. 현재 서버는 MySQL·ES·작업자를 함께 운영하는 t4g.medium이다. 고용24 교육의 초회 적재·검색 연결은 완료했고 매일 자동 수집·적재 예약은 후속 계획이다.
 
 ## 기준 문서
 
@@ -11,6 +11,8 @@
 현재 아키텍처·AWS 본문은 누적 이력을 분리해 갱신했다. 나머지 기준 문서에는 과거 설계와 추가 기록이 남아 있으므로 현재 구현 확인 없이 확정 사실로 사용하지 않는다. 데이터·API 세부 계약은 실제 스키마·검증 코드와 대조한다. 전체 기준 문서 정합화는 남은 작업이다.
 
 ## 상세 문서
+
+- [고용24 교육 초회 적재·운영 검색 확인](deployments/WORK24_INITIAL_IMPORT.md)
 
 - [검색 동기화 운영](SEARCH_SYNC.md)
 - [저장 답변 조회·수정](SAVED_ANSWERS_REVIEW_PLAN.md)

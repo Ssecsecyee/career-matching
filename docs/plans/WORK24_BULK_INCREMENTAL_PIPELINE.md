@@ -1,6 +1,6 @@
 # 고용24 훈련 대량 수집·증분 갱신 운영 절차
 
-상태: 로컬 목록 수집기·상세 큐·변환·DB inventory 구현 / 운영 적재·예약 실행 연결 전
+상태: 초회 운영 DB 적재·교육 ES 검색 연결 완료 / 일일 자동 수집·적재 예약 연결 전
 
 ## 수집 범위와 사실
 
@@ -48,7 +48,7 @@ Plan: rolling list inventory -> offline count reconciliation -> bounded pending 
 | app/ingestion/work24_details.py | 제한된 수의 신규·변경·재확인 큐 상세/일정 조회 및 검증 |
 | app/ingestion/work24_daily.py | 목록→대조→제한 상세 작업을 순차 실행하는 일일 실행기. 스케줄러 자체는 등록하지 않음 |
 
-모든 작업의 업무 DB 수정 및 ES 쓰기는 0이다. 로컬 SQLite는 수집 상태 저장소이며 AWS MySQL과 다르다.
+위 로컬 수집 도구 자체는 업무 DB·ES에 쓰지 않는다. 초회 운영 반영은 별도 ingest_work24.py·remote_import_work24.py·infra/apply_work24.py로 수행했다. [운영 반영 기록](../deployments/WORK24_INITIAL_IMPORT.md)을 참조한다. 로컬 SQLite는 수집 상태 저장소이며 AWS MySQL과 다르다.
 
 ## 신규만 가져온다는 의미
 
@@ -121,8 +121,8 @@ python work24_daily.py --env-path "C:\AWS_project\career_matching\app\ingestion\
 1. 수집 건수 차이·중복·기간을 대조하고 신규 표본을 검수.
 2. 합의한 source_payloads/classification_codes/training_classifications 및 교육 확장 마이그레이션을 격리 DB에서 검증.
 3. DB inventory→신규/변경 판단→검증된 공통 교육 upsert→같은 트랜잭션 outbox를 연결. 아직 이 문서의 수집 도구가 운영 DB에 자동으로 쓰지는 않는다.
-4. 교육 ES 시작일 필드 추가 및 재색인 후 신청 후보 검색 코드 배포. 현재 교육 ES 조회는 검증 예산 1,000건을 초과하면 중단하므로, 대량 공개 전에 상위 후보의 제한 조회·검증 및 페이지 탐색을 별도 검증해야 한다. 전체 목록을 읽는 방식 그대로 운영 전환하지 않는다.
+4. 교육 ES 시작일 필드 추가 및 재색인 후 신청 후보 검색 코드 배포. 운영 반영 완료: 총수가 많아도 오류를 내지 않고 상위 100건씩 최대 1,000건 범위에서 검증해 최대 3건을 반환한다.
 5. 최종적으로 EC2의 별도 systemd timer/작업자로 정기 실행. API 키는 서버 비밀 저장소로 옮기고 IAM 범위를 제한. 로컬 .env 경로를 서버에서 사용하지 않음.
 6. 호출 시간·대기열·원본 용량·429·실패 알림과 서버 밖 원본 보존을 확인. 현재 4GiB 공유 호스트에서 대량 정제·색인 동시 실행은 피함.
 
-목록 전체 조회는 Lambda 한 번에 끝내는 작업으로 가정하지 않는다. 장기 작업은 EC2에서 진행하거나 작은 범위로 쪼개야 한다. 스케줄·AWS 리소스·비밀 업로드·운영 DB 적재는 아직 실행하지 않았다.
+목록 전체 조회는 Lambda 한 번에 끝내는 작업으로 가정하지 않는다. 장기 작업은 EC2에서 진행하거나 작은 범위로 쪼개야 한다. 일일 스케줄·서버용 API 키 업로드는 아직 실행하지 않았다. 초회 운영 DB 적재·색인 반영은 별도 배포 기록에 정리했다.
