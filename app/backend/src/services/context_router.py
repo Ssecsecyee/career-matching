@@ -162,7 +162,7 @@ class ContextRouter:
         if repository is None:
             courses=[];status='unavailable'
         else:
-            courses=repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode)
+            courses=repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True)
             status='found' if courses else 'no_match'
         ids=[c['source']+':'+c['source_id'] for c in courses]
         if set(ids).intersection(navigation['shown_ids']) or len(set(ids))!=len(ids):
@@ -170,10 +170,10 @@ class ContextRouter:
         navigation['shown_ids']=list(dict.fromkeys(navigation['shown_ids']+ids))
         state['training_navigation']=navigation
         learning={'status':status,'topics':topics,'delivery_mode':mode,'courses':courses,
-                  'basis':'validated_context_intent_and_stored_training',
+                  'basis':'validated_context_intent_and_stored_training', 'visibility_policy':'before_training_start_kst',
                   'limitations':['현재 모집 여부·지원 자격은 원문에서 확인해야 합니다.','미확인/과거 자료는 학습 참고용입니다.','교육 수료로 경력·학위·면허를 대체하지 않습니다.']}
         state['learning_context']=learning;state['conversation_target']='training'
-        message=('저장된 교육 자료를 조회했습니다. 신청 후보와 과거·모집 미확인 참고 자료를 구분해 확인해 주세요.' if courses else
+        message=('시작일이 지나지 않은 교육 자료를 조회했습니다. 신청 기간·모집 여부·지원 자격은 고용24 또는 교육기관에서 확인해 주세요.' if courses else
                  '교육 검색 연결을 사용할 수 없습니다.' if status=='unavailable' else
                  '같은 조건에서 아직 보여드리지 않은 교육 자료가 없습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.' if not reset else
                  '저장된 자료에서 해당 주제·수강 방식에 맞는 교육을 찾지 못했습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.')

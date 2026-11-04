@@ -66,7 +66,7 @@ class ContextRoutingTests(unittest.TestCase):
             if target=='jobs':
                 jobs.search.assert_called_once();training.search.assert_not_called()
             else:
-                training.search.assert_called_once_with(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online')
+                training.search.assert_called_once_with(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online',candidates_only=True)
                 jobs.search.assert_not_called()
                 self.assertEqual(state['conversation_target'],'training')
 
@@ -115,7 +115,7 @@ class ContextRoutingTests(unittest.TestCase):
         _,second,_=router.advance(state,{'action':'search','message':'그거 말고'},invoke)
         self.assertEqual(second['learning_opportunities'],[])
         self.assertEqual(second['learning_search']['topics'],['ROS 2'])
-        self.assertEqual(training.search.call_args.kwargs,{'exclude_ids':['boottent:one'],'delivery_mode':'online'})
+        self.assertEqual(training.search.call_args.kwargs,{'exclude_ids':['boottent:one'],'delivery_mode':'online','candidates_only':True})
         self.assertIn('없다는 뜻은 아닙니다',second['message'])
 
     def test_context_is_bounded_and_redacts_basic_secrets(self):
@@ -242,8 +242,8 @@ class AdditionalIntentTests(unittest.TestCase):
         query=build_training_query(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online')
         self.assertIn({'term':{'delivery_mode':'online'}},query['query']['bool']['filter'])
         primary,fallback=Mock(),Mock();primary.search.side_effect=SearchUnavailable();fallback.search.return_value=[]
-        SearchFailover(primary,fallback,entity='training').search(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online')
-        fallback.search.assert_called_once_with(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online')
+        SearchFailover(primary,fallback,entity='training').search(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online',candidates_only=True)
+        fallback.search.assert_called_once_with(['ROS 2'],exclude_ids=['boottent:old'],delivery_mode='online',candidates_only=True)
 
 
 class FixedIntentCaseTests(unittest.TestCase):

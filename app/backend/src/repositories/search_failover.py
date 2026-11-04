@@ -15,9 +15,12 @@ class SearchFailover:
     def get(self, identity):
         return self.fallback.get(identity)
 
-    def search(self, query, *, exclude_ids=(), delivery_mode=None):
+    def search(self, query, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
         kwargs = {'exclude_ids': exclude_ids} if exclude_ids else {}
         if delivery_mode is not None:kwargs['delivery_mode']=delivery_mode
+        if candidates_only:
+            if self.entity != 'training':raise ValueError('Candidate mode is for training only')
+            kwargs['candidates_only']=True
         self.last_search_backend = 'elasticsearch'
         self.search_degraded = False
         try:

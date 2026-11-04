@@ -8,10 +8,10 @@ from src.repositories.mysql_training import MySQLTrainingRepository, card
 TRAINING_FIELDS = ('offering_id,source,source_id,source_url,source_version,title,provider_name,'
                   'curriculum,learning_topics,tech_stacks,eligibility,preferred_conditions,benefits,'
                   'selection_process,application_notes,delivery_mode,addresses,tuition,currency,'
-                  'cost_description,recruitment_status,additional_sections,application_deadline,content_hash')
+                  'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,content_hash')
 
 
-def build_training_query(topics, *, exclude_ids=(), delivery_mode=None):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
     if (not isinstance(topics, list) or not 1 <= len(topics) <= 8 or
             any(not isinstance(t, str) or not 1 <= len(t) <= 60 for t in topics)):
         raise ValueError('Invalid training topics')
@@ -29,6 +29,9 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None):
     extra=[]
     if excluded:
         extra.append({'bool':{'must_not':[{'bool':{'filter':[{'term':{'source':source}},{'term':{'source_id':identity}}]}} for source,identity in excluded]}})
+    if candidates_only:
+        extra.extend([{'range': {'training_start_at': {'gt': 'now'}}},
+                      {'bool': {'must_not': [{'term': {'recruitment_status': 'closed'}}]}}])
     if delivery_mode:extra.append({'term':{'delivery_mode':delivery_mode}})
     return {'size': 1000, 'track_total_hits': True, 'timeout': '5s',
             '_source': ['source', 'source_id', 'source_version'],
@@ -44,8 +47,8 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None):
-        result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics, exclude_ids=exclude_ids, delivery_mode=delivery_mode))
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
+        result = self.request('POST', '/' + self.index + '/_search', build_training_query(topics, exclude_ids=exclude_ids, delivery_mode=delivery_mode, candidates_only=candidates_only))
         if result.get('timed_out'):
             raise SearchUnavailable('elasticsearch_query_timeout')
         if result.get('_shards', {}).get('failed', 0):
@@ -79,6 +82,8 @@ class ElasticsearchTrainingRepository:
             if row is None or str(row['source_version']) != str(candidate['source_version']):
                 continue
             value = card(row, topics)
+            if candidates_only and (not value['start_window_eligible'] or value['recruitment_status']=='closed'):
+                continue
             value['retrieval_basis'] = 'elasticsearch_fulltext_and_topics_db_verified'
             courses.append((not value['recommendation_eligible'], rank, value))
         courses.sort(key=lambda value: value[:2])

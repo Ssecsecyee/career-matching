@@ -15,7 +15,7 @@ class LearningTests(unittest.TestCase):
         flow=DialogueFlow(MagicMock(),MagicMock(),None,training=repo)
         state={'checks':[{'type':'required','assessment':'unknown','quote':'RAG'}]}
         _,result,_=advance_intent(flow,state,'교육 찾아줘',dict(target='training',action='search',topics=['React']))
-        repo.search.assert_called_once_with(['React'],exclude_ids=[],delivery_mode=None)
+        repo.search.assert_called_once_with(['React'],exclude_ids=[],delivery_mode=None,candidates_only=True)
         self.assertEqual(result['learning_search']['topics'],['React'])
 
     def test_greetings_and_gap_summaries_do_not_query_training(self):
@@ -34,7 +34,7 @@ class LearningTests(unittest.TestCase):
         flow=DialogueFlow(MagicMock(),MagicMock(),None,training=repo)
         state={'learning_context':{'topics':['React']}}
         _,result,_=advance_intent(flow,state,'온라인으로',dict(target='training',action='refine_search',delivery_mode='online'))
-        repo.search.assert_called_once_with(['React'],exclude_ids=[],delivery_mode='online')
+        repo.search.assert_called_once_with(['React'],exclude_ids=[],delivery_mode='online',candidates_only=True)
         self.assertEqual(result['learning_search']['topics'],['React'])
 
     def test_technology_names_have_boundaries(self):

@@ -7,18 +7,21 @@ def decode(value, default):
     return json.loads(value) if isinstance(value, (str, bytes)) else (value if value is not None else default)
 
 
-def card(row, topics):
+def card(row, topics, *, now=None):
+    from src.services.training_dates import start_visibility
+    now = now or datetime.now(timezone.utc)
+    before_start, start_reason = start_visibility(row, now=now)
     arrays={key:decode(row.get(key),[]) for key in ('learning_topics','tech_stacks','addresses')}
     extra=decode(row.get('additional_sections'),{})
     dates=extra.get('date_precision',{})
     deadline=row.get('application_deadline')
     valid_deadline=False
     if isinstance(deadline,datetime):
-        valid_deadline=deadline.replace(tzinfo=timezone.utc)>datetime.now(timezone.utc)
+        valid_deadline=(deadline.replace(tzinfo=timezone.utc) if deadline.tzinfo is None else deadline)>now
     elif dates.get('application_deadline',{}).get('raw'):
-        try:valid_deadline=date.fromisoformat(dates['application_deadline']['raw'])>=datetime.now(timezone(timedelta(hours=9))).date()
+        try:valid_deadline=date.fromisoformat(dates['application_deadline']['raw'])>=now.astimezone(timezone(timedelta(hours=9))).date()
         except (ValueError,TypeError):pass
-    eligible=(row.get('recruitment_status')=='active' and extra.get('recommendation_eligible') is True and valid_deadline)
+    eligible=(row.get('recruitment_status')=='active' and extra.get('recommendation_eligible') is True and valid_deadline and before_start)
     available={v.casefold() for key in ('learning_topics','tech_stacks') for v in arrays[key] if isinstance(v,str)}
     result={key:row.get(key) for key in ('offering_id','source','source_id','source_version','source_url','recruitment_status','delivery_mode','currency','content_hash')}
     for key,limit in [('title',220),('provider_name',160),('curriculum',500),('eligibility',400),('cost_description',250)]:
@@ -28,6 +31,7 @@ def card(row, topics):
                   tuition=str(row['tuition']) if row.get('tuition') is not None else None,
                   dates=dates,application_deadline=deadline.isoformat()+'Z' if isinstance(deadline,datetime) else None,
                   recommendation_eligible=eligible,
+                  start_window_eligible=before_start, start_window_reason=start_reason,
                   usage='application_candidate' if eligible else 'historical_learning_reference',
                   warning=None if eligible else '과거 회차 또는 모집 미확인 자료입니다. 현재 신청 가능한 교육 추천이 아닙니다.')
     return result
@@ -36,7 +40,7 @@ def card(row, topics):
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics,*,exclude_ids=(),delivery_mode=None):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False):
         if not isinstance(topics,list) or not 1<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
         expressions=[];params=['boottent','goyong24_training']
@@ -49,14 +53,18 @@ class MySQLTrainingRepository:
         if excluded:
             extra+=' AND NOT ('+' OR '.join(['(source=%s AND source_id=%s)']*len(excluded))+')'
             params.extend(v for pair in excluded for v in pair)
+        if candidates_only:
+            extra+=" AND (starts_at > UTC_TIMESTAMP() OR (starts_at IS NULL AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.date_precision.starts_at.raw')),'%%Y-%%m-%%d') > DATE(UTC_TIMESTAMP() + INTERVAL 9 HOUR))) AND recruitment_status <> 'closed'"
         if delivery_mode:
             extra+=' AND delivery_mode=%s';params.append(delivery_mode)
-        fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,content_hash'
+        fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,content_hash'
         conn=self.factory()
         try:
             with conn.cursor() as cur:
                 cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' OR '.join(expressions)+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 20",params)
                 cards=[card(row,topics) for row in cur.fetchall()]
+                if candidates_only:
+                    cards=[c for c in cards if c['start_window_eligible'] and c['recruitment_status'] != 'closed']
             cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
             return cards[:3]
         finally:conn.close()

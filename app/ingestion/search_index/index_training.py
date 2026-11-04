@@ -24,6 +24,7 @@ def mapping():
         properties[name] = {'type': 'text', 'analyzer': 'ko_text'}
     for name in ['learning_topics', 'tech_stacks']:
         properties[name] = {'type': 'text', 'analyzer': 'tech_exact', 'search_analyzer': 'tech_query'}
+    properties['training_start_at'] = {'type': 'date'}
     config['mappings'] = {'dynamic': 'strict', 'properties': properties}
     return config
 
@@ -43,7 +44,11 @@ def main():
     documents = []
     config = mapping()
     for row in rows:
-        doc = {key: row.get(key) or '' for key in config['mappings']['properties']}
+        doc = {key: row.get(key) or '' for key in config['mappings']['properties'] if key != 'training_start_at'}
+        from src.services.training_dates import effective_start
+        start = effective_start(row)
+        if start is not None:
+            doc['training_start_at'] = start.isoformat()
         for name in ['learning_topics', 'tech_stacks']:
             doc[name] = decode(row.get(name), [])
         doc['source_version'] = str(row['source_version'])

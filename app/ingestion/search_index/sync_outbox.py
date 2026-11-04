@@ -24,6 +24,10 @@ def training_document(row):
     for key in ('learning_topics', 'tech_stacks'):
         value = row.get(key) or []
         doc[key] = json.loads(value) if isinstance(value, (str, bytes)) else value
+    from src.services.training_dates import effective_start
+    start = effective_start(row)
+    if start is not None:
+        doc['training_start_at'] = start.isoformat()
     doc['document_key'] = json.dumps([row['source'], row['source_id']], ensure_ascii=False, separators=(',', ':'))
     return hashlib.sha256(doc['document_key'].encode()).hexdigest(), doc
 

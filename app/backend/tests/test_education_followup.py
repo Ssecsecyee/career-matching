@@ -30,7 +30,7 @@ class EducationFollowupTests(unittest.TestCase):
     def test_new_education_topic_requeries_instead_of_reusing_react(self):
         repo=MagicMock();repo.search.return_value=[];flow=DialogueFlow(MagicMock(),MagicMock(),None,training=repo)
         _,result,_=advance_intent(flow,{'learning_context':self.context()},'Python 교육',dict(target='training',action='search',topics=['Python']))
-        repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None)
+        repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None,candidates_only=True)
         self.assertEqual(result['learning_search']['topics'],['Python'])
 
     def test_completed_checklist_followup_delivers_education_even_with_selected_job(self):
