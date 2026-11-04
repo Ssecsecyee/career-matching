@@ -109,8 +109,10 @@ class ContextRoutingTests(unittest.TestCase):
 
     def test_training_next_excludes_source_aware_ids_and_keeps_mode(self):
         router,planner,_,training=self.fixture(dict(target='training',action='search',reason='Learn ROS',topics=['ROS 2'],delivery_mode='online'))
-        training.search.side_effect=[[{'source':'boottent','source_id':'one','title':'Course','recommendation_eligible':False}],[]]
-        state,first,_=router.advance({}, {'action':'search','message':'ROS2 온라인 교육'},invoke)
+        course={'source':'boottent','source_id':'one','title':'Course','recommendation_eligible':False}
+        training.search.side_effect=[[course],[course],[]]
+        state,review,_=router.advance({}, {'action':'search','message':'ROS2 온라인 교육'},invoke)
+        state,first,_=router.advance(state,{'action':'confirm_search','search_id':review['search_id']},invoke)
         planner.decision=dict(target='training',action='next_results',reason='Another course')
         _,second,_=router.advance(state,{'action':'search','message':'그거 말고'},invoke)
         self.assertEqual(second['learning_opportunities'],[])
@@ -133,7 +135,7 @@ class IntentAdapterTests(unittest.TestCase):
             result,usage=BedrockPlanner('m','r',client=runtime,on_partial=partial).classify('딴거',{})
         self.assertEqual(result['decision']['action'],'next_results')
         self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1536)
-        self.assertEqual(usage['prompt_version'],'context-intent-v4');partial.assert_not_called()
+        self.assertEqual(usage['prompt_version'],'context-intent-v5');partial.assert_not_called()
 
     def test_invalid_output_is_available_for_private_audit_only(self):
         runtime=FakeRuntime('not JSON')
@@ -150,7 +152,7 @@ class IntentAuditTests(unittest.TestCase):
         store=IntentDecisionStore(lambda:connection)
         identity=store.start(ticket,'model',{'stage':'conversation'})
         params=cur.execute.call_args.args[1]
-        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v4')
+        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v5')
         cur.fetchone.side_effect=[{'state_version':2,'requirement_answers':{'_lease':{'request':'r'}}}]
         store.classified(ticket,identity,'token=private-value a@example.com',{'action':'chat'})
         params=cur.execute.call_args.args[1]

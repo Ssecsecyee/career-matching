@@ -60,6 +60,9 @@ class DialogueFlow:
             return revise(self,state,payload)
         if action == 'consult':
             return state, self.consult(state,payload,invoke), evidence
+        if action == 'confirm_search' and payload.get('search_id') and payload.get('search_id')==(state.get('training_search_context') or {}).get('search_id'):
+            from src.services.context_router import ContextRouter
+            return ContextRouter(self).advance(state,payload,invoke)
         if action == 'confirm_search':
             return state, self.confirm_search(state, payload), evidence
         if action == 'search':

@@ -48,10 +48,11 @@ class LearningTests(unittest.TestCase):
         jobs=MagicMock();state={'stage':'gap_guidance','checks':[]}
         flow=DialogueFlow(jobs,planner,None,training=repo)
         state,result,_=advance_intent(flow,state,'교육',dict(target='training',action='search',topics=['React']))
+        state,result,_=flow.advance(state,{'action':'confirm_search','search_id':result['search_id']},None)
         _,result,_=advance_intent(flow,state,'이중 어떤거',dict(target='training',action='chat'))
         self.assertEqual(planner.respond.call_args.args[1]['training_retrieval']['courses'],[course])
         self.assertEqual(result['learning_opportunities'],[course]);jobs.search.assert_not_called()
-        self.assertEqual(repo.search.call_count,1)
+        self.assertEqual(repo.search.call_count,2)
 
     def test_sql_uses_bound_parameters_and_closes_connection(self):
         conn=MagicMock();cur=conn.cursor.return_value.__enter__.return_value;cur.fetchall.return_value=[]

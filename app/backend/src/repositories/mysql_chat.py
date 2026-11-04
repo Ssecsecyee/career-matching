@@ -148,6 +148,8 @@ class MySQLChatStore:
         if state.get('search_context') and response.get('search_id') == state['search_context']['search_id']:
             # Keep historical executed plans after the next search replaces session state.
             persisted['_search_record'] = dict(state['search_context'])
+        if state.get('training_search_context') and response.get('search_id')==state['training_search_context']['search_id']:
+            persisted['_training_search_record']=dict(state['training_search_context'])
         connection = self.factory()
         try:
             connection.begin()

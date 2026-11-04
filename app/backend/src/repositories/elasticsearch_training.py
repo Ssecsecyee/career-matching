@@ -51,6 +51,7 @@ class ElasticsearchTrainingRepository:
         query = build_training_query(topics, exclude_ids=exclude_ids,
                                      delivery_mode=delivery_mode, candidates_only=candidates_only)
         self.search_limited = False
+        self.last_candidate_total = None
         courses, seen = [], set()
         rank = 0
         for page in range(10):
@@ -62,6 +63,7 @@ class ElasticsearchTrainingRepository:
             hits = result['hits']
             if hits['total'].get('relation') != 'eq':
                 raise RuntimeError('incomplete_training_search')
+            if page==0:self.last_candidate_total=hits['total']['value']
             page_hits = hits['hits']
             if len(page_hits) != min(query['size'], max(0, hits['total']['value'] - rank)):
                 raise RuntimeError('invalid_training_page')

@@ -24,8 +24,11 @@ class SearchFailover:
         self.last_search_backend = 'elasticsearch'
         self.search_degraded = False
         try:
-            return self.primary.search(query, **kwargs)
+            result=self.primary.search(query, **kwargs)
+            self.last_candidate_total=getattr(self.primary,'last_candidate_total',None)
+            return result
         except SearchUnavailable:
+            self.last_candidate_total=None
             self.last_search_backend = 'mysql'
             self.search_degraded = True
             # Never include endpoints, credentials, query text, or raw exception text.

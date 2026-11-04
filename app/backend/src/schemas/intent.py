@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v4'
+INTENT_VERSION = 'context-intent-v5'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -106,7 +106,7 @@ class IntentDecision(BaseModel):
         elif self.action=='remember':
             if self.target!='selected':raise ValueError('Correction targets saved experience')
         elif self.action in {'confirm_search'}:
-            if self.target!='jobs':raise ValueError('Only job review can be confirmed')
+            if self.target not in {'jobs','training'}:raise ValueError('Search review target required')
         elif self.action=='summary':
             if self.target!='selected':raise ValueError('Selected summary required')
         elif self.action=='clarify':

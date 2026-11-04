@@ -48,6 +48,7 @@ def routing_context(state):
         'search_review_pending':state.get('stage')=='search_review',
         'last_job_ids':[r['source_id'] for r in state.get('candidate_jobs',[])][:30],
         'shown_job_count':len(navigation.get('shown_ids',[])),
+        'training_review':{'pending':state.get('stage')=='training_search_review','topics':(state.get('training_search_context') or {}).get('topics',[]),'delivery_mode':(state.get('training_search_context') or {}).get('delivery_mode')},
         'training':{'status':learning.get('status'),'topics':learning.get('topics',[]),
                     'delivery_mode':learning.get('delivery_mode'),
                     'displayed_courses':[{k:c.get(k) for k in ('source','source_id','title')} for c in learning.get('courses',[])][:10]},

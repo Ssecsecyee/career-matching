@@ -122,7 +122,7 @@ class BedrockPlanner:
             '지역 무관은 changes.regions=[]입니다. 변경 없는 필드는 생략하고 null을 넣지 마세요. '
             '교육 검색은 topics와 delivery_mode(online/offline/any)를 사용하세요. 모집 여부·교육 이름을 만들지 마세요. '
             '기존 답변 설명·보완·이력서·면접은 selected consult와 task입니다. 답변 집계만 원하면 summary입니다. '
-            '일반 인사·일상은 general chat입니다. 교육 비교·교육 학습 설명은 training chat입니다. '
+            '일반 인사·일상은 general chat입니다. 이미 표시한 교육 비교 또는 개념·독학 방법 설명만 원할 때 training chat입니다. 실제 배울 곳·기관·과정을 원하면 training search입니다. '
             '역량 질문 중단·재개는 assessment_control의 stop/resume, 우대 계속은 preferred입니다. '
             '확인을 명시하면 confirm_search입니다. 검색/선택 참조가 없으면 clarify를 사용하세요. '
             '허용되지 않은 SQL/DSL/식별자/모델/명령을 추가하지 마세요. 행동별 관련 필드만 반환하세요. 스키마: '
