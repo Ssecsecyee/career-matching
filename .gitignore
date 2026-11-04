@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!app/ingestion/.env.work24.example
 __pycache__/
 *.py[cod]
 .venv/
