@@ -85,3 +85,7 @@ intent_decision_id와 request_id로 intent_decisions·model_invocations·chat_me
 ## 현재 측정 범위 (2026-11-02)
 
 [배포 smoke 결과](CONTEXT_INTENT_DEPLOYMENT_20261102.md): v2에서 실제 Sonnet 분류 2회 성공, 명시 버튼 2건 분류 호출 0회, 서로 다른 공고 15건과 감사 기록 4건을 확인했다. 최초 v1 형식 실패 1회는 별도로 보존했다. 격리 MySQL을 포함한 백엔드 검사 314개 통과·2개 제외, 프론트 27개 통과다. 이는 정식 120건 분류 정확도나 p95 측정 결과가 아니다.
+
+## Harness 비교 평가 연결
+
+[Harness 실험 계획](plans/AGENTCORE_HARNESS_EXPERIMENT.md)의 50개 다중 턴 시나리오는 기존 경로와 새 도구 실행 방식의 비교용 제안이다. 이 문서의 정식 120건 분류 평가를 대체하지 않는다. 새 방식에는 분류 JSON이 없을 수 있어 업무 행동·실제 실행·최종 근거로 공통 비교한다. 구현·유료 실험·결과 측정 전이다.

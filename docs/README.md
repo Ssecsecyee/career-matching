@@ -23,6 +23,11 @@
 - [보안·운영 후속 작업](SECURITY_OPERATIONS_ROADMAP.md)
 - [남은 과업](REMAINING_TASKS.md)
 
+## 검토 중인 전환·실험
+
+- [AgentCore Harness 전환 계획](plans/AGENTCORE_HARNESS_ADOPTION.md): 제안 단계. 기존 검색·DB·검증을 도구로 재사용하고 문맥/도구 선택만 비교한다.
+- [Harness 비교 실험](plans/AGENTCORE_HARNESS_EXPERIMENT.md): 별도 smoke 5개 + 고정 50개 시나리오 설계. 평가셋/실행기·AWS 리소스·실측 결과는 아직 없다.
+
 ## 관리 원칙
 
 현재 기준 본문에는 현재 구조를 한 번만 설명한다. 계획은 구현·배포와 구분하고 상세 이력은 별도 기록에 둔다. 민감 설정·토큰·실사용자 대화는 문서에 복사하지 않는다. sources·archive 및 기존 workspace 연결 자료를 수정하거나 삭제하지 않는다.
