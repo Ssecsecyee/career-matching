@@ -217,12 +217,15 @@ class ContextRouter:
         if repository is None:
             courses=[];status='unavailable'
         else:
-            courses=confirmed if confirmed is not None else repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True)
+            kwargs={'exclude_groups':navigation['shown_groups']} if navigation.get('shown_groups') else {}
+            courses=confirmed if confirmed is not None else repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True,**kwargs)
             status='found' if courses else 'no_match'
         ids=[c['source']+':'+c['source_id'] for c in courses]
         if set(ids).intersection(navigation['shown_ids']) or len(set(ids))!=len(ids):
             raise FlowError('training_navigation_duplicate',502)
         navigation['shown_ids']=list(dict.fromkeys(navigation['shown_ids']+ids))
+        from src.services.training_groups import group_key
+        navigation['shown_groups']=list(dict.fromkeys(navigation.get('shown_groups',[])+[group_key(c) for c in courses if c.get('cohorts')]))
         state['training_navigation']=navigation
         learning={'status':status,'topics':topics,'delivery_mode':mode,'courses':courses,
                   'basis':'validated_context_intent_and_stored_training', 'visibility_policy':'before_training_start_kst',
@@ -232,6 +235,9 @@ class ContextRouter:
                  '교육 검색 연결을 사용할 수 없습니다.' if status=='unavailable' else
                  '같은 조건에서 아직 보여드리지 않은 교육 자료가 없습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.' if not reset else
                  '저장된 자료에서 해당 주제·수강 방식에 맞는 교육을 찾지 못했습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.')
+        if getattr(repository,'search_limited',False) is True:
+            learning['search_limited']=True
+            message+=' 조회 범위 제한이 있어 다른 과정이 더 있을 수 있습니다. 검색 조건을 좁혀 주세요.'
         record(state,message,'assistant')
         result={'stage':'conversation','message':message,'memory':public_memory(state)}
         attach(result,learning)

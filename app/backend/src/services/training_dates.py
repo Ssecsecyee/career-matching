@@ -89,4 +89,6 @@ def refresh_card_status(course,*,now=None):
     result['recommendation_eligible']=eligible
     result['usage']='application_candidate' if eligible else 'historical_learning_reference' if status['schedule_status']=='ended' else 'learning_reference'
     result['warning']=None if eligible else status['schedule_label']+' · '+status['recruitment_label']+' 자료입니다. 신청 기간·현재 모집 여부·지원 자격은 원문 또는 교육기관에서 확인해 주세요.'
+    if course.get('cohorts'):
+        result['cohorts']=[refresh_card_status(c,now=now) for c in course['cohorts']]
     return result

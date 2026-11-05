@@ -8,6 +8,7 @@ import { AssessmentStepper } from './AssessmentStepper.jsx';
 import { AssessmentSummary } from './AssessmentSummary.jsx';
 import { SearchReview } from './SearchReview.jsx';
 import { TrainingStatus } from './TrainingStatus.jsx';
+import { TrainingCohorts } from './TrainingCohorts.jsx';
 import { summaryActionRequest } from './consultationRequest.js';
 import { controlRequest } from './controlRequest.js';
 import { ConditionReferences } from './ConditionReferences.jsx';
@@ -47,8 +48,10 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
         <TrainingStatus course={course}/>
         <h3>{course.title}</h3><p>{course.provider_name} · {course.delivery_mode === 'online' ? '온라인' : course.delivery_mode === 'offline' ? '오프라인' : '혼합/미확인'}</p>
         <p>연결된 주제: {(course.matched_topics || []).join(' · ')}</p><p>{course.curriculum}</p>
+        {course.cohorts?.length ? <TrainingCohorts course={course}/> : <>
         <p className="fine">페이지 표시 자부담: {course.tuition == null ? '미확인' : `${Number(course.tuition).toLocaleString()} ${course.currency || ''}`} · 최종 비용과 수강 자격은 기관 확인 필요</p>
         {course.dates?.starts_at?.raw && <p className="fine">저장된 교육 일정: {course.dates.starts_at.raw} ~ {course.dates.ends_at?.raw || '미확인'}</p>}
+        </>}
         {course.warning && <p className="fine">{course.warning}</p>}
         <a href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a>
       </article>)}

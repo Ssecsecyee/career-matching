@@ -60,7 +60,7 @@ class LearningTests(unittest.TestCase):
         topic="React' OR 1=1 --"
         MySQLTrainingRepository(lambda:conn).search([topic])
         query,args=cur.execute.call_args.args
-        self.assertNotIn(topic,query);self.assertIn(topic,args);self.assertIn('LIMIT 20',query)
+        self.assertNotIn(topic,query);self.assertIn(topic,args);self.assertIn('LIMIT 1000',query)
         conn.close.assert_called_once()
 
     def test_past_or_unknown_cannot_be_application_recommendation(self):

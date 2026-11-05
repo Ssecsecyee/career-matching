@@ -5,7 +5,7 @@ from src.repositories.search_failover import SearchFailover, SearchUnavailable
 from src.repositories.job_search_factory import LocalElasticTransport
 from src.repositories.mysql_training import MySQLTrainingRepository, card
 
-TRAINING_FIELDS = ('offering_id,source,source_id,source_url,source_version,title,provider_name,'
+TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,'
                   'curriculum,learning_topics,tech_stacks,eligibility,preferred_conditions,benefits,'
                   'selection_process,application_notes,delivery_mode,addresses,tuition,currency,'
                   'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
@@ -47,7 +47,9 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=()):
+        from src.services.training_groups import grouped,exclusions
+        exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,
                                      delivery_mode=delivery_mode, candidates_only=candidates_only)
         self.search_limited = False
@@ -95,14 +97,14 @@ class ElasticsearchTrainingRepository:
                 value['retrieval_basis'] = 'elasticsearch_fulltext_and_topics_db_verified'
                 courses.append((not value['recommendation_eligible'], rank + offset, value))
             rank += len(candidates)
-            if len(courses) >= 3 or len(page_hits) < query['size'] or rank >= hits['total']['value']:break
+            if len(grouped([v[2] for v in courses],exclude_groups=exclude_groups)) >= 3 or len(page_hits) < query['size'] or rank >= hits['total']['value']:break
             after = page_hits[-1].get('sort')
             if not isinstance(after, list) or len(after)!=2 or after==query.get('search_after'):raise RuntimeError('invalid_training_cursor')
             query = dict(query, search_after=after)
         else:
             self.search_limited = True
         courses.sort(key=lambda value: value[:2])
-        return [value[2] for value in courses[:3]]
+        return grouped([value[2] for value in courses],exclude_groups=exclude_groups)
 
 
 

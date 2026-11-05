@@ -37,15 +37,20 @@ def card(row, topics, *, now=None):
     for field in ('starts_at','ends_at'):
         value=row.get(field)
         result[field]=value.isoformat()+('Z' if value.tzinfo is None else '') if isinstance(value,datetime) else None
+    from src.services.training_groups import identity
+    result['cohort_name']=row.get('cohort_name')
+    result['course_group_key']=identity(row,extra)
     return refresh_card_status(result,now=now)
 
 
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=()):
         if not isinstance(topics,list) or not 1<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
+        from src.services.training_groups import exclusions
+        exclusions(exclude_groups)
         expressions=[];params=['boottent','goyong24_training']
         for topic in topics:
             expressions.append("(JSON_CONTAINS(LOWER(CAST(COALESCE(learning_topics,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s))) OR JSON_CONTAINS(LOWER(CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s))))")
@@ -60,14 +65,17 @@ class MySQLTrainingRepository:
             extra+=" AND (starts_at > UTC_TIMESTAMP() OR (starts_at IS NULL AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.date_precision.starts_at.raw')),'%%Y-%%m-%%d') > DATE(UTC_TIMESTAMP() + INTERVAL 9 HOUR))) AND recruitment_status <> 'closed'"
         if delivery_mode:
             extra+=' AND delivery_mode=%s';params.append(delivery_mode)
-        fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
+        fields='offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
         conn=self.factory()
         try:
             with conn.cursor() as cur:
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' OR '.join(expressions)+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 20",params)
-                cards=[card(row,topics) for row in cur.fetchall()]
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' OR '.join(expressions)+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000",params)
+                rows=cur.fetchall()
+                cards=[card(row,topics) for row in rows]
                 if candidates_only:
                     cards=[c for c in cards if c['start_window_eligible'] and c['recruitment_status'] != 'closed']
             cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
-            return cards[:3]
+            from src.services.training_groups import grouped
+            self.search_limited=len(rows)>=1000
+            return grouped(cards,exclude_groups=exclude_groups)
         finally:conn.close()

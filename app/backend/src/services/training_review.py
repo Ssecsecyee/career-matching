@@ -4,7 +4,7 @@ from uuid import uuid4
 
 
 def signatures(courses):
-    return [(c['source'],c['source_id'],str(c.get('source_version')),c.get('content_hash')) for c in courses]
+    return [(c['source'],c['source_id'],str(c.get('source_version')),c.get('content_hash')) for course in courses for c in (course.get('cohorts') or [course])]
 
 
 def remember_review(state,topics,mode,courses,repository):
@@ -14,7 +14,7 @@ def remember_review(state,topics,mode,courses,repository):
     if not isinstance(backend,str):backend='unknown'
     filters=['주제·기관 검색어: '+', '.join(topics),'교육 시작일 이전 자료만 조회']
     if mode:filters.append('수강 방식: '+{'online':'온라인','offline':'오프라인'}[mode])
-    limitations=['검색 후보 수는 신청 가능·지원 자격 확인 건수가 아닙니다.',
+    limitations=['검색 후보 수에는 같은 과정의 여러 회차가 포함되며, 서로 다른 과정 수나 신청 가능·지원 자격 확인 건수가 아닙니다.',
         '신청 기간·현재 모집 여부·지원 대상은 고용24 또는 교육기관에서 확인해야 합니다.',
         '목록 중심 자료로 상세 커리큘럼·수강 방식이 미확인인 과정이 있습니다.']
     if getattr(repository,'search_degraded',False) is True:limitations.append('검색엔진 장애로 MySQL에서 조회했으며 후보 수와 순위는 다를 수 있습니다.')
