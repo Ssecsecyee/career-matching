@@ -15,3 +15,7 @@
 미리보기: https://d1elpjlek4sj83.cloudfront.net/previews/ux-all-jobs-2058a88/index.html#jobs
 
 코드 2058a88. CloudFront HTML 200 및 전용 자산 경로 확인. 기본 서비스는 이전 팝업 버전을 유지한다. 미리보기의 실제 API 요청은 운영 백엔드에 연결된다.
+
+## 기본 서비스 배포
+
+2026-11-05 사용자 요청으로 기본 주소에 배포 완료. 코드 2058a88 기준, JS index-h0CXNnbO.js. CloudFront 기본 HTML HTTP 200 및 배포 자산 일치, apiEnabled=true 확인. 백엔드·DB 변경 없음. 기존 미리보기와 이전 코드 버전은 유지한다.
