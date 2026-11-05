@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {fileURLToPath} from 'node:url';
+import {build} from 'esbuild';
+import {Window} from 'happy-dom';
+import React,{act} from 'react';
+test('actual tab changes preserve conversation draft and list selection without requests',async()=>{
+ const window=new Window({url:'http://localhost/#chat'});
+ for(const key of ['window','document','navigator','HTMLElement','HTMLInputElement','HTMLTextAreaElement','Event','MouseEvent'])Object.defineProperty(globalThis,key,{value:window[key] || window,configurable:true,writable:true});
+ globalThis.IS_REACT_ACT_ENVIRONMENT=true;window.HTMLElement.prototype.scrollIntoView=function(){};
+ let requests=0;globalThis.fetch=async(url)=>url==='/deploy-config.json'?{ok:true,json:async()=>({apiEnabled:true})}:(requests++,{ok:true,status:200,json:async()=>({stage:'choose_job',cached:true,session_id:'11111111-1111-4111-8111-111111111111',total:1,candidate_jobs:[{source:'jumpit',source_id:'42',title:'Synthetic developer',company_name:'Synthetic company',tech_stacks:['React'],source_url:'https://example.com/job'}]})});
+ const {createRoot}=await import('react-dom/client');
+ const built=await build({entryPoints:[fileURLToPath(new URL('./AppRouter.jsx',import.meta.url))],bundle:true,write:false,format:'esm',platform:'browser',define:{'process.env.NODE_ENV':'"development"'},plugins:[{name:'shared-react',setup(b){b.onResolve({filter:/^(react|react-dom)(\/.*)?$/},a=>({path:import.meta.resolve(a.path),external:true}));}}]});
+ const {AppRouter}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+ const container=document.createElement('div');document.body.append(container);const root=createRoot(container);
+ const change=async hash=>act(async()=>{window.location.hash=hash;window.dispatchEvent(new window.Event('hashchange'));});
+ const fill=async(el,value)=>act(async()=>{const proto=el.tagName==='INPUT'?window.HTMLInputElement.prototype:window.HTMLTextAreaElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(el,value);el.dispatchEvent(new window.Event('input',{bubbles:true}));el.dispatchEvent(new window.Event('change',{bubbles:true}));});
+ const submit=async form=>act(async()=>{form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));});
+ try{
+ await act(async()=>{root.render(React.createElement(AppRouter));});
+ await fill(container.querySelector('#access-code'),'x'.repeat(32));await submit(container.querySelector('form'));
+ const textarea=container.querySelector('#message');assert.ok(textarea);await fill(textarea,'React jobs');await submit(textarea.closest('form'));
+ assert.equal(requests,1);assert.match(container.textContent,/Synthetic developer/);
+ await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(container.querySelector('.chat-view').hidden);
+ const item=container.querySelector('.browse-result');assert.ok(item);await act(async()=>item.click());assert.match(container.querySelector('.browse-detail').textContent,/Synthetic developer/);
+ await change('#training');await change('#jobs');assert.equal(item.getAttribute('aria-pressed'),'true');await change('#chat');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.equal(requests,1);assert.match(container.querySelector('.conversation').textContent,/React jobs/);
+ globalThis.fetch=async(url)=>{if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};requests++;return {ok:true,status:200,json:async()=>({stage:'checking_required',grouped:true,cached:true,session_id:'11111111-1111-4111-8111-111111111111',requirement_type:'required',source_url:'https://example.com/job',questions:[{question_id:'q1',quote:'React experience'},{question_id:'q2',quote:'Git experience'}],progress:{answered:0,total:2}})};};
+ await act(async()=>{container.querySelector('.conversation .job-bottom button').click();});
+ const stepper=container.querySelector('.assessment-stepper');assert.ok(stepper);
+ const met=stepper.querySelector('.assessment-options button');await act(async()=>met.click());
+ const detail=stepper.querySelector('input');await fill(detail,'Keep this answer detail');
+ await change('#jobs');await change('#training');await change('#chat');
+ assert.equal(container.querySelector('.assessment-stepper'),stepper);
+ assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
+ await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
+ }finally{await act(async()=>root.unmount());window.happyDOM.abort();}
+});
