@@ -112,6 +112,7 @@ export function CareerApp({page='chat',adminChat=false}) {
 
   async function send(payload, text) {
     if (inFlight.current) return;
+    if(payload.action==='search' && !adminChat && window.location.hash==='#jobs')payload={...payload,page_size:20};
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
@@ -230,7 +231,7 @@ export function CareerApp({page='chat',adminChat=false}) {
           <div className="composer-bottom"><span>{noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </div>
-      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onAssess={select} results={latestSearchResults(messages,'jobs')}/></div>
+      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onAssess={select} results={latestSearchResults(messages,'jobs')}/></div>
       <div hidden={page!=='training'}><ExplorationPreview target="training" busy={busy || !!pending} onExplain={explainTraining} results={latestSearchResults(messages,'training')}/></div>
       </div>
       </>}

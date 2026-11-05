@@ -11,3 +11,12 @@ test('only confirmed results appear and empty latest results do not resurrect ea
  m.push({role:'assistant',data:{stage:'conversation',learning_search:{status:'found'},learning_opportunities:[{source_id:'2'}]}});assert.equal(latestSearchResults(m,'training').items[0].source_id,'2');
  m.push({role:'assistant',data:{stage:'conversation',learning_search:{status:'no_match'},learning_opportunities:[]}});assert.deepEqual(latestSearchResults(m,'training').items,[]);
 });
+
+test('scroll pages append unique jobs and exhausted results stop loading',()=>{
+ const m=[{role:'assistant',data:{stage:'choose_job',total:3,candidate_jobs:[{source_id:'1'}]}},{role:'assistant',data:{stage:'choose_job',search_continuation:true,total:2,candidate_jobs:[{source_id:'1'},{source_id:'2'}]}}];
+ let r=latestSearchResults(m,'jobs');assert.deepEqual(r.items.map(c=>c.source_id),['1','2']);assert.equal(r.total,3);
+ m.push({role:'assistant',data:{stage:'conversation',search_continuation:true,total:0,candidate_jobs:[]}});
+ r=latestSearchResults(m,'jobs');assert.equal(r.hasMore,false);assert.equal(r.items.length,2);
+ m.push({role:'assistant',data:{stage:'choose_job',total:1,candidate_jobs:[{source_id:'9'}]}});
+ assert.deepEqual(latestSearchResults(m,'jobs').items.map(c=>c.source_id),['9']);
+});

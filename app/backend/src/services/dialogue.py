@@ -77,7 +77,7 @@ class DialogueFlow:
         if action == 'select':
             state.pop('answer_summary', None)
             for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
-            if payload['source_id'] not in state.get('candidate_ids', []):
+            if payload['source_id'] not in set(state.get('candidate_ids', [])) | set((state.get('search_navigation') or {}).get('shown_ids', [])):
                 raise FlowError('job_not_in_session_candidates', 409)
             job = self.jobs.get(payload['source_id'])
             ensure_selectable(job, self.include_unverified)
@@ -224,6 +224,9 @@ class DialogueFlow:
     def execute_search(self, state, plan, raw_plan, payload, *, require_review=False, exclude_ids=()):
         """Execute a validated plan without any free-text interpretation."""
         evidence = []
+        if payload.get('page_size') == 20:
+            state['browse_page_size'] = 20
+            plan = SearchPlan.parse({**plan.to_dict(), 'limit': 20})
         state.pop('learning_context', None)
         for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
         # Superseded review IDs must not reveal the new search's candidates.
@@ -256,8 +259,8 @@ class DialogueFlow:
     def more_jobs(self, state):
         page = state['search_navigation']
         if len(page['shown_ids']) >= 1000:
-            return {'stage':'conversation', 'message':'현재 탐색 한도에 도달했습니다. 검색 조건을 좁혀 새로 찾아주세요.'}
-        plan = SearchPlan.parse(page['plan'])
+            return {'stage':'conversation', 'search_continuation':True, 'candidate_jobs':[], 'total':0, 'message':'현재 탐색 한도에 도달했습니다. 검색 조건을 좁혀 새로 찾아주세요.'}
+        plan = SearchPlan.parse({**page['plan'], **({'limit':20} if state.get('browse_page_size')==20 else {})})
         total, jobs = self.jobs.search(plan, exclude_ids=page['shown_ids'])
         cards = [{key: row.get(key) for key in
                   ('source_id','title','company_name','tech_stacks','addresses','source_url',
