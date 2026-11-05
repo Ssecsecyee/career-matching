@@ -153,7 +153,9 @@ class ContextRouter:
             result={'stage':'conversation','message':reply,'memory':public_memory(state)}
             if target=='training':
                 learning=state.get('learning_context')
-                if learning is not None:attach(result,learning)
+                # Retain retrieval in state/model context, not as a new result list.
+                if learning and learning.get('courses'):
+                    result['training_navigation_available']=True
             return state,result,[]
         raise FlowError('unsupported_intent_action')
 

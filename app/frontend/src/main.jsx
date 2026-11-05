@@ -57,6 +57,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
       </article>)}
       {active && data.learning_opportunities?.length > 0 && <button className="quiet" disabled={busy} onClick={() => onAssessment('next_training')}>다음 교육 보기</button>}
     </section>}
+    {data.training_navigation_available && !data.learning_search && active && <button className="quiet" disabled={busy} onClick={() => onAssessment('next_training')}>다음 교육 보기</button>}
     {data.stage === 'no_results' && !data.message && <p>조건에 맞는 공고를 찾지 못했습니다. 기술이나 지역 조건을 조금 줄여 다시 말씀해 주세요.</p>}
     {data.cached && <span className="fine">저장된 응답</span>}
   </>;

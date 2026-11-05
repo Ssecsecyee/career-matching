@@ -12,6 +12,8 @@
 
 ## 상세 문서
 
+- [교육 설명 시 목록 재출력 제거](plans/TRAINING_REPLY_PRESENTATION.md)
+
 - [교육 회차 묶음과 다른 과정 탐색](plans/TRAINING_COHORT_GROUPING.md)
 
 - [Vue 검색 표기 누락 수정](plans/VUE_SEARCH_SPELLING_FIX.md)

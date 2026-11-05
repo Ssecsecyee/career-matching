@@ -52,7 +52,9 @@ class LearningTests(unittest.TestCase):
         _,result,_=advance_intent(flow,state,'이중 어떤거',dict(target='training',action='chat'))
         self.assertEqual({k:planner.respond.call_args.args[1]['training_retrieval']['courses'][0][k] for k in course},course)
         self.assertEqual(planner.respond.call_args.args[1]['training_retrieval']['courses'][0]['schedule_status'],'unknown')
-        self.assertEqual({k:result['learning_opportunities'][0][k] for k in course},course);jobs.search.assert_not_called()
+        self.assertNotIn('learning_opportunities',result)
+        self.assertNotIn('learning_search',result)
+        self.assertTrue(result['training_navigation_available']);jobs.search.assert_not_called()
         self.assertEqual(repo.search.call_count,2)
 
     def test_sql_uses_bound_parameters_and_closes_connection(self):

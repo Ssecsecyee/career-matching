@@ -15,11 +15,28 @@ class EducationFollowupTests(unittest.TestCase):
             'basis':'explicit_learning_topic_and_self_assessed_gaps','limitations':[]}
 
     def test_pronoun_and_recommendation_retain_exact_displayed_list_without_new_query(self):
-        for text in ['이중 어떤걸 제일 추천해?','첫 번째랑 두 번째 비교해줘']:
+        for text in ['이중 어떤걸 제일 추천해?','첫 번째랑 두 번째 비교해줘','실제 교육 A에 대해서 알려줘']:
             previous=self.context();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'두 과정을 비교합니다.'},{})
             flow=DialogueFlow(MagicMock(),planner,None,training=repo)
-            _,result,_=advance_intent(flow,{'learning_context':previous},text,dict(target='training',action='chat'))
-            self.assertEqual([{k:c[k] for k in original} for c,original in zip(result['learning_opportunities'],previous['courses'])],previous['courses']);repo.search.assert_not_called()
+            state,result,_=advance_intent(flow,{'learning_context':previous},text,dict(target='training',action='chat'))
+            self.assertNotIn('learning_opportunities',result)
+            self.assertNotIn('learning_search',result)
+            self.assertTrue(result['training_navigation_available'])
+            courses=planner.respond.call_args.args[1]['training_retrieval']['courses']
+            self.assertEqual([c['source_id'] for c in courses],['first','second'])
+            self.assertEqual([c['source_id'] for c in state['learning_context']['courses']],['first','second'])
+            repo.search.assert_not_called()
+
+    def test_next_results_after_explanation_retains_exclusions_and_only_then_returns_cards(self):
+        previous=self.context();repo=MagicMock();repo.search.return_value=[]
+        planner=MagicMock();planner.respond.return_value=({'reply':'교육 A 설명입니다.'},{})
+        flow=DialogueFlow(MagicMock(),planner,None,training=repo)
+        state,result,_=advance_intent(flow,{'learning_context':previous},'교육 A 알려줘',dict(target='training',action='chat'))
+        self.assertNotIn('learning_search',result)
+        state,result,_=advance_intent(flow,state,'다음 교육',dict(target='training',action='next_results'))
+        repo.search.assert_called_once_with(['React'],exclude_ids=['fixture:first','fixture:second'],delivery_mode=None,candidates_only=True)
+        self.assertIn('learning_search',result)
+        self.assertEqual(result['learning_opportunities'],[])
 
     def test_new_job_request_is_not_hijacked_by_previous_education(self):
         repo=MagicMock();jobs=MagicMock();jobs.search.return_value=(0,[])
@@ -33,12 +50,15 @@ class EducationFollowupTests(unittest.TestCase):
         repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None,candidates_only=True)
         self.assertEqual(result['learning_search']['topics'],['Python'])
 
-    def test_completed_checklist_followup_delivers_education_even_with_selected_job(self):
+    def test_completed_checklist_followup_retains_education_context_without_redisplaying_cards(self):
         previous=self.context();state={'stage':'gap_guidance','checks':[],'selected':{'source_id':'job'},'learning_context':copy.deepcopy(previous)}
         jobs=MagicMock();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'교육을 비교합니다.'},{})
         _,result,_=advance_intent(DialogueFlow(jobs,planner,None,training=repo),state,'이중 어떤걸 제일 추천해?',dict(target='training',action='chat'))
         self.assertEqual(planner.respond.call_args.args[1]['conversation_focus']['kind'],'training')
-        self.assertEqual([{k:c[k] for k in original} for c,original in zip(result['learning_opportunities'],previous['courses'])],previous['courses'])
+        self.assertNotIn('learning_opportunities',result)
+        self.assertNotIn('learning_search',result)
+        self.assertTrue(result['training_navigation_available'])
+        self.assertEqual(state['selected'],{'source_id':'job'})
         jobs.search.assert_not_called();repo.search.assert_not_called()
 
     def test_technology_keyword_search_includes_tags_and_casefold_without_weakening_skill_filter(self):
