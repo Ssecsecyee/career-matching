@@ -1,7 +1,7 @@
 # 교육 일정·모집 상태 분리
 
 기준일: 2026-11-05
-상태: 구현·로컬 검증 완료 / AWS SSO 갱신 후 배포 대기
+상태: 구현·AWS 배포·운영 검색 확인 완료
 
 ## 문제
 
@@ -25,4 +25,4 @@ recommendation_eligible=false인 모든 교육에 과거 회차 또는 모집 �
 
 Vue 검색 누락 원인 확인 → 같은 교육 회차 묶기 → 교육 설명 시 기존 카드 재출력 분리. 해당 후속 기능은 이번 수정에 포함하지 않는다.
 
-배포 패키지 20261105T011442Z 생성 완료. apply는 TokenRetrievalError로 중단되어 이번 변경의 운영 반영은 아직 완료되지 않았다.
+AWS SSO 갱신 후 release 20261105T011442Z 및 웹 배포 완료. 운영 React 교육 검색 3건이 모두 upcoming·recruitment unknown·recommendation_eligible false로 반환되고 과거 회차 경고가 없는 것을 확인했다. 검증은 읽기 전용이며 모델 호출 0회·DB 변경 0건이다.
