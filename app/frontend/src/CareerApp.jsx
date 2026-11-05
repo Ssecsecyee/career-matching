@@ -97,6 +97,7 @@ export function CareerApp({page='chat',adminChat=false}) {
     }
   },[unlocked,apiEnabled,page,session,adminChat]);
   useEffect(() => {
+    if(page==='jobs' && (busyAction==='next_results' || messages.at(-1)?.data?.search_continuation))return;
     const stepper=conversation.current?.querySelector('.assessment-stepper');
     const summary=conversation.current?.querySelector('.message:last-of-type .assessment-summary');
     const review=conversation.current?.querySelector('.message:last-of-type .search-review');
