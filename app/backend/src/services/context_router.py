@@ -138,7 +138,12 @@ class ContextRouter:
                 return self.clarify(state,'상담할 공고를 먼저 선택해 주세요.')
             history=consultation_context(state)
             if target=='training':
-                history['training_retrieval']=state.get('learning_context') or {'status':'unavailable','courses':[],'topics':[]}
+                from src.services.training_dates import refresh_card_status
+                learning=state.get('learning_context')
+                if learning is not None:
+                    learning=dict(learning,courses=[refresh_card_status(c) for c in learning.get('courses',[])])
+                    state['learning_context']=learning
+                history['training_retrieval']=learning or {'status':'unavailable','courses':[],'topics':[]}
                 history['conversation_focus']={'kind':'training'}
                 state['conversation_target']='training'
             reply=invoke('context_response',self.flow.planner.respond,text,history)['reply']

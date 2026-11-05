@@ -19,7 +19,7 @@ class EducationFollowupTests(unittest.TestCase):
             previous=self.context();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'두 과정을 비교합니다.'},{})
             flow=DialogueFlow(MagicMock(),planner,None,training=repo)
             _,result,_=advance_intent(flow,{'learning_context':previous},text,dict(target='training',action='chat'))
-            self.assertEqual(result['learning_opportunities'],previous['courses']);repo.search.assert_not_called()
+            self.assertEqual([{k:c[k] for k in original} for c,original in zip(result['learning_opportunities'],previous['courses'])],previous['courses']);repo.search.assert_not_called()
 
     def test_new_job_request_is_not_hijacked_by_previous_education(self):
         repo=MagicMock();jobs=MagicMock();jobs.search.return_value=(0,[])
@@ -38,7 +38,7 @@ class EducationFollowupTests(unittest.TestCase):
         jobs=MagicMock();repo=MagicMock();planner=MagicMock();planner.respond.return_value=({'reply':'교육을 비교합니다.'},{})
         _,result,_=advance_intent(DialogueFlow(jobs,planner,None,training=repo),state,'이중 어떤걸 제일 추천해?',dict(target='training',action='chat'))
         self.assertEqual(planner.respond.call_args.args[1]['conversation_focus']['kind'],'training')
-        self.assertEqual(result['learning_opportunities'],previous['courses'])
+        self.assertEqual([{k:c[k] for k in original} for c,original in zip(result['learning_opportunities'],previous['courses'])],previous['courses'])
         jobs.search.assert_not_called();repo.search.assert_not_called()
 
     def test_technology_keyword_search_includes_tags_and_casefold_without_weakening_skill_filter(self):

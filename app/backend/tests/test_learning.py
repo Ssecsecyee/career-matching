@@ -50,8 +50,9 @@ class LearningTests(unittest.TestCase):
         state,result,_=advance_intent(flow,state,'교육',dict(target='training',action='search',topics=['React']))
         state,result,_=flow.advance(state,{'action':'confirm_search','search_id':result['search_id']},None)
         _,result,_=advance_intent(flow,state,'이중 어떤거',dict(target='training',action='chat'))
-        self.assertEqual(planner.respond.call_args.args[1]['training_retrieval']['courses'],[course])
-        self.assertEqual(result['learning_opportunities'],[course]);jobs.search.assert_not_called()
+        self.assertEqual({k:planner.respond.call_args.args[1]['training_retrieval']['courses'][0][k] for k in course},course)
+        self.assertEqual(planner.respond.call_args.args[1]['training_retrieval']['courses'][0]['schedule_status'],'unknown')
+        self.assertEqual({k:result['learning_opportunities'][0][k] for k in course},course);jobs.search.assert_not_called()
         self.assertEqual(repo.search.call_count,2)
 
     def test_sql_uses_bound_parameters_and_closes_connection(self):
@@ -66,7 +67,7 @@ class LearningTests(unittest.TestCase):
         row={'offering_id':1,'tuition':0,'recruitment_status':'unknown','learning_topics':['React'],
              'additional_sections':{'recommendation_eligible':False,'date_precision':{'starts_at':{'raw':'2024-07-24'}}}}
         result=card(row,['React']);self.assertFalse(result['recommendation_eligible'])
-        self.assertEqual(result['usage'],'historical_learning_reference')
+        self.assertEqual(result['usage'],'learning_reference')
         row.update(recruitment_status='active',application_deadline=datetime.utcnow()-timedelta(days=1),additional_sections={'recommendation_eligible':True})
         self.assertFalse(card(row,['React'])['recommendation_eligible'])
 

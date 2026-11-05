@@ -8,7 +8,7 @@ from src.repositories.mysql_training import MySQLTrainingRepository, card
 TRAINING_FIELDS = ('offering_id,source,source_id,source_url,source_version,title,provider_name,'
                   'curriculum,learning_topics,tech_stacks,eligibility,preferred_conditions,benefits,'
                   'selection_process,application_notes,delivery_mode,addresses,tuition,currency,'
-                  'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,content_hash')
+                  'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
 
 
 def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):

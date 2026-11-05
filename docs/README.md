@@ -12,6 +12,8 @@
 
 ## 상세 문서
 
+- [교육 일정·모집 상태 표시](plans/TRAINING_STATUS_DISPLAY.md)
+
 - [교육 탐색 문맥·검색 기준 확인](plans/TRAINING_CONTEXT_AND_SEARCH_REVIEW.md)
 
 - [고용24 교육 초회 적재·운영 검색 확인](deployments/WORK24_INITIAL_IMPORT.md)

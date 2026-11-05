@@ -26,7 +26,7 @@ class ElasticTrainingTests(unittest.TestCase):
         cards=repo.search(['React'])
         self.assertEqual(len(cards),1)
         self.assertFalse(cards[0]['recommendation_eligible'])
-        self.assertEqual(cards[0]['usage'],'historical_learning_reference')
+        self.assertEqual(cards[0]['usage'],'learning_reference')
     def test_old_index_version_is_excluded(self):
         self.assertEqual(ElasticsearchTrainingRepository(DB,lambda *args:hits(2)).search(['React']),[])
     def test_bad_topics_and_partial_results_fail(self):

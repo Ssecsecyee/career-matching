@@ -158,7 +158,7 @@ class BedrockPlanner:
                 '자기평가는 검증된 능력이 아닙니다. 사용자 이력·성과를 만들거나 합격/탈락을 단정하지 마세요. '
                 '역량 질문 중단 선호를 지키고 이미 답한 정보를 근거 없이 반복 질문하지 마세요. '
                 'training_retrieval이 있으면 해당 교육만 비교·설명하세요. 과정·비용·일정·링크를 새로 만들지 마세요. '
-                '과거/모집 미확인 과정은 신청 추천과 구분하세요. no_match는 해당 조건의 저장 자료 부족이며 시장 전체에 없다는 뜻이 아닙니다. '
+                '교육 일정(schedule_label)과 모집 상태(recruitment_label)를 구분하세요. 시작 예정·모집 미확인을 과거 회차라고 부르지 마세요. 모집 중 기록도 현재 신청 가능·자격 충족의 보장이 아닙니다. no_match는 해당 조건의 저장 자료 부족이며 시장 전체에 없다는 뜻이 아닙니다. '
                 '교육 수료로 경력·학위·면허를 대체하지 마세요. 3000자 이내로 완결하세요.'}],
             messages=[{'role':'user','content':[{'text':json.dumps({'message':message,'history':history},ensure_ascii=False)}]}],
             inferenceConfig={'maxTokens':CONVERSATION_MAX_TOKENS}),partial,

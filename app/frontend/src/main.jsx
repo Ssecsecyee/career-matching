@@ -7,6 +7,7 @@ import { TypingText } from './TypingText.jsx';
 import { AssessmentStepper } from './AssessmentStepper.jsx';
 import { AssessmentSummary } from './AssessmentSummary.jsx';
 import { SearchReview } from './SearchReview.jsx';
+import { TrainingStatus } from './TrainingStatus.jsx';
 import { summaryActionRequest } from './consultationRequest.js';
 import { controlRequest } from './controlRequest.js';
 import { ConditionReferences } from './ConditionReferences.jsx';
@@ -43,7 +44,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
       {data.learning_search.status === 'no_match' && <p>저장된 자료에서 해당 주제·수강 방식에 맞는 과정을 찾지 못했습니다. 실제 개설·모집 과정이 없다는 뜻은 아닙니다.</p>}
       {data.learning_search.status === 'need_topic' && <p>배우고 싶은 기술이나 분야를 알려주세요.</p>}
       {(data.learning_opportunities || []).map(course => <article className="check" key={`${course.source}:${course.source_id}`}>
-        <span className="pill">{course.recommendation_eligible ? '신청 후보 · 원문 재확인 필요' : '학습 참고용 · 모집 미확인/과거 회차'}</span>
+        <TrainingStatus course={course}/>
         <h3>{course.title}</h3><p>{course.provider_name} · {course.delivery_mode === 'online' ? '온라인' : course.delivery_mode === 'offline' ? '오프라인' : '혼합/미확인'}</p>
         <p>연결된 주제: {(course.matched_topics || []).join(' · ')}</p><p>{course.curriculum}</p>
         <p className="fine">페이지 표시 자부담: {course.tuition == null ? '미확인' : `${Number(course.tuition).toLocaleString()} ${course.currency || ''}`} · 최종 비용과 수강 자격은 기관 확인 필요</p>

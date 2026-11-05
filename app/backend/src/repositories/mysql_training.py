@@ -29,12 +29,15 @@ def card(row, topics, *, now=None):
     result.update(matched_topics=[t for t in topics if t.casefold() in available],
                   learning_topics=arrays['learning_topics'][:20],addresses=arrays['addresses'][:3],
                   tuition=str(row['tuition']) if row.get('tuition') is not None else None,
-                  dates=dates,application_deadline=deadline.isoformat()+'Z' if isinstance(deadline,datetime) else None,
+                  dates=dates,application_deadline=deadline.isoformat()+('Z' if deadline.tzinfo is None else '') if isinstance(deadline,datetime) else None,
                   recommendation_eligible=eligible,
                   start_window_eligible=before_start, start_window_reason=start_reason,
-                  usage='application_candidate' if eligible else 'historical_learning_reference',
-                  warning=None if eligible else '과거 회차 또는 모집 미확인 자료입니다. 현재 신청 가능한 교육 추천이 아닙니다.')
-    return result
+                  usage='application_candidate' if eligible else 'learning_reference')
+    from src.services.training_dates import refresh_card_status
+    for field in ('starts_at','ends_at'):
+        value=row.get(field)
+        result[field]=value.isoformat()+('Z' if value.tzinfo is None else '') if isinstance(value,datetime) else None
+    return refresh_card_status(result,now=now)
 
 
 class MySQLTrainingRepository:
@@ -57,7 +60,7 @@ class MySQLTrainingRepository:
             extra+=" AND (starts_at > UTC_TIMESTAMP() OR (starts_at IS NULL AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.date_precision.starts_at.raw')),'%%Y-%%m-%%d') > DATE(UTC_TIMESTAMP() + INTERVAL 9 HOUR))) AND recruitment_status <> 'closed'"
         if delivery_mode:
             extra+=' AND delivery_mode=%s';params.append(delivery_mode)
-        fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,content_hash'
+        fields='offering_id,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
         conn=self.factory()
         try:
             with conn.cursor() as cur:
