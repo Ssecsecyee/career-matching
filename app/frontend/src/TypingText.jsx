@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { typingSpeed } from './typingSpeed.js';
+import { MarkdownAnswer } from './MarkdownAnswer.jsx';
 
 export function TypingText({ text, animate = true, streaming = false }) {
   const [shown, setShown] = useState(() => animate ? '' : text);
@@ -28,6 +29,6 @@ export function TypingText({ text, animate = true, streaming = false }) {
   const typing = animate && !revealAll && shown !== text;
   return <div className="typing-answer">
     {(streaming || typing) && <div className="typing-status"><span role="status">{streaming ? '답변 작성 중' : '답변 표시 중'}</span>{typing && <button className="quiet" type="button" onClick={() => setRevealAll(true)}>전체 보기</button>}</div>}
-    <p className="muted assistant-text">{shown}{(streaming || typing) && <span className="typing-cursor" aria-hidden="true">▍</span>}</p>
+    <MarkdownAnswer text={shown} pending={streaming || typing}/>{(streaming || typing) && <span className="typing-cursor" aria-hidden="true">▍</span>}
   </div>;
 }

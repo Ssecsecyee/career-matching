@@ -49,3 +49,17 @@
 .admin-search-debug td,.admin-search-debug th{white-space:normal;overflow-wrap:anywhere;min-width:9rem}
 .admin-search-debug li p{margin:.35rem 0 1rem}
 .admin-search-debug pre{max-height:24rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Model prose is rendered as semantic Markdown, independently of agent execution. */
+.markdown-answer{color:#303b34;font-size:15px;line-height:1.85;overflow-wrap:anywhere;white-space:normal}
+.markdown-answer p{margin:0 0 14px;font-size:inherit;line-height:inherit;white-space:normal}
+.markdown-answer h2{font-size:21px;line-height:1.5;margin:22px 0 12px;font-weight:700;letter-spacing:-.4px}
+.markdown-answer h3{font-size:17px;margin:20px 0 10px;line-height:1.6}.markdown-answer h4{font-size:15px;margin:16px 0 8px}
+.markdown-answer>:first-child{margin-top:0}.markdown-answer ul,.markdown-answer ol{padding-left:24px;margin:10px 0 18px}
+.markdown-answer li{padding:2px 0}.markdown-answer li>p{margin:0 0 7px}.markdown-answer strong{font-weight:700;color:#263b2e}
+.markdown-answer hr{border:0;border-top:1px solid #e7ebe5;margin:22px 0}.markdown-answer blockquote{margin:15px 0;padding:8px 16px;border-left:3px solid #b5cbb7;background:#f7f9f5}
+.answer-link,.source-link{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:4px 10px;border-radius:8px;border:1px solid #d6e4d8;background:#f3f8f2;color:#315f41;font-size:.9em;text-decoration:none;vertical-align:baseline;line-height:1.6}
+.answer-link:hover,.source-link:hover{background:#e7f1e5;text-decoration:none;border-color:#a8c4ac}.answer-link:focus-visible,.source-link:focus-visible{outline:2px solid #477e51}
+.answer-table{overflow-x:auto;margin:14px 0;max-width:100%}.answer-table table{width:100%;border-collapse:collapse;font-size:13px}.answer-table th,.answer-table td{padding:9px 12px;border:1px solid #e0e7dd;text-align:left}.answer-table th{background:#f3f6f0}
+.markdown-answer pre{overflow-x:auto;padding:14px;border-radius:10px;background:#f4f6f2;white-space:pre;max-width:100%;font-size:13px}.markdown-answer :not(pre)>code{background:#f0f3ed;border-radius:4px;padding:2px 5px;font-size:.9em}
+@media(max-width:600px){.markdown-answer{font-size:14px}.markdown-answer h2{font-size:19px}.answer-link,.source-link{font-size:12px}}

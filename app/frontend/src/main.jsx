@@ -55,7 +55,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
         {course.dates?.starts_at?.raw && <p className="fine">저장된 교육 일정: {course.dates.starts_at.raw} ~ {course.dates.ends_at?.raw || '미확인'}</p>}
         </>}
         {course.warning && <p className="fine">{course.warning}</p>}
-        <div className="job-bottom"><a href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a><TrainingExplainButton course={course} active={active} busy={busy} onExplain={onExplain}/></div>
+        <div className="job-bottom"><a className="source-link" href={safeSourceUrl(course.source_url)} target="_blank" rel="noreferrer">교육 정보 출처 ↗</a><TrainingExplainButton course={course} active={active} busy={busy} onExplain={onExplain}/></div>
       </article>)}
       {active && data.learning_opportunities?.length > 0 && <button className="quiet" disabled={busy} onClick={() => onAssessment('next_training')}>다음 교육 보기</button>}
     </section>}

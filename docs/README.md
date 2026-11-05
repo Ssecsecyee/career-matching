@@ -12,6 +12,8 @@
 
 ## 상세 문서
 
+- [답변 마크다운·상세 링크 표시](plans/ANSWER_MARKDOWN_PRESENTATION.md)
+
 - [교육 설명 버튼](plans/TRAINING_EXPLANATION_BUTTON.md)
 
 - [교육 설명 시 목록 재출력 제거](plans/TRAINING_REPLY_PRESENTATION.md)

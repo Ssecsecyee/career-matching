@@ -11,7 +11,7 @@ export function TrainingCohorts({ course }) {
       <TrainingStatus course={c}/>
       <p>교육 일정: {c.dates?.starts_at?.raw || c.starts_at || '미확인'} ~ {c.dates?.ends_at?.raw || c.ends_at || '미확인'}</p>
       <p className="fine">페이지 표시 자부담: {c.tuition == null ? '미확인' : `${Number(c.tuition).toLocaleString()} ${c.currency || ''}`} · 최종 비용과 수강 자격은 기관 확인 필요</p>
-      <a href={safeSourceUrl(c.source_url)} target="_blank" rel="noreferrer">이 회차 원문 확인 ↗</a>
+      <a className="source-link" href={safeSourceUrl(c.source_url)} target="_blank" rel="noreferrer">이 회차 원문 확인 ↗</a>
     </section>)}
   </details>;
 }
