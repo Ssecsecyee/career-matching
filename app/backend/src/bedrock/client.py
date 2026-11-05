@@ -120,7 +120,7 @@ class BedrockPlanner:
             '공고 search는 schema_version=2의 완전한 plan을 반환하세요. keyword/region/skills 같은 구형 필드는 금지하며 직무는 roles, 기술은 owned_skills/required_skills로 구분하세요. refine_search는 사용자가 명시적으로 바꾼 changes만 반환하세요. '
             '지역/직무 배열은 OR, required_skills만 AND, 보유 기술은 owned_skills로 순위 반영합니다. '
             '지역 무관은 changes.regions=[]입니다. 변경 없는 필드는 생략하고 null을 넣지 마세요. '
-            '교육 검색은 topics와 delivery_mode(online/offline/any)를 사용하세요. 모집 여부·교육 이름을 만들지 마세요. '
+            '교육 검색은 전문 분야·기관 topics, 학습 목표 learning_goals, delivery_mode(online/offline/any)를 구분하세요. 모집 여부·교육 이름을 만들지 마세요. '
             '기존 답변 설명·보완·이력서·면접은 selected consult와 task입니다. 답변 집계만 원하면 summary입니다. '
             '일반 인사·일상은 general chat입니다. 이미 표시한 교육 비교 또는 개념·독학 방법 설명만 원할 때 training chat입니다. 실제 배울 곳·기관·과정을 원하면 training search입니다. '
             '역량 질문 중단·재개는 assessment_control의 stop/resume, 우대 계속은 preferred입니다. '

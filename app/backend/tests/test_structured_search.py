@@ -194,7 +194,7 @@ class ModelContractTests(unittest.TestCase):
         self.assertEqual(plan.required_skills,())
         self.assertIn('FFI',plan.owned_skills)
         self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1536)
-        self.assertEqual(usage['prompt_version'],'context-intent-v5')
+        self.assertEqual(usage['prompt_version'],'context-intent-v6')
 
     def test_dangerous_or_mixed_model_output_is_rejected(self):
         import os

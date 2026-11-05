@@ -12,6 +12,8 @@
 
 ## 상세 문서
 
+- [교육 전문 분야·학습 목표 분리](plans/TRAINING_TOPICS_AND_GOALS.md)
+
 - [답변 마크다운·상세 링크 표시](plans/ANSWER_MARKDOWN_PRESENTATION.md)
 
 - [교육 설명 버튼](plans/TRAINING_EXPLANATION_BUTTON.md)

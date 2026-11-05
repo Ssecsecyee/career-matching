@@ -28,6 +28,16 @@ class TrainingReviewTests(unittest.TestCase):
             self.assertNotIn('training_navigation',state)
             planner.respond.assert_not_called();jobs.search.assert_not_called()
 
+    def test_learning_goal_is_recorded_not_sent_as_an_or_search_topic(self):
+        flow,repo,planner,_=self.fixture()
+        state,result,_=advance_intent(flow,{},'데이터분석 배우고 포트폴리오 만들고 싶어',dict(target='training',action='search',topics=['데이터분석'],learning_goals=['데이터분석 포트폴리오 제작']))
+        repo.search.assert_called_once_with(['데이터분석'],exclude_ids=[],delivery_mode=None,candidates_only=True)
+        self.assertEqual(state['training_search_context']['learning_goals'],['데이터분석 포트폴리오 제작'])
+        self.assertTrue(any('확인되지 않았습니다' in x for x in result['search_summary']['limitations']))
+        state,result,_=flow.advance(state,{'action':'confirm_search','search_id':result['search_id']},None)
+        self.assertEqual(state['learning_context']['learning_goals'],['데이터분석 포트폴리오 제작'])
+        self.assertEqual(state['training_navigation']['learning_goals'],['데이터분석 포트폴리오 제작'])
+
     def test_confirm_button_rechecks_then_reveals_without_model(self):
         flow,repo,planner,_=self.fixture();state,review,_=self.preview(flow)
         count=planner.classify.call_count

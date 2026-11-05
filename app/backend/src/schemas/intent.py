@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v5'
+INTENT_VERSION = 'context-intent-v6'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -69,12 +69,13 @@ class IntentDecision(BaseModel):
     plan: IntentJobPlan | None = None
     changes: SearchChanges | None = None
     topics: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
+    learning_goals: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
     delivery_mode: Literal['online','offline','any'] | None = None
     task: Literal['prepare','interview','learning_plan','explain_unknown','defer','general'] | None = None
     control: Literal['stop','resume','preferred'] | None = None
     question: Annotated[str, Field(min_length=1,max_length=500)] | None = None
 
-    @field_validator('topics',mode='before')
+    @field_validator('topics','learning_goals',mode='before')
     @classmethod
     def topic_terms(cls,value):
         terms=SearchPlan.bounded_terms(value)
@@ -93,7 +94,7 @@ class IntentDecision(BaseModel):
                 allowed={key,'search_basis','required_skill_evidence'}
                 if getattr(self,key) is None:raise ValueError('Missing job search contract')
                 if self.plan is not None and self.plan.schema_version!=2:raise ValueError('Version 2 required')
-            elif self.target=='training':allowed={'topics','delivery_mode'}
+            elif self.target=='training':allowed={'topics','learning_goals','delivery_mode'}
             else:raise ValueError('Invalid search target')
         elif self.action=='next_results':
             if self.target not in {'jobs','training'}:raise ValueError('Invalid list target')
