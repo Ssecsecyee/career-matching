@@ -1,8 +1,9 @@
 """Small versioned spelling expansions, shared by both search backends."""
-POLICY_VERSION = 'structured-search-v2'
+POLICY_VERSION = 'structured-search-v3'
 REGIONS = {'경남': ('경남', '경상남도'), '경상남도': ('경남', '경상남도'),
            '부산': ('부산',), '부산광역시': ('부산',)}
-SKILLS = {'vuejs': ('Vue.js', 'VueJs'), 'vue.js': ('Vue.js', 'VueJs'),
+VUE_SPELLINGS = ('Vue', 'Vue.js', 'VueJs')
+SKILLS = {'vue': VUE_SPELLINGS, 'vuejs': VUE_SPELLINGS, 'vue.js': VUE_SPELLINGS,
           'react.js': ('React', 'React.js'), 'react': ('React', 'React.js'),
           '리액트': ('React', 'React.js'), '리엑트': ('React', 'React.js'),
           'python': ('Python',), '파이썬': ('Python',),

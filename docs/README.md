@@ -12,6 +12,8 @@
 
 ## 상세 문서
 
+- [Vue 검색 표기 누락 수정](plans/VUE_SEARCH_SPELLING_FIX.md)
+
 - [교육 일정·모집 상태 표시](plans/TRAINING_STATUS_DISPLAY.md)
 
 - [교육 탐색 문맥·검색 기준 확인](plans/TRAINING_CONTEXT_AND_SEARCH_REVIEW.md)
