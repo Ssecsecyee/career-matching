@@ -6,7 +6,7 @@ import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
 function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
-export function ExplorationPreview({target,results,busy=false,onExplain,onAssess,onNext,onReset,active=true}) {
+export function ExplorationPreview({target,results,busy=false,onExplain,onAssess,onNext,onReset,active=true,details={},detailError='',onRead}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState('');
  const jobs=target==='jobs';
  const sentinel=useRef(null);
@@ -35,7 +35,7 @@ export function ExplorationPreview({target,results,busy=false,onExplain,onAssess
    <section className="browse-card-grid" aria-label="최근 검색 결과">{filtered.map(item=>{
     const key=`${item.source || 'jumpit'}:${item.source_id}`,name=jobs?item.company_name:item.provider_name;
     return <article className="explore-card" key={key}>
-     <button type="button" className="browse-result" aria-pressed={selected===key} onClick={()=>setSelected(key)}>
+     <button type="button" className="browse-result" aria-pressed={selected===key} onClick={()=>{setSelected(key);if(jobs)onRead?.(item);}}>
       <div className="explore-card-brand"><CompanyBadge name={name}/><div><span className="explore-company">{name}</span><small>{regionOf(item) || '지역 미확인'}{!jobs?' · '+(item.delivery_mode==='online'?'온라인':item.delivery_mode==='offline'?'오프라인':'방식 미확인'):''}</small></div></div>
       <h2>{item.title}</h2><p className="explore-card-description">{jobs?(item.tech_stacks || []).slice(0,7).join(' · ') || '상세 조건은 원문에서 확인해 주세요.':item.curriculum || '세부 커리큘럼은 교육 원문에서 확인해 주세요.'}</p>
      </button>
@@ -49,6 +49,7 @@ export function ExplorationPreview({target,results,busy=false,onExplain,onAssess
    <CompanyBadge name={jobs?current.company_name:current.provider_name}/><p className="muted">{jobs?current.company_name:current.provider_name}</p><h2>{current.title}</h2>
    <p>{(current.addresses || []).join(' · ') || '지역 미확인'}</p>
    {jobs?<><div className="tags">{(current.tech_stacks || []).map(skill=><span key={skill}>{skill}</span>)}</div><p className="fine">검색 요약을 보고 있습니다. 상세 지원조건은 공고 원문에서 확인해 주세요. 읽기만으로 역량 문답이 시작되지는 않습니다.</p></>:<><TrainingStatus course={current}/>{current.curriculum&&<p>{current.curriculum}</p>}{current.cohorts?.length?<TrainingCohorts course={current}/>:<p>상세 일정은 원문에서 확인해 주세요.</p>}{current.warning&&<p className="fine">{current.warning}</p>}</>}
+   {jobs && <div className="job-detail-sections">{detailError && <p role="alert">{detailError}</p>}{!details[current.source_id] && !detailError && <p role="status">{busy?'상세 내용을 불러오고 있어요…':'공고를 다시 선택해 상세 내용을 불러오세요.'}</p>}{[['responsibilities','주요업무'],['qualifications','자격요건'],['preferred_requirements','우대사항'],['benefits','복지·혜택'],['hiring_process','채용절차'],['application_notes','지원 유의사항'],['service_info','서비스 소개']].map(([field,label])=>details[current.source_id]?.[field] && <section key={field}><h3>{label}</h3><p>{details[current.source_id][field]}</p></section>)}<p className="fine">저장된 원문 기준입니다. 현재 모집 여부와 최신 조건은 원문에서 확인해 주세요.</p></div>}
    <div className="browse-actions">{jobs ? onAssess && <button type="button" disabled={busy} onClick={()=>{onAssess(current);setSelected(null);}}>지원조건 확인하기</button> : onExplain && <button type="button" disabled={busy} onClick={()=>{onExplain(current);setSelected(null);}}>이 교육 설명해줘</button>}<a className="source-link" href={safeSourceUrl(current.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'공고':'교육'} 원문 보기 ↗</a><a className="source-link" href="#chat">AI 상담에서 이어가기 →</a></div>
   </section>}
  </main>;

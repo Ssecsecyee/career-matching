@@ -74,6 +74,13 @@ class DialogueFlow:
             plan=SearchPlan.parse(payload['search_plan'])
             return self.execute_search(state,plan,plan.to_dict(),payload)
 
+        if action == 'view_job':
+            allowed=set(state.get('candidate_ids',[])) | set((state.get('search_navigation') or {}).get('shown_ids',[]))
+            if payload['source_id'] not in allowed:raise FlowError('job_not_in_session_candidates',409)
+            job=self.jobs.get(payload['source_id'])
+            ensure_selectable(job,self.include_unverified)
+            fields=('source_id','source_version','title','company_name','source_url','addresses','tech_stacks','responsibilities','qualifications','preferred_requirements','benefits','hiring_process','application_notes','service_info','recruitment_status')
+            return state, {'stage':'job_detail','job_detail':{k:job.get(k) for k in fields}}, evidence
         if action == 'select':
             state.pop('answer_summary', None)
             for name in ('condition_review','original_conditions','reference_conditions'):state.pop(name,None)
