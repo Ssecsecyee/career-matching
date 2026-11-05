@@ -83,3 +83,15 @@
 @media(max-width:620px){.browse-card-grid{grid-template-columns:minmax(0,1fr)}.browse-toolbar{gap:8px}.list-search{width:100%}.list-search input{width:100%}.explorer-layout .workspace-tabs a{padding:10px 15px}.explore-card .browse-result{min-height:220px;padding:20px}.browse-heading h1{font-size:20px}.explore-card-footer{padding:13px 20px 18px}.browse-detail{padding:20px}.explorer-layout .rail-nav a{padding:8px 2px}.explorer-layout .sidebar{padding-top:18px}}
 
 .explore-card .company-badge{display:flex;color:#fff;font-weight:700}
+
+/* A single mounted conversation switches between docked and floating layouts. */
+.popup-heading{display:none}
+.explorer-layout.floating-chat .workspace-body{grid-template-columns:minmax(0,1fr)}
+.explorer-layout.floating-chat .workspace-body>div:not(.chat-view){grid-column:1}
+.explorer-layout.floating-chat .chat-view{display:flex;position:fixed;inset:auto 24px 24px auto;z-index:20;width:min(450px,calc(100vw - 104px));height:min(740px,calc(100dvh - 110px));border:1px solid #d9e2ee;border-radius:20px;background:#fff;box-shadow:0 18px 70px #20334b33;overflow:hidden}
+.explorer-layout.floating-chat .copilot-heading,.floating-chat .copilot-toggle{display:none}
+.floating-chat .popup-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;background:#edf5ff;border-bottom:1px solid #d9e2ee;flex-shrink:0}
+.popup-heading>div{display:flex;gap:5px}.popup-heading button{border:0;background:transparent;padding:6px;font-size:14px;color:#30465e;cursor:pointer}
+.explorer-layout.chat-minimized .chat-view{display:none}
+.chat-launcher{position:fixed;right:24px;bottom:24px;z-index:21;border:0;border-radius:28px;padding:16px 22px;background:#2563eb;color:white;box-shadow:0 6px 24px #20334b33;cursor:pointer}
+@media(max-width:620px){.explorer-layout.floating-chat .chat-view{right:10px;bottom:10px;width:calc(100vw - 30px);height:calc(100dvh - 100px)}.popup-open{font-size:12px}.chat-launcher{right:12px;bottom:16px}}

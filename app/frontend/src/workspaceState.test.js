@@ -42,6 +42,15 @@ test('actual tab changes preserve conversation draft and list selection without 
  await change('#jobs');await change('#training');await change('#chat');
  assert.equal(container.querySelector('.assessment-stepper'),stepper);
  assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
+ await act(async()=>container.querySelector('.popup-open').click());
+ assert.equal(window.location.hash,'#jobs');assert.ok(container.querySelector('.floating-chat'));
+ assert.equal(container.querySelector('#message'),textarea);assert.equal(container.querySelector('.assessment-stepper'),stepper);
+ await act(async()=>container.querySelector('[aria-label="상담창 최소화"]').click());assert.ok(container.querySelector('.chat-minimized'));
+ await act(async()=>container.querySelector('.chat-launcher').click());assert.ok(!container.querySelector('.chat-minimized'));
+ await act(async()=>container.querySelector('[aria-label="상담창 닫기"]').click());
+ await act(async()=>container.querySelector('.chat-launcher').click());
+ assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
+ await act(async()=>container.querySelector('[aria-label="상담창 고정"]').click());assert.ok(!container.querySelector('.floating-chat'));
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
  }finally{await act(async()=>root.unmount());window.happyDOM.abort();}
 });
