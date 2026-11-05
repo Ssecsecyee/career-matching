@@ -13,3 +13,7 @@ feature/copilot-workspace 브랜치에서 별도 커밋과 태그로 보관하�
 미리보기: https://d1elpjlek4sj83.cloudfront.net/previews/ux-popup-c9323f8/index.html#jobs
 
 코드 커밋: c9323f8 · 태그: ux-workspace-popup-20261105. 빌드 통과 및 CloudFront HTML 200·전용 자산 경로 확인. 기존 root 서비스와 이전 미리보기는 교체하지 않았다. 미리보기의 대화 요청은 기존 운영 백엔드를 이용한다.
+
+## 기본 주소 반영
+
+2026-11-05 사용자 요청으로 기본 CloudFront 주소에 프론트엔드를 배포했다. 코드 c9323f8 기준, JS index-DYJeFzBf.js. 기본 HTML HTTP 200 및 배포 자산 일치, apiEnabled=true를 확인했다. 기존 backend·DB·인프라 변경 없음. 기존 별도 미리보기도 유지한다.
