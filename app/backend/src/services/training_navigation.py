@@ -14,3 +14,8 @@ def training_exclusions(values):
 def training_mode(value):
     if value not in (None,'online','offline'):raise ValueError('Invalid delivery mode')
     return value
+
+
+def training_operator(value):
+    if value not in ('and','or'):raise ValueError('Invalid training topic operator')
+    return value

@@ -178,6 +178,7 @@ class ContextRouter:
         from src.services.training_review import remember_review
         previous=(state.get('training_search_context') if state.get('stage') in {'training_search_review','training_no_results'} else None) or state.get('training_navigation') or state.get('learning_context') or {}
         topics=list(d.topics) if d.topics is not None else (previous.get('topics',[]) if d.action=='refine_search' else [])
+        operator=d.topic_operator if d.topic_operator is not None else (previous.get('topic_operator','or') if d.action=='refine_search' else 'or')
         goals=list(d.learning_goals) if d.learning_goals is not None else (previous.get('learning_goals',[]) if d.action=='refine_search' else [])
         mode=d.delivery_mode if d.delivery_mode is not None else (previous.get('delivery_mode') if d.action=='refine_search' else None)
         mode=None if mode=='any' else mode
@@ -186,8 +187,9 @@ class ContextRouter:
             return self.clarify(state,'배우고 싶은 분야·기술 또는 찾는 교육기관명을 알려주세요.')
         repository=self.flow.training
         if repository is None:return self.clarify(state,'현재 교육 검색 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.')
-        courses=repository.search(topics,exclude_ids=[],delivery_mode=mode,candidates_only=True)
-        result=remember_review(state,topics,mode,courses,repository,learning_goals=goals)
+        options={'topic_operator':operator} if operator!='or' else {}
+        courses=repository.search(topics,exclude_ids=[],delivery_mode=mode,candidates_only=True,**options)
+        result=remember_review(state,topics,mode,courses,repository,learning_goals=goals,topic_operator=operator)
         record(state,result['message'],'assistant')
         return state,result,[]
 
@@ -198,17 +200,18 @@ class ContextRouter:
             raise FlowError('stale_training_search',409)
         repository=self.flow.training
         if repository is None:return self.clarify(state,'현재 교육 검색 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.')
-        courses=repository.search(context['topics'],exclude_ids=[],delivery_mode=context['delivery_mode'],candidates_only=True)
+        options={'topic_operator':context['topic_operator']} if context.get('topic_operator','or')!='or' else {}
+        courses=repository.search(context['topics'],exclude_ids=[],delivery_mode=context['delivery_mode'],candidates_only=True,**options)
         expected=[tuple(x) for x in context['candidate_versions']]
         if signatures(courses)!=expected:
-            result=remember_review(state,context['topics'],context['delivery_mode'],courses,repository,learning_goals=context.get('learning_goals',[]))
+            result=remember_review(state,context['topics'],context['delivery_mode'],courses,repository,learning_goals=context.get('learning_goals',[]),topic_operator=context.get('topic_operator','or'))
             result['search_changed']=True
             result['message']='확인하는 동안 교육 정보나 노출 대상이 바뀌었습니다. 갱신된 기준을 다시 확인해 주세요.'
             record(state,result['message'],'assistant')
             return state,result,[]
         from datetime import datetime,timezone
         context['confirmed_at']=datetime.now(timezone.utc).isoformat()
-        state['training_navigation']={'topics':context['topics'],'delivery_mode':context['delivery_mode'],'shown_ids':[],'learning_goals':context.get('learning_goals',[])}
+        state['training_navigation']={'topics':context['topics'],'delivery_mode':context['delivery_mode'],'shown_ids':[],'topic_operator':context.get('topic_operator','or'),'learning_goals':context.get('learning_goals',[])}
         state['stage']='conversation'
         state,result,evidence=self.training(state,None,reset=False,confirmed=courses)
         result.update(search_id=search_id,search_target='training')
@@ -225,7 +228,7 @@ class ContextRouter:
         previous=state.get('learning_context') or {}
         navigation=state.get('training_navigation') or {}
         if not reset and not navigation and previous.get('topics'):
-            navigation={'topics':previous['topics'],'delivery_mode':previous.get('delivery_mode'),
+            navigation={'topics':previous['topics'],'topic_operator':previous.get('topic_operator','or'),'learning_goals':previous.get('learning_goals',[]),'delivery_mode':previous.get('delivery_mode'),
                 'shown_ids':[c['source']+':'+c['source_id'] for c in previous.get('courses',[])]}
         if not reset and not navigation:
             return self.clarify(state,'이어서 볼 교육 검색이 없습니다. 먼저 배우고 싶은 주제를 알려주세요.')
@@ -237,6 +240,7 @@ class ContextRouter:
             courses=[];status='unavailable'
         else:
             kwargs={'exclude_groups':navigation['shown_groups']} if navigation.get('shown_groups') else {}
+            if navigation.get('topic_operator','or')!='or':kwargs['topic_operator']=navigation['topic_operator']
             courses=confirmed if confirmed is not None else repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True,**kwargs)
             status='found' if courses else 'no_match'
         ids=[c['source']+':'+c['source_id'] for c in courses]
@@ -246,7 +250,7 @@ class ContextRouter:
         from src.services.training_groups import group_key
         navigation['shown_groups']=list(dict.fromkeys(navigation.get('shown_groups',[])+[group_key(c) for c in courses if c.get('cohorts')]))
         state['training_navigation']=navigation
-        learning={'status':status,'topics':topics,'learning_goals':navigation.get('learning_goals',[]),'delivery_mode':mode,'courses':courses,
+        learning={'status':status,'topics':topics,'topic_operator':navigation.get('topic_operator','or'),'learning_goals':navigation.get('learning_goals',[]),'delivery_mode':mode,'courses':courses,
                   'basis':'validated_context_intent_and_stored_training', 'visibility_policy':'before_training_start_kst',
                   'limitations':['현재 모집 여부·지원 자격은 원문에서 확인해야 합니다.','미확인/과거 자료는 학습 참고용입니다.','교육 수료로 경력·학위·면허를 대체하지 않습니다.']}
         state['learning_context']=learning;state['conversation_target']='training';state['stage']='conversation'

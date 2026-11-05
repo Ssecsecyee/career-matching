@@ -30,7 +30,7 @@ class TrainingReviewTests(unittest.TestCase):
 
     def test_learning_goal_is_recorded_not_sent_as_an_or_search_topic(self):
         flow,repo,planner,_=self.fixture()
-        state,result,_=advance_intent(flow,{},'데이터분석 배우고 포트폴리오 만들고 싶어',dict(target='training',action='search',topics=['데이터분석'],learning_goals=['데이터분석 포트폴리오 제작']))
+        state,result,_=advance_intent(flow,{},'데이터분석 교육을 찾되 포트폴리오 목표는 검색 조건이 아니라 참고만 해줘',dict(target='training',action='search',topics=['데이터분석'],learning_goals=['데이터분석 포트폴리오 제작']))
         repo.search.assert_called_once_with(['데이터분석'],exclude_ids=[],delivery_mode=None,candidates_only=True)
         self.assertEqual(state['training_search_context']['learning_goals'],['데이터분석 포트폴리오 제작'])
         self.assertTrue(any('확인되지 않았습니다' in x for x in result['search_summary']['limitations']))

@@ -11,7 +11,9 @@ TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_u
                   'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
 
 
-def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or"):
+    from src.services.training_navigation import training_operator
+    training_operator(topic_operator)
     if (not isinstance(topics, list) or not 1 <= len(topics) <= 8 or
             any(not isinstance(t, str) or not 1 <= len(t) <= 60 for t in topics)):
         raise ValueError('Invalid training topics')
@@ -37,7 +39,7 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidat
             '_source': ['source', 'source_id', 'source_version'],
             'query': {'bool': {'filter': [{'terms': {'source': ['boottent', 'goyong24_training']}},
                                           {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}]+extra,
-                               'should': clauses, 'minimum_should_match': 1}},
+                               'should': clauses, 'minimum_should_match': len(clauses) if topic_operator=='and' else 1}},
             'sort': ['_score', {'document_key': 'asc'}]}
 
 
@@ -47,11 +49,11 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=()):
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or"):
         from src.services.training_groups import grouped,exclusions
         exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,
-                                     delivery_mode=delivery_mode, candidates_only=candidates_only)
+                                     delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator)
         self.search_limited = False
         self.last_candidate_total = None
         courses, seen = [], set()

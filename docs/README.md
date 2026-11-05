@@ -12,7 +12,9 @@
 
 ## 상세 문서
 
-- [교육 전문 분야·학습 목표 분리](plans/TRAINING_TOPICS_AND_GOALS.md)
+- [교육 검색 AND·OR 관계 보존](plans/TRAINING_BOOLEAN_SEARCH.md)
+
+- [교육 전문 분야·학습 목표 분리 이력 — 동시 조건 제외 방식 정정](plans/TRAINING_TOPICS_AND_GOALS.md)
 
 - [답변 마크다운·상세 링크 표시](plans/ANSWER_MARKDOWN_PRESENTATION.md)
 
