@@ -6,7 +6,7 @@ import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
 function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
-export function ExplorationPreview({target,results,busy=false,onExplain,onAssess}) {
+export function ExplorationPreview({target,results,busy=false,onExplain,onAssess,onNext,onReset}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState('');
  const jobs=target==='jobs';
  const current=results.items.find(item=>`${item.source || 'jumpit'}:${item.source_id}`===selected);
@@ -18,10 +18,12 @@ export function ExplorationPreview({target,results,busy=false,onExplain,onAssess
    <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>
    {(keyword || region) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');}}>필터 초기화</button>}
   </div>
-  <div className="browse-heading"><h1>최근 검색 {jobs?'공고':'교육'} <em>{filtered.length}개</em></h1>
-   <p>AI 검색에서 확인한 목록 {results.items.length}개 중 표시합니다. 현재 모집 여부는 원문에서 확인해 주세요.</p>
+  <div className="browse-heading"><h1>{jobs?'탐색 가능한':'최근 검색'} {jobs?'공고':'교육'} <em>{jobs?(results.total ?? filtered.length):filtered.length}개</em></h1>
+   <p>{jobs?'현재 페이지 '+results.items.length+'개를 표시합니다. AI에게 조건을 말하면 전체 검색 대상에서 좁혀집니다.':'AI 검색에서 확인한 목록 '+results.items.length+'개 중 표시합니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
   </div>
-  {!results.items.length ? <section className="browse-empty"><span className="browse-empty-symbol">⌕</span><h2>왼쪽 AI에게 원하는 조건을 알려주세요</h2><p>{jobs?'관심 직무·기술·지역으로 공고를 찾아보세요.':'배우고 싶은 분야와 필요한 조건으로 교육을 찾아보세요.'}</p><a href="#chat" className="source-link">AI 상담으로 시작하기 →</a></section> :
+  {jobs && results.summary && <section className="source" aria-label="현재 적용한 검색 조건"><strong>현재 적용한 조건</strong>{results.summary.filters?.length?<ul>{results.summary.filters.map(t=><li key={t}>{t}</li>)}</ul>:<p>지역·직무·필수 기술 제한 없음</p>}{results.summary.ranking?.length>0 && <p>관련성 순위: {results.summary.ranking.join(' · ')}</p>}</section>}
+  {jobs && results.continuation && <p className="fine">앞서 본 공고를 제외한 남은 후보 수입니다.</p>}
+  {!results.items.length ? <section className="browse-empty"><span className="browse-empty-symbol">⌕</span><h2>{jobs?'현재 조건에서 표시할 공고가 없습니다':'왼쪽 AI에게 원하는 조건을 알려주세요'}</h2><p>{jobs?'관심 직무·기술·지역으로 공고를 찾아보세요.':'배우고 싶은 분야와 필요한 조건으로 교육을 찾아보세요.'}</p><a href="#chat" className="source-link">AI 상담으로 시작하기 →</a></section> :
    !filtered.length ? <section className="browse-empty"><h2>현재 목록에 맞는 항목이 없어요</h2><p>필터를 바꾸거나 왼쪽 AI에서 새로운 검색을 시작해 주세요.</p></section> :
    <section className="browse-card-grid" aria-label="최근 검색 결과">{filtered.map(item=>{
     const key=`${item.source || 'jumpit'}:${item.source_id}`,name=jobs?item.company_name:item.provider_name;
@@ -33,6 +35,7 @@ export function ExplorationPreview({target,results,busy=false,onExplain,onAssess
      <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><span>{jobs?'모집 원문 확인':item.schedule_label || '일정 미확인'}</span></div>
     </article>;
    })}</section>}
+  {jobs && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');onReset?.();}}>전체 공고로 초기화</button>{results.items.length>0 && <button type="button" disabled={busy} onClick={()=>{setSelected(null);setKeyword('');setRegion('');onNext?.();}}>다음 공고 보기 →</button>}<small>입력창·지역 필터는 현재 페이지에만 적용됩니다. 전체 검색은 AI 상담을 이용하세요.</small></div>}
   {current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
    <button type="button" className="detail-close" onClick={()=>setSelected(null)} aria-label="상세 닫기">×</button>
    <CompanyBadge name={jobs?current.company_name:current.provider_name}/><p className="muted">{jobs?current.company_name:current.provider_name}</p><h2>{current.title}</h2>

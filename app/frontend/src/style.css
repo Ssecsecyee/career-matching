@@ -95,3 +95,5 @@
 .explorer-layout.chat-minimized .chat-view{display:none}
 .chat-launcher{position:fixed;right:24px;bottom:24px;z-index:21;border:0;border-radius:28px;padding:16px 22px;background:#2563eb;color:white;box-shadow:0 6px 24px #20334b33;cursor:pointer}
 @media(max-width:620px){.explorer-layout.floating-chat .chat-view{right:10px;bottom:10px;width:calc(100vw - 30px);height:calc(100dvh - 100px)}.popup-open{font-size:12px}.chat-launcher{right:12px;bottom:16px}}
+
+.browse-pagination{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:24px 0}.browse-pagination small{color:#64748b}

@@ -8,8 +8,8 @@ export function latestSearchResults(messages, target) {
   for (let i=messages.length-1;i>=0;i--) {
     const data=messages[i].role==='assistant' && messages[i].data;
     if(!data)continue;
-    if(target==='jobs' && data.stage==='no_results' && data.search_summary)return {items:[]};
-    if(target==='jobs' && data.stage==='choose_job')return {items:data.candidate_jobs || [],total:data.total};
+    if(target==='jobs' && data.stage==='no_results' && data.search_summary)return {items:[],total:0,summary:data.search_summary};
+    if(target==='jobs' && data.stage==='choose_job')return {items:data.candidate_jobs || [],total:data.total,summary:data.search_summary,continuation:data.search_continuation};
     if(target==='training' && data.learning_search && !['training_search_review','training_no_results'].includes(data.stage))
       return {items:data.learning_opportunities || []};
   }

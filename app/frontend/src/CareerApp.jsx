@@ -89,6 +89,13 @@ export function CareerApp({page='chat',adminChat=false}) {
   const [pending, setPending] = useState(null);
   const bottom = useRef(null);
   const conversation = useRef(null);
+  const initialBrowse=useRef(false);
+  useEffect(()=>{
+    if(unlocked && apiEnabled && !adminChat && page==='jobs' && !session && !initialBrowse.current && !inFlight.current){
+      initialBrowse.current=true;
+      send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},null));
+    }
+  },[unlocked,apiEnabled,page,session,adminChat]);
   useEffect(() => {
     const stepper=conversation.current?.querySelector('.assessment-stepper');
     const summary=conversation.current?.querySelector('.message:last-of-type .assessment-summary');
@@ -100,7 +107,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   }, [messages,busy,error,page]);
 
   function reset() {
-    setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
+    initialBrowse.current=false; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
   }
 
   async function send(payload, text) {
@@ -108,13 +115,19 @@ export function CareerApp({page='chat',adminChat=false}) {
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
-      const response = await postChat({ payload, accessCode: code, ownerToken: owner.current, onProgress: ({ text: partial }) => {
+      let response = await postChat({ payload, accessCode: code, ownerToken: owner.current, onProgress: ({ text: partial }) => {
         setMessages(old => {
           const draft = { role: 'assistant', data: { stage: 'streaming', message: partial }, id: payload.request_id, partial: true };
           return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? draft : m) : [...old, draft];
         });
       } });
-      const data = response.body;
+      let data = response.body;
+      // Explorer explicitly opts into immediate list application. Keep chat-only consent unchanged.
+      if(response.ok && !adminChat && window.location.hash==='#jobs' && data.stage==='search_review' && data.search_id){
+        const confirmed=await postChat({payload:requestPayload('confirm_search',{search_id:data.search_id},data.session_id || session),accessCode:code,ownerToken:owner.current});
+        if(!confirmed.ok){setSession(data.session_id || session);setResult(data);setMessages(old=>[...old,{role:'assistant',data,id:payload.request_id}]);setError('검색 기준 적용에 실패했습니다. 표시된 검색 기준에서 다시 확인해 주세요.');return;}
+        data={...confirmed.body,message:'말씀하신 검색 기준으로 공고 목록을 갱신했습니다. 적용한 조건을 확인하고 추가하거나 해제할 조건을 말씀해 주세요.'};
+      }
       if (data.session_id) setSession(data.session_id);
       if (!response.ok) {
         setMessages(old => old.filter(m => m.id !== payload.request_id));
@@ -217,7 +230,7 @@ export function CareerApp({page='chat',adminChat=false}) {
           <div className="composer-bottom"><span>{noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </div>
-      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" busy={busy || !!pending} onAssess={select} results={latestSearchResults(messages,'jobs')}/></div>
+      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onAssess={select} results={latestSearchResults(messages,'jobs')}/></div>
       <div hidden={page!=='training'}><ExplorationPreview target="training" busy={busy || !!pending} onExplain={explainTraining} results={latestSearchResults(messages,'training')}/></div>
       </div>
       </>}

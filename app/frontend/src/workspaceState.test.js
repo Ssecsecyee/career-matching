@@ -52,5 +52,12 @@ test('actual tab changes preserve conversation draft and list selection without 
  assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
  await act(async()=>container.querySelector('[aria-label="상담창 고정"]').click());assert.ok(!container.querySelector('.floating-chat'));
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
+ // A fresh explorer session loads bounded all-jobs data without asking the model.
+ let sent=[];globalThis.fetch=async(url,options)=>{if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};const payload=JSON.parse(options.body);sent.push(payload);return {ok:true,status:200,json:async()=>payload.action==='confirm_search'?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:1,candidate_jobs:[{source_id:'44',title:'Filtered React job',company_name:'Test',tech_stacks:['React']}],search_summary:{filters:['React'],ranking:[],limitations:[]}}:payload.search_plan?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:50,candidate_jobs:[{source_id:'43',title:'Initial all jobs',company_name:'Test'}]}:{stage:'search_review',cached:true,search_id:'33333333-3333-4333-8333-333333333333',session_id:'22222222-2222-4222-8222-222222222222',search_summary:{filters:['React'],ranking:[],limitations:[]}}};};
+ await change('#jobs');await fill(container.querySelector('#access-code'),'x'.repeat(32));await submit(container.querySelector('form'));
+ assert.equal(sent.length,1);assert.equal(sent[0].search_plan.limit,20);assert.equal(sent[0].search_plan.keyword,'');assert.match(container.querySelector('.browse-heading').textContent,/50/);
+ await fill(container.querySelector('#message'),'React jobs');await submit(container.querySelector('#message').closest('form'));
+ assert.equal(sent.length,3);assert.equal(sent[2].action,'confirm_search');assert.equal(sent[2].session_id,'22222222-2222-4222-8222-222222222222');assert.match(container.querySelector('.browse-card-grid').textContent,/Filtered React job/);assert.match(container.querySelector('[aria-label="현재 적용한 검색 조건"]').textContent,/React/);
+
  }finally{await act(async()=>root.unmount());window.happyDOM.abort();}
 });
