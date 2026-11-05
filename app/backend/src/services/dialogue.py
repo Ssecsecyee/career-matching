@@ -48,7 +48,7 @@ class DialogueFlow:
         if action == 'search' and payload.get('search_plan') is None:
             from src.services.context_router import ContextRouter
             return ContextRouter(self).advance(state,payload,invoke)
-        if action in {'next_results','assessment_control'}:
+        if action in {'next_results','assessment_control','explain_training'}:
             from src.services.context_router import ContextRouter
             return ContextRouter(self).advance(state,payload,invoke)
         if action == 'review_answers':

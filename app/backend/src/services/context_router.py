@@ -16,6 +16,15 @@ class ContextRouter:
         if payload['action']=='confirm_search' and payload.get('search_id') and payload.get('search_id')==(state.get('training_search_context') or {}).get('search_id'):
             if on_decision:on_decision(None,{'direct_action':'confirm_search','target':'training'})
             return self.confirm_training(state,payload['search_id'])
+        if payload['action']=='explain_training':
+            courses=(state.get('learning_context') or {}).get('courses',[])
+            course=next((c for c in courses if c['source']==payload['source'] and c['source_id']==payload['source_id']
+                         and str(c.get('source_version'))==payload['source_version']),None)
+            if course is None:raise FlowError('training_reference_changed',409)
+            state['training_focus']={k:payload[k] for k in ('source','source_id','source_version')}
+            if on_decision:on_decision(None,{'direct_action':'explain_training','target':'training',**state['training_focus']})
+            message=f"{course.get('provider_name','')} · {course['title']} 교육을 설명해줘. 저장된 회차 일정·비용·모집 상태·지원 자격을 구분하고, 없는 상세 정보는 추측하지 말아줘."
+            return self.execute(state,{'message':message},IntentDecision(target='training',action='chat',reason='Explicit displayed education explanation button'),invoke)
         state.setdefault('stage','conversation')
         if payload['action']=='next_results':
             decision=IntentDecision(target=payload['target'],action='next_results',reason='Explicit result navigation button')
@@ -143,9 +152,15 @@ class ContextRouter:
                 if learning is not None:
                     learning=dict(learning,courses=[refresh_card_status(c) for c in learning.get('courses',[])])
                     state['learning_context']=learning
-                history['training_retrieval']=learning or {'status':'unavailable','courses':[],'topics':[]}
+                retrieval=learning or {'status':'unavailable','courses':[],'topics':[]}
+                focus=state.get('training_focus')
+                if focus and learning:
+                    focused=[c for c in learning.get('courses',[]) if c['source']==focus['source'] and c['source_id']==focus['source_id'] and str(c.get('source_version'))==focus['source_version']]
+                    if focused:retrieval=dict(learning,courses=focused)
+                history['training_retrieval']=retrieval
                 history['conversation_focus']={'kind':'training'}
                 state['conversation_target']='training'
+            state.pop('training_focus',None)
             reply=invoke('context_response',self.flow.planner.respond,text,history)['reply']
             reply=respect_preferences(reply,state)
             record(state,reply,'assistant')
@@ -205,6 +220,7 @@ class ContextRouter:
             result=review_response(state)
             if state['stage']=='training_search_review':result['message']='아직 교육 목록을 표시하기 전입니다. 검색 기준을 확인하면 첫 목록을 보여드리겠습니다.'
             return state,result,[]
+        state.pop('training_focus',None)
         previous=state.get('learning_context') or {}
         navigation=state.get('training_navigation') or {}
         if not reset and not navigation and previous.get('topics'):
