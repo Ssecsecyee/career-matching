@@ -1,7 +1,7 @@
 # 답변 마크다운·상세 링크 표시
 
 기준일: 2026-11-05
-상태: 구현·로컬 검증 완료 / 웹 배포 예정
+상태: 구현·로컬 검증·웹 배포 완료
 
 ## 원인과 책임
 
@@ -23,3 +23,5 @@ react-markdown과 remark-gfm으로 일반 모델 답변의 제목·강조·목�
 
 - https://github.com/remarkjs/react-markdown
 - https://github.com/remarkjs/remark-gfm
+
+CloudFront 웹 게시 완료. 배포 산출물 index-BaOVeogk.js / index-C8k9MC4x.css. 백엔드·DB 변경 없이 표시 계층만 반영했다. 기존 브라우저 탭은 새로고침 후 확인한다.
