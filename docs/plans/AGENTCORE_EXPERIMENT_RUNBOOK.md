@@ -43,3 +43,10 @@ infra/agentcore/setup.py는 create/status, activate.py는 실험 전용 역할 �
 현재 전역 예약 3턴 사용, 3턴 남음(확인 시점 기준). 실패 1턴·인사 검증 1턴·실제 검색 검증 1턴이 포함된다. 개발자 로컬 합성 smoke는 별도 소량 사용량이며 5 USD 승인 범위에 합산해야 한다. AWS 실제 청구 총액을 확정한 수치는 아니다. 사용자 테스트 후 추가 호출은 한도에 의해 중단된다.
 
 기존 배포 config 백업은 유지하고 systemd에서 /opt/career/agentcore-experiment에만 쓰기를 허용한다. 실험 종료 시 기능 플래그 비활성화·역할 추가 정책 제거·Harness/Memory 종료 및 보존 자료 처리를 검토한다. 삭제는 사용자의 대화 보존 요구와 함께 별도 실행한다.
+
+
+## Job-grounded discovery (Harness v2)
+
+Combined assessment and education requests follow: clarify role if needed -> search jobs -> user selects a card -> existing source-condition assessment -> saved-answer-based education search. Once the role is known, stop the independent Python/framework survey. Question counts have no fixed UX limit; avoid duplicate questions. This is model guidance, not an enforced state transition or completed live quality evaluation.
+
+The approved USD 5 experiment budget and global six-turn reservation remain unchanged. Check remaining allowance before additional live evaluations.

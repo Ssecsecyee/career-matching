@@ -166,7 +166,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
                 from src.schemas.intent import INTENT_VERSION
                 version = INTENT_VERSION
             if purpose == 'context_response':version = 'context-response-v1'
-            if purpose == 'agentcore':version = 'career-harness-v1'
+            if purpose == 'agentcore':version = 'career-harness-v2'
             if purpose == 'condition_review':
                 from src.schemas.condition_review import POLICY_VERSION
                 version=getattr(adapter,'prompt_version',POLICY_VERSION)
