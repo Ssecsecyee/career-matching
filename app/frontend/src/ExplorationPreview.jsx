@@ -6,17 +6,17 @@ import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
 function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
-export function ExplorationPreview({target,results,busy=false,loading=false,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead}) {
+export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState('');
  const jobs=target==='jobs';
  const initialLoading=active && loading && !results.items.length;
  const sentinel=useRef(null);
  useEffect(()=>{
-   if(!active || busy || !results.hasMore || keyword || region || !onNext || typeof IntersectionObserver==='undefined')return;
+   if(!active || busy || loadError || !results.hasMore || keyword || region || !onNext || typeof IntersectionObserver==='undefined')return;
    const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();onNext();}},{rootMargin:'0px 0px 200px 0px'});
    if(sentinel.current)observer.observe(sentinel.current);
    return ()=>observer.disconnect();
- },[active,jobs,busy,results.items.length,results.hasMore,keyword,region,onNext]);
+ },[active,jobs,busy,loadError,results.items.length,results.hasMore,keyword,region,onNext]);
  const current=results.items.find(item=>`${item.source || 'jumpit'}:${item.source_id}`===selected);
  const trainingDetail=current && trainingDetails[current.source+':'+current.source_id];
  const regions=[...new Set(results.items.map(regionOf).filter(Boolean))];
@@ -44,8 +44,8 @@ export function ExplorationPreview({target,results,busy=false,loading=false,onEx
      <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><span>{jobs?'모집 원문 확인':item.schedule_label || '일정 미확인'}</span></div>
     </article>;
    })}</section>}
-  {!initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button>{results.hasMore && <button type="button" disabled={busy} onClick={()=>{setSelected(null);setKeyword('');setRegion('');onNext?.();}}>다음 {jobs?'공고':'교육'} 보기 →</button>}<small>입력창·지역 필터는 현재 페이지에만 적용됩니다. 전체 검색은 AI 상담을 이용하세요.</small></div>}
-  {!initialLoading && <div ref={sentinel} className="browse-load-status" role="status">{busy?'목록을 불러오고 있어요…':results.hasMore?'아래로 스크롤하면 더 불러옵니다':'현재 조건의 목록을 모두 확인했습니다'}</div>}
+  {!initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>입력창·지역 필터는 현재 페이지에만 적용됩니다. 전체 검색은 AI 상담을 이용하세요.</small></div>}
+  {!initialLoading && <div ref={sentinel} className="browse-load-status" role="status">{loadError?<><p>목록을 추가로 불러오지 못했습니다.</p><button type="button" disabled={busy} onClick={onRetry}>다시 불러오기</button></>:busy?'목록을 불러오고 있어요…':results.hasMore?'아래로 스크롤하면 더 불러옵니다':'현재 조건의 목록을 모두 확인했습니다'}</div>}
   {current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
    <button type="button" className="detail-close" onClick={()=>setSelected(null)} aria-label="상세 닫기">×</button>
    <CompanyBadge name={jobs?current.company_name:current.provider_name}/><p className="muted">{jobs?current.company_name:current.provider_name}</p><h2>{current.title}</h2>
