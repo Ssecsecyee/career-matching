@@ -125,3 +125,17 @@ class Work24InventoryTests(unittest.TestCase):
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM records').fetchone()[0],0)
 
 if __name__=='__main__':unittest.main()
+
+
+class Work24ServiceScopeTests(unittest.TestCase):
+    def test_card_only_run_does_not_require_or_call_other_service_keys(self):
+        import work24_collect
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);env=root/'keys.env';env.write_text('WORK24_CARD_TRAINING_API_KEY=synthetic')
+            args=['work24_collect.py','--env-path',str(env),'--output',str(root/'run'),'--start','2099-01-01','--end','2099-01-01','--services','card']
+            with patch.object(sys,'argv',args),patch.object(work24_collect,'fetch',return_value=b'<HRDNet><scn_cnt>0</scn_cnt><srchList/></HRDNet>') as fetch,patch.object(work24_collect.time,'sleep'):
+                self.assertEqual(work24_collect.main(),0)
+                self.assertEqual(fetch.call_args.args[0],'card');self.assertEqual(fetch.call_count,1)
+            db=sqlite3.connect(root/'run/catalog.sqlite3')
+            self.assertEqual(db.execute('SELECT DISTINCT service FROM buckets').fetchall(),[('card',)])
+            db.close()

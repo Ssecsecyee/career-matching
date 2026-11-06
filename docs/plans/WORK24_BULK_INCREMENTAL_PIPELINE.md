@@ -126,3 +126,10 @@ python work24_daily.py --env-path "C:\AWS_project\career_matching\app\ingestion\
 6. 호출 시간·대기열·원본 용량·429·실패 알림과 서버 밖 원본 보존을 확인. 현재 4GiB 공유 호스트에서 대량 정제·색인 동시 실행은 피함.
 
 목록 전체 조회는 Lambda 한 번에 끝내는 작업으로 가정하지 않는다. 장기 작업은 EC2에서 진행하거나 작은 범위로 쪼개야 한다. 일일 스케줄·서버용 API 키 업로드는 아직 실행하지 않았다. 초회 운영 DB 적재·색인 반영은 별도 배포 기록에 정리했다.
+
+
+## 내일배움카드 단독 증분 갱신
+
+work24_collect.py --services card로 기존 카탈로그를 유지하며 목록을 수집한다. 신규와 변경은 최신 운영 inventory의 해시로 대조한다. 변경은 expected_previous_hash와 원천 서비스·검증 수준을 확인하고 source_version을 증가시킨다. 상세 보강된 기존 행은 덮어쓰지 않는다.
+
+infra/apply_work24.py build --source 경로 --incremental은 별도 입력 파일로 증분 패키지를 만든다. submit 시 전체 DB gzip 백업 검증을 먼저 수행하며 변경 전 행을 별도 보존한다. 이후 트랜잭션별 신규/변경·Outbox를 함께 커밋하고 기존 교육 별칭에 반영한다. 시작일 도래/미확인 내일배움카드는 원본 모집 상태를 바꾸지 않고 검색 문서만 제외한다. Bedrock 호출은 없다.

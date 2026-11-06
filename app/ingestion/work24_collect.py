@@ -107,26 +107,26 @@ def report(db,run,out):
     return value
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--env-path',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--start',type=date.fromisoformat,required=True);ap.add_argument('--end',type=date.fromisoformat,required=True);ap.add_argument('--resume',action='store_true');ap.add_argument('--catalog',type=Path);ap.add_argument('--run-id');ap.add_argument('--interval',type=float,default=1.25);ap.add_argument('--window-days',type=int,default=7)
+    ap=argparse.ArgumentParser();ap.add_argument('--env-path',type=Path,required=True);ap.add_argument('--output',type=Path,required=True);ap.add_argument('--start',type=date.fromisoformat,required=True);ap.add_argument('--end',type=date.fromisoformat,required=True);ap.add_argument('--resume',action='store_true');ap.add_argument('--catalog',type=Path);ap.add_argument('--run-id');ap.add_argument('--interval',type=float,default=1.25);ap.add_argument('--window-days',type=int,default=7);ap.add_argument('--services',nargs='+',choices=list(SERVICES),default=list(SERVICES))
     args=ap.parse_args()
     if args.end<args.start or args.interval<1.25 or not 1<=args.window_days<=366:raise ValueError('invalid_scope_or_interval')
     keys={}
     for line in args.env_path.read_text(encoding='utf-8-sig').splitlines():
         if line.lstrip().startswith('#') or '=' not in line:continue
         k,v=line.split('=',1);keys[k.strip()]=v.strip().strip('"').strip("'")
-    if any(not keys.get(v[1]) for v in SERVICES.values()):raise ValueError('missing_service_key')
+    if any(not keys.get(SERVICES[name][1]) for name in args.services):raise ValueError('missing_service_key')
     if args.output.exists() and any(args.output.iterdir()) and not args.resume:raise ValueError('nonempty_output_requires_resume')
     args.output.mkdir(parents=True,exist_ok=True)
     catalog=args.catalog or args.output/'catalog.sqlite3'
     catalog.parent.mkdir(parents=True,exist_ok=True)
-    db=sqlite3.connect(catalog);init(db)
+    db=sqlite3.connect(catalog,timeout=30);db.execute('PRAGMA journal_mode=WAL');init(db)
     run=args.run_id or args.start.isoformat()+'_'+args.end.isoformat()
     prior=db.execute('SELECT status FROM runs WHERE id=?',(run,)).fetchone()
     if prior and not args.resume:raise ValueError('resume_required')
     if prior and db.execute('SELECT start,end FROM runs WHERE id=?',(run,)).fetchone()!=(args.start.isoformat(),args.end.isoformat()):raise ValueError('resume_scope_mismatch')
     if not prior:
         db.execute("INSERT INTO runs VALUES(?,?,?,'running')",(run,args.start.isoformat(),args.end.isoformat()))
-        for service in SERVICES:
+        for service in args.services:
             for lo,hi in date_windows(args.start,args.end,args.window_days):db.execute('INSERT INTO buckets(run,service,start,end) VALUES(?,?,?,?)',(run,service,lo.isoformat(),hi.isoformat()))
         db.commit()
     db.execute("UPDATE runs SET status='running' WHERE id=?",(run,));db.commit()
@@ -156,7 +156,12 @@ def main():
             for secret in keys.values():
                 if secret:safe=safe.replace(secret,'[REDACTED]')
             dest=args.output/'pages'/service/(start+'_'+end);dest.mkdir(parents=True,exist_ok=True)
-            with gzip.open(dest/(str(page)+'.xml.gz'),'wt',encoding='utf-8') as stream:stream.write(safe)
+            target=dest/(str(page)+'.xml.gz')
+            if target.exists():
+                import shutil
+                prior=dest/(str(page)+'.prior-'+datetime.now(KST).strftime('%Y%m%dT%H%M%S%f')+'.xml.gz')
+                shutil.copy2(target,prior)
+            with gzip.open(target,'wt',encoding='utf-8') as stream:stream.write(safe)
             with db:
                 save_page(db,run,(service,start,end,page),total,rows,hashlib.sha256(raw).hexdigest())
                 if page*100>=total:db.execute("UPDATE buckets SET status='done' WHERE run=? AND service=? AND start=? AND end=?",(run,service,start,end))

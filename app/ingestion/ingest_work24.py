@@ -47,3 +47,38 @@ def insert_batch(rows,conn):
                 events.append((actual['offering_id'],1))
             cur.executemany("INSERT INTO search_outbox(entity_type,entity_id,source_version,operation) VALUES('training',%s,%s,'upsert')",events)
     return {'inserted':len(fresh),'skipped':len(rows)-len(fresh)}
+
+
+def apply_incremental(rows,conn):
+    """Card-only updates with optimistic version/hash checks; caller commits."""
+    if not rows or len(rows)>200 or len({r['source_id'] for r in rows})!=len(rows):raise ValueError('invalid_work24_batch')
+    result={'inserted':0,'updated':0,'skipped':0}
+    for raw in rows:
+        row=validated(raw)
+        if row['source']!='goyong24_training' or row['raw_detail']['collection_metadata']['service']!='card':raise ValueError('card_only_incremental_scope')
+        with conn.cursor() as cur:
+            cur.execute('SELECT offering_id,content_hash,source_version,raw_detail FROM training_offerings WHERE source=%s AND source_id=%s',(row['source'],row['source_id']))
+            old=cur.fetchone()
+            if old is None:
+                if raw.get('expected_previous_hash'):raise ValueError('previous_work24_row_missing')
+                part=insert_batch([raw],conn);result['inserted']+=part['inserted'];result['skipped']+=part['skipped'];continue
+            if old['content_hash']==row['content_hash']:
+                result['skipped']+=1;continue
+            if raw.get('expected_previous_hash')!=old['content_hash']:raise ValueError('concurrent_work24_change')
+            previous=old['raw_detail']
+            if isinstance(previous,str):previous=json.loads(previous)
+            meta=previous.get('collection_metadata',{})
+            if meta.get('service')!='card' or meta.get('validation_level')!='list_schema_only':raise ValueError('preserve_enriched_work24_row')
+            row['source_version']=int(old['source_version'])+1
+            columns=[k for k in row if k not in ('source','source_id')]
+            values=[]
+            for key in columns:
+                value=row[key]
+                if key in JSON_FIELDS:value=json.dumps(value,ensure_ascii=False)
+                elif key in TIME_FIELDS and value is not None:value=datetime.fromisoformat(value.replace('Z','+00:00')).astimezone(timezone.utc).replace(tzinfo=None)
+                values.append(value)
+            cur.execute('UPDATE training_offerings SET '+','.join(k+'=%s' for k in columns)+' WHERE offering_id=%s AND content_hash=%s AND source_version=%s',values+[old['offering_id'],old['content_hash'],old['source_version']])
+            if cur.rowcount!=1:raise ValueError('concurrent_work24_change')
+            cur.execute("INSERT INTO search_outbox(entity_type,entity_id,source_version,operation) VALUES('training',%s,%s,'upsert')",(old['offering_id'],row['source_version']))
+            result['updated']+=1
+    return result
