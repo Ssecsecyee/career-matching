@@ -194,3 +194,12 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
  .unified-workspace .browse-toolbar .list-search{flex-basis:100%}
  .unified-workspace .browse-page{padding:16px 12px 40px}
 }
+
+/* Roundy composer: fixed-size icon, blue send control. */
+.unified-workspace .composer .send{display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;height:38px;min-width:38px;min-height:38px;padding:0;border:0;border-radius:12px;background:#2563eb;color:#fff;line-height:1;box-shadow:none}
+.unified-workspace .composer .send:hover:not(:disabled){background:#1d4ed8}
+.unified-workspace .composer .send:disabled{background:#dbeafe;color:#79a2e8;opacity:1}
+.unified-workspace .composer .send svg{display:block;width:20px;height:20px;flex:none}
+.unified-workspace .composer:focus-within{border-color:#93b9f5;box-shadow:0 0 0 3px #2563eb0d}
+.unified-workspace .composer textarea{resize:none}
+.unified-workspace .copilot-heading strong{color:#2459a7}
