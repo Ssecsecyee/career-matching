@@ -40,7 +40,23 @@ class AgentCoreTests(unittest.TestCase):
    import json
    self.assertEqual(json.loads(p.read_text())['reserved_turns'],26)
  def test_contract_has_no_execution_or_write_tools(self):
-  self.assertEqual([t['name'] for t in tools()],['get_saved_answers','search_jobs','search_training'])
+  self.assertEqual([t['name'] for t in tools()],['next_results','get_saved_answers','search_jobs','search_training'])
  def test_engine_is_only_explicit_free_text_search(self):
   validate_payload({'action':'search','message':'hello','engine':'agentcore','request_id':str(uuid4())})
   with self.assertRaises(ValueError):validate_payload({'action':'search','search_plan':{},'engine':'agentcore','request_id':str(uuid4())})
+
+ def test_next_jobs_after_assessment_excludes_seen_and_preserves_answers(self):
+  from copy import deepcopy
+  class Jobs:
+   def search(self,plan,exclude_ids=()):
+    self.excluded=list(exclude_ids)
+    return 1,[{'source_id':'new','title':'Other job','source_version':1}]
+  jobs=Jobs();flow=DialogueFlow(jobs,None,None);a=self.adapter(None);a.flow=flow
+  state={'stage':'assessment_checkpoint','profile':{},'selected':{'source_id':'selected','source_version':2},'checks':[{'condition_id':'one','assessment':'unmet'}],'search_navigation':{'plan':{'keyword':'','region':'','skills':[],'limit':3},'shown_ids':['selected','seen']}}
+  selected=deepcopy(state['selected']);checks=deepcopy(state['checks'])
+  output,result=a.dispatch('next_results',{'target':'jobs'},state,{'message':'other jobs'})
+  self.assertTrue(result['search_continuation']);self.assertEqual(result['candidate_jobs'][0]['source_id'],'new')
+  self.assertEqual(jobs.excluded,['selected','seen']);self.assertEqual(state['selected'],selected);self.assertEqual(state['checks'],checks)
+ def test_navigation_rejects_identity_or_unsupported_target(self):
+  for args in ({'target':'jobs','owner':'other'},{'target':'shell'},{}):
+   with self.assertRaises(ValueError):self.adapter(None).dispatch('next_results',args,{}, {})

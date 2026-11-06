@@ -53,3 +53,8 @@ The approved USD 5 experiment budget and global six-turn reservation remain unch
 ## Turn ceiling removed with explicit cost approval
 
 The user explicitly approved exceeding the previous USD 5 experiment budget and removing the six-turn ceiling. Existing reserved_turns values remain counters and do not block requests. Failures also increment the counter. The file lock prevents concurrent writes. There is no real-time dollar billing cutoff. Administrator-only access and per-request execution/time/output safety limits remain. No paid model verification was run for this change.
+
+
+## Harness v3 result navigation
+
+The inline next_results tool exposes the existing ContextRouter navigation action with target jobs/training only. Other-job requests after assessment use prior criteria and exclude already displayed IDs, while preserving selected source and checks. Search tools remain for changed criteria. Tool trace records navigation success/error. A regression test covers assessment_checkpoint -> unseen job results without losing answers. This fixes the missing capability; live natural-language accuracy is not established by mocked tests.
