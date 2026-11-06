@@ -13,7 +13,7 @@ export function latestSearchResults(messages, target) {
       if(d.stage==='choose_job' || d.search_continuation){
         const cards=d.candidate_jobs || [];
         const items=d.search_continuation?[...list.items,...cards]:cards;
-        list={items:[...new Map(items.map(c=>[`${c.source || 'jumpit'}:${c.source_id}`,c])).values()],total:d.search_continuation?list.total:d.total,summary:d.search_summary || list.summary,hasMore:cards.length>0 && d.total>cards.length};
+        list={items:[...new Map(items.map(c=>[`${c.source || 'jumpit'}:${c.source_id}`,c])).values()],total:d.search_continuation?list.total:d.total,summary:d.search_summary || (d.search_continuation?list.summary:undefined),hasMore:cards.length>0 && d.total>cards.length};
       }
     }
     return list;

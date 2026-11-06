@@ -54,3 +54,14 @@ class CatalogSearchTests(unittest.TestCase):
   self.assertIsNone(MySQLTrainingRepository(Connection).get({'source':'boottent','source_id':'example'}))
   self.assertTrue(cursor.sql.startswith('SELECT '))
   self.assertEqual(cursor.params,('boottent','example'))
+
+ def test_region_refinement_preserves_ai_role_and_skills(self):
+  class Jobs:
+   def search(self,plan,**kwargs):self.plan=plan;return 0,[]
+  jobs=Jobs();flow=DialogueFlow(jobs,None,None)
+  state={'search_navigation':{'plan':{'schema_version':2,'roles':['프론트엔드'],'owned_skills':['React'],'limit':20},'shown_ids':[]}}
+  def no_model(*args):raise AssertionError('Unexpected model invocation')
+  flow.advance(state,{'action':'search','preserve_current':True,'search_plan':{'region':'경기','limit':20}},no_model)
+  self.assertEqual(jobs.plan.roles,('프론트엔드',))
+  self.assertEqual(jobs.plan.owned_skills,('React',))
+  self.assertEqual(jobs.plan.regions,('경기',))

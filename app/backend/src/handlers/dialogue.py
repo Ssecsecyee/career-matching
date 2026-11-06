@@ -28,9 +28,10 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": {"filters"}, "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": {"filters"}, "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine", "preserve_current"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
+    if "preserve_current" in value and type(value["preserve_current"]) is not bool:raise ValueError("Invalid preserve_current")
     if action not in fields or set(value) - common - fields[action]:
         raise ValueError("Unsupported request fields")
     if value.get("model_tier", "main") != "main":

@@ -82,7 +82,18 @@ class DialogueFlow:
             record(state,payload.get('message',''),'search')
             statement=payload.get('profile',{}).get('user_statement')
             if isinstance(statement,str):record(state,statement)
-            plan=SearchPlan.parse(payload['search_plan'])
+            incoming=SearchPlan.parse(payload['search_plan'])
+            previous=(state.get('search_navigation') or {}).get('plan')
+            if payload.get('preserve_current') and previous and not incoming.keyword:
+                base=SearchPlan.parse(previous).to_dict()
+                if base.get('schema_version')==2:
+                    base.update(regions=[incoming.region] if incoming.region else [],limit=incoming.limit)
+                    base['required_skills']=list(dict.fromkeys(base.get('required_skills',[])+list(incoming.skills)))
+                else:
+                    base.update(region=incoming.region,limit=incoming.limit)
+                    base['skills']=list(dict.fromkeys(base.get('skills',[])+list(incoming.skills)))
+                plan=SearchPlan.parse(base)
+            else:plan=incoming
             return self.execute_search(state,plan,plan.to_dict(),payload)
 
         if action == 'view_training':
