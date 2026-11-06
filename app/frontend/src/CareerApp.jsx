@@ -108,7 +108,10 @@ export function CareerApp({page='chat',adminChat=false}) {
   const initialBrowse=useRef(false);
   const initialTraining=useRef(false);
   useEffect(()=>{
-    if(unlocked && apiEnabled && !adminChat && page==='training' && !initialTraining.current && !inFlight.current){initialTraining.current=true;send(requestPayload('browse_training',{},session));}
+    if(unlocked && apiEnabled && !adminChat && page==='training' && !initialTraining.current && !inFlight.current){
+      initialTraining.current=true;
+      if(!messages.some(m=>m.data?.learning_search || ['training_search_review','training_no_results'].includes(m.data?.stage)))send(requestPayload('browse_training',{},session));
+    }
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(()=>{
     if(unlocked && apiEnabled && !adminChat && page==='jobs' && !initialBrowse.current && !messages.some(m=>m.data?.stage==='choose_job' || (m.data?.stage==='no_results' && m.data?.search_summary)) && !inFlight.current){
@@ -162,6 +165,7 @@ export function CareerApp({page='chat',adminChat=false}) {
         if (response.status === 401) setUnlocked(false);
         return;
       }
+      if(data.learning_search || ['training_search_review','training_no_results'].includes(data.stage))initialTraining.current=true;
       if(!adminChat && ['#jobs','#training'].includes(window.location.hash)){
         if(data.stage==='choose_job')window.location.hash='#jobs';
         else if(data.learning_search && !['training_search_review','training_no_results'].includes(data.stage))window.location.hash='#training';

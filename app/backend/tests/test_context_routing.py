@@ -135,7 +135,7 @@ class IntentAdapterTests(unittest.TestCase):
             result,usage=BedrockPlanner('m','r',client=runtime,on_partial=partial).classify('딴거',{})
         self.assertEqual(result['decision']['action'],'next_results')
         self.assertEqual(runtime.calls[0]['inferenceConfig']['maxTokens'],1536)
-        self.assertEqual(usage['prompt_version'],'context-intent-v7');partial.assert_not_called()
+        self.assertEqual(usage['prompt_version'],'context-intent-v8');partial.assert_not_called()
 
     def test_invalid_output_is_available_for_private_audit_only(self):
         runtime=FakeRuntime('not JSON')
@@ -152,7 +152,7 @@ class IntentAuditTests(unittest.TestCase):
         store=IntentDecisionStore(lambda:connection)
         identity=store.start(ticket,'model',{'stage':'conversation'})
         params=cur.execute.call_args.args[1]
-        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v7')
+        self.assertEqual(params[3],3);self.assertEqual(params[-2],'context-intent-v8')
         cur.fetchone.side_effect=[{'state_version':2,'requirement_answers':{'_lease':{'request':'r'}}}]
         store.classified(ticket,identity,'token=private-value a@example.com',{'action':'chat'})
         params=cur.execute.call_args.args[1]

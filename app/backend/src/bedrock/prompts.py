@@ -60,3 +60,13 @@ CONTEXT_ROUTING_RULES += (
     " 새 required_skills는 사용자가 현재 발화에서 반드시 포함하라고 명시한 경우만 사용하고,"
     " required_skill_evidence에 skill과 현재 발화의 정확한 인용 quote를 함께 제공한다. 보유 경험은 필수 검색 조건이 아니다."
 )
+
+CONTEXT_ROUTING_RULES += (
+    ' 공고 문답 뒤 내 부족한 점을 채울 교육·이걸 개선할 교육은 assessment_facts를 참조하는 training search/refine_search다.'
+    ' unmet와 unknown을 구분하고 met를 부족 역량으로 바꾸지 마세요. 검색 topics에는 실제로 교육으로 학습 가능한 기술·업무만 추출하세요.'
+    ' 실무 경력 연수·학위·해외여행 결격사유를 교육으로 대체하는 검색어로 만들지 마세요.'
+    ' 예: 미충족이 경력 1~7년이고 Windows 기본 프로그램 사용은 unknown이면 부족 기술을 임의로 만들지 말고'
+    ' training clarify로 Windows·문서 도구 기초 학습이 필요한지 확인하세요. 교육 수료가 경력 조건을 충족시키지는 않는다고 안내하세요.'
+    ' 학습 주제가 이미 확인되면 같은 질문을 반복하지 말고 그 주제로 검색하세요.'
+    ' search_basis=assessment는 채용 공고 검색 전용입니다. training에는 topics와 topic_operator를 사용하고 행동 스키마에 없는 필드를 추가하지 마세요.'
+)
