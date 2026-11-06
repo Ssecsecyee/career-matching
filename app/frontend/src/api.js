@@ -12,7 +12,8 @@ export function requestPayload(action, values, sessionId, requestId = crypto.ran
 }
 
 export async function postChat({ payload, accessCode, ownerToken, fetcher = fetch, pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 240, onProgress = () => {} }) {
-  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${accessCode}`, 'X-Client-Token': ownerToken };
+  const headers = { 'Content-Type': 'application/json', 'X-Client-Token': ownerToken };
+  if(accessCode)headers.Authorization = 'Bearer '+accessCode;
   let result = await fetcher('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload) });
   let body = await result.json();
   if (result.status !== 202) return { ok: result.ok, status: result.status, body };

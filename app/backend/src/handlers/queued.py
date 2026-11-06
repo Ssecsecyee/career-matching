@@ -59,7 +59,7 @@ class JobStore:
 def authorize(headers):
     from src.services.admin_auth import authenticate
     secret=read_secret(os.environ['CHAT_SECRET_ARN'])
-    return authenticate(headers,secret.get('token',''),secret.get('admin_token',''))
+    return authenticate(headers,secret.get('token',''),secret.get('admin_token',''),allow_public=secret.get('public_access') is True)
 
 
 

@@ -119,8 +119,10 @@ def publish(args):
         content_type='text/javascript' if key.endswith('.js') else (mimetypes.guess_type(key)[0] or 'application/octet-stream')
         s3.put_object(Bucket=out['WebBucket'],Key=key,Body=path.read_bytes(),ContentType=content_type,
             CacheControl='no-cache' if key=='index.html' else 'public,max-age=31536000,immutable',ServerSideEncryption='AES256')
-    s3.put_object(Bucket=out['WebBucket'],Key='deploy-config.json',Body=json.dumps({'apiEnabled':bool(origin)}).encode(),
+    s3.put_object(Bucket=out['WebBucket'],Key='deploy-config.json',Body=json.dumps({'apiEnabled':bool(origin),'publicAccess':current.get('public_access',False) if args.public_access is None else args.public_access}).encode(),
         ContentType='application/json',CacheControl='no-store',ServerSideEncryption='AES256')
+    if args.public_access is not None:
+        current['public_access']=args.public_access;saved(current)
     client(sess,'cloudfront').create_invalidation(DistributionId=out['DistributionId'],InvalidationBatch={
         'Paths':{'Quantity':1,'Items':['/*']},'CallerReference':datetime.now(timezone.utc).isoformat()})
     print(json.dumps({'url':out['WebsiteUrl'],'backend_connected':bool(origin)}))
@@ -128,6 +130,7 @@ def publish(args):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['template','plan','review','apply','status','publish'])
+    parser.add_argument('--public-access',action=argparse.BooleanOptionalAction,default=None,help='Show the ordinary site without an access-code form; server must allow public access separately')
     parser.add_argument('--api-origin',help='HTTPS endpoint from backend.py status; preserve existing origin when omitted')
     parser.add_argument('--profile',default='myisb_IsbUsersPS-954935267704')
     parser.add_argument('--region',default='ap-northeast-2',choices=['ap-northeast-2'])

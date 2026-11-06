@@ -4,7 +4,7 @@ import hmac
 import re
 
 
-def authenticate(headers, user_token, admin_token=''):
+def authenticate(headers, user_token, admin_token='', *, allow_public=False):
     headers={k.lower():v for k,v in headers.items()}
     supplied=headers.get('authorization','')
     client=headers.get('x-client-token','')
@@ -16,4 +16,6 @@ def authenticate(headers, user_token, admin_token=''):
     for role,token in [('admin',admin_token),('user',user_token)]:
         if len(token)>=32 and hmac.compare_digest(supplied,'Bearer '+token):
             return hmac.new(token.encode(),client.encode(),hashlib.sha256).hexdigest(),client,role
+    if allow_public is True and not supplied and len(user_token)>=32:
+        return hmac.new(user_token.encode(),client.encode(),hashlib.sha256).hexdigest(),client,'user'
     return None
