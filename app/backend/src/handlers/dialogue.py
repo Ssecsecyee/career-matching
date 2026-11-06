@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -51,6 +51,8 @@ def validate_payload(value):
     elif action == "browse_training":
         pass
     elif action == "search":
+        if value.get("engine","legacy") not in {"legacy","agentcore"}:raise ValueError("Invalid engine")
+        if "engine" in value and value.get("search_plan") is not None:raise ValueError("Engine applies to free text only")
         if "page_size" in value and (type(value["page_size"]) is not int or value["page_size"] != 20):
             raise ValueError("Invalid browse page size")
         if value.get("search_plan") is not None:
@@ -155,7 +157,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             selected_classifier=QuestionConditionReviewer(model,region)
 
         def invoke(purpose, function, *args):
-            adapter = planner if purpose in {"search_plan", "consultation", "intent_classification", "context_response"} else questioner
+            adapter = planner if purpose in {"search_plan", "consultation", "intent_classification", "context_response", "agentcore"} else questioner
             if purpose=='condition_review':adapter=selected_classifier
             from src.bedrock.prompts import SEARCH_PROMPT_VERSION, CONSULTATION_PROMPT_VERSION
             version = SEARCH_PROMPT_VERSION if purpose == "search_plan" else "question-memory-v2"
@@ -164,6 +166,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
                 from src.schemas.intent import INTENT_VERSION
                 version = INTENT_VERSION
             if purpose == 'context_response':version = 'context-response-v1'
+            if purpose == 'agentcore':version = 'career-harness-v1'
             if purpose == 'condition_review':
                 from src.schemas.condition_review import POLICY_VERSION
                 version=getattr(adapter,'prompt_version',POLICY_VERSION)
@@ -192,7 +195,27 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         from src.services.context_router import ContextRouter
         def decided(raw, decision):
             if audit:audit.classified(ticket, decision_id, raw, decision)
-        state, result, evidence = ContextRouter(flow).advance(ticket['state'], payload, invoke, decided)
+        state=ticket['state']
+        if payload['action']=='search' and payload.get('search_plan') is None:
+            requested=payload.get('engine') or state.get('conversation_engine','legacy')
+            if requested=='agentcore' and (role!='admin' or os.getenv('ENABLE_AGENTCORE_EXPERIMENT')!='true'):
+                raise FlowError('agentcore_experiment_admin_only',403)
+            if state.get('conversation_engine',requested)!=requested:raise FlowError('conversation_engine_changed_start_new',409)
+            state['conversation_engine']=requested
+            if requested=='agentcore':
+                import boto3
+                from botocore.config import Config
+                from src.agentcore.adapter import HarnessAdapter
+                from src.agentcore.budget import reserve
+                arn=os.environ['AGENTCORE_HARNESS_ARN']
+                sdk=boto3.Session(region_name=region).client('bedrock-agentcore',config=Config(connect_timeout=5,read_timeout=60,retries={'total_max_attempts':1}))
+                adapter=HarnessAdapter(sdk,arn,flow,ticket['session_id'],owner,model,region,
+                    lambda:reserve(os.getenv('AGENTCORE_BUDGET_PATH','/opt/career/agentcore-budget.json')))
+                result=invoke('agentcore',adapter.run,payload['message'],state,payload)
+                evidence=[]
+                decided(None,{'engine':'agentcore','tools':state.get('agentcore_tool_trace',[])})
+            else:state,result,evidence=ContextRouter(flow).advance(state,payload,invoke,decided)
+        else:state,result,evidence=ContextRouter(flow).advance(state,payload,invoke,decided)
         from src.services.condition_review import attach_selection
         result=attach_selection(state,result)
         if state.get("selected"):
