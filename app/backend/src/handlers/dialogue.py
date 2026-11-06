@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": {"filters"}, "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -49,7 +49,9 @@ def validate_payload(value):
             if value.get('assessment') not in {'met','unmet','unknown'}:raise ValueError('Invalid revised assessment')
             if not isinstance(value.get('detail',''),str) or len(value.get('detail',''))>2000:raise ValueError('Invalid revised detail')
     elif action == "browse_training":
-        pass
+        if "filters" in value:
+            from src.schemas.catalog import TrainingCatalogFilters
+            TrainingCatalogFilters.model_validate(value["filters"])
     elif action == "search":
         if value.get("engine","legacy") not in {"legacy","agentcore"}:raise ValueError("Invalid engine")
         if "engine" in value and value.get("search_plan") is not None:raise ValueError("Engine applies to free text only")

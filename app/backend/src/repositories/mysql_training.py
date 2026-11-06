@@ -46,7 +46,7 @@ def card(row, topics, *, now=None):
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="or",browse_all=False):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="or",browse_all=False,catalog_filters=None):
         if not isinstance(topics,list) or not (0 if browse_all else 1)<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
         from src.services.training_navigation import training_operator
@@ -67,11 +67,19 @@ class MySQLTrainingRepository:
             extra+=" AND (starts_at > UTC_TIMESTAMP() OR (starts_at IS NULL AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.date_precision.starts_at.raw')),'%%Y-%%m-%%d') > DATE(UTC_TIMESTAMP() + INTERVAL 9 HOUR))) AND recruitment_status <> 'closed'"
         if delivery_mode:
             extra+=' AND delivery_mode=%s';params.append(delivery_mode)
+        if catalog_filters is not None:
+            from src.schemas.catalog import training_clauses
+            extra_clauses,extra_params=training_clauses(catalog_filters)
+            if extra_clauses:extra+=' AND ('+') AND ('.join(extra_clauses)+')'
+            params.extend(extra_params)
         fields='offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
         conn=self.factory()
         try:
             with conn.cursor() as cur:
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+(" ORDER BY RAND() LIMIT 1000" if browse_all and not topics else " ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000"),params)
+                if catalog_filters is not None:
+                    cur.execute("SELECT COUNT(*) AS n FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra,params)
+                    self.last_candidate_total=int(cur.fetchone()['n'])
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+(" ORDER BY RAND() LIMIT 1000" if browse_all and not topics and not catalog_filters else " ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000"),params)
                 rows=cur.fetchall()
                 cards=[card(row,topics) for row in rows]
                 if candidates_only:

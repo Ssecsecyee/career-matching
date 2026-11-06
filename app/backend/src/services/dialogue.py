@@ -55,8 +55,9 @@ class DialogueFlow:
             from src.services.context_router import ContextRouter
             state.pop('training_search_context',None)
             state['training_browse']=True
+            state['training_catalog_filters']=payload.get('filters')
             state['training_displayed']={}
-            state['training_navigation']={'topics':[],'delivery_mode':None,'shown_ids':[],'shown_groups':[],'topic_operator':'or'}
+            state['training_navigation']={'topics':[],'delivery_mode':(payload.get('filters') or {}).get('delivery_mode') if (payload.get('filters') or {}).get('delivery_mode') in {'online','offline'} else None,'shown_ids':[],'shown_groups':[],'topic_operator':'or'}
             state['stage']='conversation'
             state,result,evidence=ContextRouter(self).training(state,None,reset=False)
             result['training_continuation']=False
@@ -249,6 +250,7 @@ class DialogueFlow:
     def execute_search(self, state, plan, raw_plan, payload, *, require_review=False, exclude_ids=()):
         """Execute a validated plan without any free-text interpretation."""
         evidence = []
+        if plan.schema_version==1:state.pop('search_context',None)
         if payload.get('page_size') == 20:
             state['browse_page_size'] = 20
             plan = SearchPlan.parse({**plan.to_dict(), 'limit': 20})

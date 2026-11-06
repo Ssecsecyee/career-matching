@@ -9,7 +9,7 @@ export function latestSearchResults(messages, target) {
     let list={items:[],total:0,hasMore:false};
     for(const message of messages){
       const d=message.role==='assistant' && message.data;if(!d)continue;
-      if(d.stage==='no_results' && d.search_summary){list={items:[],total:0,hasMore:false,summary:d.search_summary};continue;}
+      if(d.stage==='no_results' && (d.search_summary || Array.isArray(d.candidate_jobs))){list={items:[],total:0,hasMore:false,summary:d.search_summary};continue;}
       if(d.stage==='choose_job' || d.search_continuation){
         const cards=d.candidate_jobs || [];
         const items=d.search_continuation?[...list.items,...cards]:cards;

@@ -25,13 +25,13 @@ test('actual tab changes preserve conversation draft and list selection without 
  await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(!container.querySelector('.chat-view').hidden);assert.ok(container.querySelector('.app').classList.contains('explorer-layout'));
  await change('#my');assert.doesNotMatch(container.querySelector('.my-page').textContent,/상담용 이력서/);assert.match(container.querySelector('.my-page').textContent,/최근 본 항목/);await change('#jobs');
  const searchField=container.querySelector('main[aria-label="채용공고 탐색"] input[type="search"]');
- await fill(searchField,'Python');assert.equal(container.querySelectorAll('.explore-card').length,1);
- assert.match(container.querySelector('.explore-card').textContent,/Python developer/);
+ await fill(searchField,'Python');assert.equal(container.querySelectorAll('.explore-card').length,2);
+ assert.match(container.querySelector('.browse-card-grid').textContent,/Python developer/);
  await fill(searchField,'');
- const region=container.querySelector('main[aria-label="채용공고 탐색"] select');
+ const region=container.querySelector('main[aria-label="채용공고 탐색"] select[aria-label="지역"]');
  await act(async()=>{region.value='부산';region.dispatchEvent(new window.Event('change',{bubbles:true}));});
- assert.equal(container.querySelectorAll('.explore-card').length,1);
- await act(async()=>{container.querySelector('.browse-toolbar .quiet').click();});
+ assert.equal(container.querySelectorAll('.explore-card').length,2);
+ await act(async()=>{region.value='';region.dispatchEvent(new window.Event('change',{bubbles:true}));});
  assert.equal(container.querySelectorAll('.explore-card').length,2);assert.equal(requests,2);
  const item=container.querySelector('.browse-result');assert.ok(item);await act(async()=>item.click());assert.match(container.querySelector('.browse-detail').textContent,/Synthetic developer/);assert.match(container.querySelector('.job-detail-sections').textContent,/Build software/);assert.ok(container.querySelector('.detail-header'));assert.equal(container.querySelector('.detail-header .detail-close'),null);assert.match(container.querySelector('.browse-actions').textContent,/내 역량 확인하기/);assert.equal(container.querySelectorAll('.browse-actions button,.browse-actions a').length,3);assert.doesNotMatch(container.querySelector('.browse-actions').textContent,/내 스크랩 보기|상담창에서 이어가기/);
  await act(async()=>{container.querySelector('.detail-backdrop').click();});assert.equal(container.querySelector('.browse-detail'),null);
@@ -84,6 +84,17 @@ test('actual tab changes preserve conversation draft and list selection without 
  assert.equal(sent.at(-1).action,'browse_training');
  await change('#jobs');assert.equal(sent.at(-1).action,'search');assert.equal(sent.at(-1).session_id,'44444444-4444-4444-8444-444444444444');assert.match(container.querySelector('.browse-card-grid').textContent,/Jobs after training/);
  const count=sent.length;await change('#training');await change('#jobs');assert.equal(sent.length,count);
+ const manualForm=container.querySelector('form[aria-label="공고 직접 검색"]');
+ await fill(manualForm.querySelector('input[type="search"]'),'Company');
+ await act(async()=>{const field=manualForm.querySelector('[aria-label="검색 컬럼"]');field.value='company_name';field.dispatchEvent(new window.Event('change',{bubbles:true}));});
+ await submit(manualForm);
+ assert.equal(sent.at(-1).search_plan.text_field,'company_name');assert.equal(sent.at(-1).search_plan.keyword,'Company');assert.equal(sent.at(-1).message,undefined);
+ await change('#training');
+ const educationForm=container.querySelector('form[aria-label="교육 직접 검색"]');
+ await fill(educationForm.querySelector('input[type="search"]'),'Python');
+ await submit(educationForm);
+ assert.equal(sent.at(-1).action,'browse_training');assert.equal(sent.at(-1).filters.keyword,'Python');assert.equal(sent.at(-1).message,undefined);
+
 
 
  }finally{await act(async()=>root.unmount());window.happyDOM.abort();}

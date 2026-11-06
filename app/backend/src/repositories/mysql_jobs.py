@@ -40,10 +40,15 @@ class MySQLJobRepository:
         parameters = ["jumpit", "active"] + (["unknown"] if self.include_unverified else [])
         if plan.keyword:
             conditions.append("LOWER(CONCAT_WS(' ',title,company_name,responsibilities,qualifications,preferred_requirements,CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci)) LIKE LOWER(%s) ESCAPE '='")
+            if plan.text_field!='all':
+                field="CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)" if plan.text_field=='tech_stacks' else plan.text_field
+                conditions[-1]="LOWER("+field+") LIKE LOWER(%s) ESCAPE '='"
             parameters.append(literal_like(plan.keyword))
         if plan.region:
-            conditions.append("CONCAT_WS(' ',CAST(addresses AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci,location_text) LIKE %s ESCAPE '='")
-            parameters.append(literal_like(plan.region))
+            from src.services.search_terms import region_terms
+            variants=region_terms([plan.region])
+            conditions.append('('+' OR '.join(["CONCAT_WS(' ',CAST(addresses AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci,location_text) LIKE %s ESCAPE '='"]*len(variants))+')')
+            parameters.extend(literal_like(v) for v in variants)
         for skill in plan.skills:
             conditions.append("JSON_CONTAINS(LOWER(CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)),JSON_QUOTE(LOWER(%s)))")
             parameters.append(skill)

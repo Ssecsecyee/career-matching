@@ -18,12 +18,18 @@ def build_query(plan, *, include_unverified=False, exclude_ids=()):
         return structured_query(plan, filters)
     filters += [{'match': {'skills': {'query': s}}} for s in plan.skills]
     if plan.region:
-        value = plan.region.replace('\\', '\\\\').replace('*', '\\*').replace('?', '\\?')
-        filters.append({'wildcard': {'location_search': {'value': '*' + value + '*'}}})
+        from src.services.search_terms import region_terms
+        clauses=[]
+        for term in region_terms([plan.region]):
+            value=term.replace(chr(92),chr(92)*2).replace('*',chr(92)+'*').replace('?',chr(92)+'?')
+            clauses.append({'wildcard':{'location_search':{'value':'*'+value+'*'}}})
+        filters.append(clauses[0] if len(clauses)==1 else {'bool':{'should':clauses,'minimum_should_match':1}})
+    from src.schemas.catalog import JOB_FIELDS
+    selected_field=JOB_FIELDS[plan.text_field]
     must = []
     if plan.keyword:
         must.append({'multi_match': {'query': plan.keyword, 'type': 'cross_fields', 'operator': 'and',
-                     'fields': ['title^4', 'company_name', 'responsibilities', 'qualifications^2',
+                     'fields': [selected_field] if selected_field else ['title^4', 'company_name', 'responsibilities', 'qualifications^2',
                                 'preferred_requirements', 'skills_text']}})
     return {'size': plan.limit, 'track_total_hits': True,
             'query': {'bool': {'filter': filters, 'must': must}},

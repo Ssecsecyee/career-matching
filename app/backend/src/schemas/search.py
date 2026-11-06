@@ -24,6 +24,7 @@ class CareerPreference(BaseModel):
 class SearchPlan(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
     # Deprecated fields retain the original literal/AND meaning for old clients.
+    text_field: Literal['all','title','company_name','responsibilities','qualifications','preferred_requirements','tech_stacks'] = 'all'
     keyword: Annotated[str, Field(max_length=120)] = ''
     region: Annotated[str, Field(max_length=80)] = ''
     skills: Terms = ()
@@ -92,5 +93,5 @@ class SearchPlan(BaseModel):
 
     def to_dict(self):
         if self.schema_version == 1:
-            return {k: self.model_dump(mode='json')[k] for k in ('keyword', 'region', 'skills', 'limit')}
+            return {**{k: self.model_dump(mode='json')[k] for k in ('keyword', 'region', 'skills', 'limit')},**({'text_field':self.text_field} if self.text_field!='all' else {})}
         return self.model_dump(mode='json', exclude={'keyword', 'region', 'skills'})

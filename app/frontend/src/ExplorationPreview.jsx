@@ -1,3 +1,4 @@
+import {CatalogSearch} from './CatalogSearch.jsx';
 import React, {useEffect,useRef,useState} from 'react';
 import {safeSourceUrl} from './api.js';
 import {TrainingStatus} from './TrainingStatus.jsx';
@@ -6,7 +7,7 @@ import {filterItems} from './browseFilters.js';
 import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
-export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false,personal=false}) {
+export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false,personal=false,onSearch}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState(''),[extra,setExtra]=useState('');
  const scrollArmed=useRef(false);
  const jobs=target==='jobs';
@@ -15,7 +16,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
  const current=results.items.find(item=>`${item.source || 'jumpit'}:${item.source_id}`===selected);
  const trainingDetail=current && trainingDetails[current.source+':'+current.source_id];
  const regions=[...new Set(results.items.map(regionOf).filter(Boolean))];
- const filtered=filterItems(results.items,{keyword,region,extra,jobs});
+ const filtered=onSearch?results.items:filterItems(results.items,{keyword,region,extra,jobs});
  const visible=filtered;
  const scrollSentinel=useRef(null);
  useEffect(()=>{
@@ -31,13 +32,13 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);window.removeEventListener('wheel',onScroll,true);window.removeEventListener('touchmove',onScroll,true);};
  },[personal,active,busy,loadError,keyword,region,extra,results.hasMore,results.items.length,onNext]);
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
-  {!personal && <><div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
+  {!personal && <>{onSearch?<CatalogSearch target={target} busy={busy} onSearch={onSearch} onReset={onReset}/>:<div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
    <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>
    {!jobs && <label className="list-region"><span>수강 방식</span><select aria-label="현재 목록 수강 방식" value={extra} onChange={e=>setExtra(e.target.value)}><option value="">전체 방식</option><option value="online">온라인</option><option value="offline">오프라인</option><option value="unknown">미확인</option></select></label>}
    {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');}}>필터 초기화</button>}
-  </div>
+  </div>}
   <div className="browse-heading"><h1>{'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
-   <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. AI에게 조건을 말하면 전체 검색 대상에서 좁혀집니다.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
+   <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. 위 검색창이나 라운디에게 조건을 말해 전체 검색 대상에서 좁혀보세요.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
   </div>
   </>}
   {jobs && results.summary && <section className="source" aria-label="현재 적용한 검색 조건"><strong>현재 적용한 조건</strong>{results.summary.filters?.length?<ul>{results.summary.filters.map(t=><li key={t}>{t}</li>)}</ul>:<p>지역·직무·필수 기술 제한 없음</p>}{results.summary.ranking?.length>0 && <p>관련성 순위: {results.summary.ranking.join(' · ')}</p>}</section>}
@@ -54,7 +55,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
      <div className="explore-card-footer"><a className="original-button" href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'모집 원문 확인 ↗':'교육 원문 ↗'}</a><button type="button" aria-label={isSaved(item)?'스크랩 해제':'스크랩 저장'} aria-pressed={isSaved(item)} onClick={()=>onSave?.(item)}>{isSaved(item)?'♥ 저장됨':'♡ 스크랩'}</button></div>
     </article>;
    })}</section>}
-  {!personal && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
+  {!personal && !onSearch && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
   {!personal && <div ref={scrollSentinel} className="browse-scroll-sentinel" aria-hidden="true"/>}
   {!personal && results.hasMore && <p className="fine" role="status">{busy?'목록을 더 불러오고 있어요…':'아래로 스크롤하면 더 불러옵니다'}</p>}
   {loadError && <div role="alert"><p>다음 목록을 불러오지 못했습니다.</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}

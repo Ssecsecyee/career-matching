@@ -175,6 +175,7 @@ class ContextRouter:
         raise FlowError('unsupported_intent_action')
 
     def preview_training(self,state,d):
+        state.pop('training_catalog_filters',None)
         from src.services.training_review import remember_review
         previous=(state.get('training_search_context') if state.get('stage') in {'training_search_review','training_no_results'} else None) or state.get('training_navigation') or state.get('learning_context') or {}
         topics=list(d.topics) if d.topics is not None else (previous.get('topics',[]) if d.action=='refine_search' else [])
@@ -242,6 +243,10 @@ class ContextRouter:
             courses=[];status='unavailable'
         else:
             kwargs={'exclude_groups':navigation['shown_groups']} if navigation.get('shown_groups') else {}
+            if state.get('training_catalog_filters') is not None:
+                repository=getattr(repository,'fallback',repository)
+                kwargs['catalog_filters']=state['training_catalog_filters']
+
             if not topics or state.get('training_browse'):kwargs['browse_all']=True
             if navigation.get('topic_operator','or')!='or':kwargs['topic_operator']=navigation['topic_operator']
             courses=confirmed if confirmed is not None else repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True,**kwargs)
@@ -268,6 +273,6 @@ class ContextRouter:
             learning['search_limited']=True
             message+=' 조회 범위 제한이 있어 다른 과정이 더 있을 수 있습니다. 검색 조건을 좁혀 주세요.'
         record(state,message,'assistant')
-        result={'stage':'conversation','message':message,'memory':public_memory(state),'training_continuation':confirmed is None,'training_has_more':bool(courses),'training_candidate_total':getattr(repository,'last_candidate_total',None)}
+        result={'stage':'conversation','message':message,'memory':public_memory(state),'training_continuation':confirmed is None,'training_has_more':bool(courses),'training_candidate_total':getattr(repository,'last_candidate_total',None),'catalog_filters':state.get('training_catalog_filters')}
         attach(result,learning)
         return state,result,[]
