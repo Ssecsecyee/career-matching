@@ -167,7 +167,7 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .unified-workspace .copilot-heading{position:relative;padding-right:90px}
 .unified-workspace .new-conversation{position:absolute;right:10px;top:12px;font-size:11px;padding:5px}
 .unified-workspace .browse-detail{width:min(510px,calc(100vw - 30px))}
-@media(max-width:800px){
+@media(max-width:1000px){
  .unified-workspace.explorer-layout{height:auto;overflow:visible}
  .unified-workspace.explorer-layout .workspace{height:auto}
  .unified-workspace.explorer-layout .workspace-body{display:flex;height:auto;overflow:visible;flex-direction:column}
@@ -178,4 +178,4 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
  .unified-workspace.explorer-layout .workspace>header{height:auto;min-height:72px;padding:10px 14px;flex-wrap:wrap}
 }
 
-@media(max-width:800px){.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1000px){.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:minmax(0,1fr)}}

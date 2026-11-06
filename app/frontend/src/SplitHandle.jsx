@@ -1,5 +1,6 @@
 import React,{useRef} from 'react';
-export function clampChatWidth(value,total){return Math.max(260,Math.min(value,680,Math.max(260,total-468)));}
+import {clampChatWidth} from './workspaceLayout.js';
+export {clampChatWidth} from './workspaceLayout.js';
 export function SplitHandle({width,onResize}){
  const drag=useRef(null);
  const total=el=>el.parentElement.getBoundingClientRect().width||window.innerWidth;

@@ -59,9 +59,9 @@ test('actual tab changes preserve conversation draft and list selection without 
  await act(async()=>splitter.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true})));
  assert.equal(container.querySelector('.app').style.getPropertyValue('--chat-width'),'360px');
  await act(async()=>{splitter.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,clientX:100,pointerId:1,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointermove',{clientX:180,pointerId:1,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointerup',{pointerId:1,bubbles:true}));});
- assert.equal(container.querySelector('.app').style.getPropertyValue('--chat-width'),'440px');
+ assert.equal(container.querySelector('.app').style.getPropertyValue('--chat-width'),Math.min(440,window.innerWidth-648)+'px');
  await act(async()=>{splitter.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,clientX:0,pointerId:2,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointermove',{clientX:10000,pointerId:2,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointerup',{pointerId:2,bubbles:true}));});
- assert.ok(Number(container.querySelector('.app').style.getPropertyValue('--chat-width').replace('px',''))<=window.innerWidth-468);
+ assert.ok(Number(container.querySelector('.app').style.getPropertyValue('--chat-width').replace('px',''))<=window.innerWidth-648);
 
  assert.equal(window.location.hash,'#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(detail.value,'Keep this answer detail');assert.equal(met.getAttribute('aria-pressed'),'true');
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');

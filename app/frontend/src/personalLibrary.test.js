@@ -24,3 +24,13 @@ test('filters distinguish teaching modes and skills; numbered pages never duplic
  assert.equal(new Set([...pageItems(jobs,1),...pageItems(jobs,2)].map(x=>x.source_id)).size,40);
  assert.equal(filterItems([{delivery_mode:'online'},{delivery_mode:'offline'},{}],{jobs:false,extra:'unknown'}).length,1);
 });
+
+import {clampChatWidth,catalogColumns} from './workspaceLayout.js';
+test('desktop layout defaults to three columns and stops shrinking at two cards',()=>{
+ assert.equal(catalogColumns(1920,340),3);
+ assert.equal(catalogColumns(1280,500),2);
+ assert.equal(catalogColumns(2560,340),4);
+ assert.equal(catalogColumns(800,260),1);
+ const width=clampChatWidth(9999,1280);
+ assert.ok(1280-width-8>=640);assert.ok(catalogColumns(1280,width)>=2);
+});
