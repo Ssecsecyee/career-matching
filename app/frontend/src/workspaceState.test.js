@@ -22,6 +22,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  const textarea=container.querySelector('#message');assert.ok(textarea);await fill(textarea,'React jobs');await submit(textarea.closest('form'));
  assert.equal(requests,2);assert.match(container.textContent,/Synthetic developer/);
  await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(!container.querySelector('.chat-view').hidden);assert.ok(container.querySelector('.app').classList.contains('explorer-layout'));
+ await change('#my');assert.match(container.querySelector('.my-page').textContent,/상담용 이력서/);await change('#jobs');
  const searchField=container.querySelector('main[aria-label="채용공고 탐색"] input[type="search"]');
  await fill(searchField,'Python');assert.equal(container.querySelectorAll('.explore-card').length,1);
  assert.match(container.querySelector('.explore-card').textContent,/Python developer/);
@@ -32,6 +33,10 @@ test('actual tab changes preserve conversation draft and list selection without 
  await act(async()=>{container.querySelector('.browse-toolbar .quiet').click();});
  assert.equal(container.querySelectorAll('.explore-card').length,2);assert.equal(requests,2);
  const item=container.querySelector('.browse-result');assert.ok(item);await act(async()=>item.click());assert.match(container.querySelector('.browse-detail').textContent,/Synthetic developer/);assert.match(container.querySelector('.job-detail-sections').textContent,/Build software/);
+ await act(async()=>{container.querySelector('.detail-backdrop').click();});assert.equal(container.querySelector('.browse-detail'),null);
+ await act(async()=>{container.querySelector('[aria-label="스크랩 저장"]').click();});
+ await change('#my');assert.match(container.querySelector('.personal-tabs').textContent,/최근 본 항목 \(1\)/);assert.match(container.querySelector('.personal-tabs').textContent,/스크랩 \(1\)/);
+ await change('#jobs');await act(async()=>item.click());
  await change('#training');await change('#jobs');assert.equal(item.getAttribute('aria-pressed'),'true');await change('#chat');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.equal(requests,2);assert.match(container.querySelector('.conversation').textContent,/React jobs/);
  globalThis.fetch=async(url,options)=>{if(options?.body && JSON.parse(options.body).action==='browse_training')return {ok:true,status:200,json:async()=>({stage:'conversation',cached:true,learning_search:{status:'found'},learning_opportunities:[],training_has_more:false})};if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};requests++;return {ok:true,status:200,json:async()=>({stage:'checking_required',grouped:true,cached:true,session_id:'11111111-1111-4111-8111-111111111111',requirement_type:'required',source_url:'https://example.com/job',questions:[{question_id:'q1',quote:'React experience'},{question_id:'q2',quote:'Git experience'}],progress:{answered:0,total:2}})};};
  await change('#jobs');

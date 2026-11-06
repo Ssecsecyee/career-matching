@@ -1,3 +1,5 @@
+import {MyPage} from './MyPage.jsx';
+import {readLibrary,writeLibrary,addRecent,toggleSaved,itemKey,withResume} from './personalLibrary.js';
 import React, { useEffect, useRef, useState } from 'react';
 import {needsStepRecovery,recoveryMessage} from './requestRecovery.js';
 import { clientToken, postChat, requestPayload, safeSourceUrl } from './api.js';
@@ -70,6 +72,12 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
 }
 
 export function CareerApp({page='chat',adminChat=false}) {
+  const [library,setLibrary]=useState(()=>readLibrary(window.localStorage));
+  const [libraryError,setLibraryError]=useState('');
+  function updateLibrary(next){try{writeLibrary(window.localStorage,next);setLibrary(next);setLibraryError('');}catch{setLibraryError('브라우저 저장 공간을 사용할 수 없습니다. 저장되지 않았습니다.');}}
+  function saveItem(item,target){updateLibrary(toggleSaved(library,item,target));}
+  function readItem(item,target){updateLibrary(addRecent(library,item,target));if(target==='jobs')loadJobDetail(item);else loadTrainingDetail(item);}
+  const isSaved=item=>library.saved.some(x=>itemKey(x)===itemKey(item));
   const [copilotOpen,setCopilotOpen]=useState(false);
   function revealConsultation(){setCopilotOpen(true);document.getElementById('message')?.focus();}
   const [apiEnabled, setApiEnabled] = useState(null);
@@ -116,7 +124,7 @@ export function CareerApp({page='chat',adminChat=false}) {
     }
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(()=>{
-    if(unlocked && apiEnabled && !adminChat && page==='jobs' && !initialBrowse.current && !messages.some(m=>m.data?.stage==='choose_job' || (m.data?.stage==='no_results' && m.data?.search_summary)) && !inFlight.current){
+    if(unlocked && apiEnabled && !adminChat && ['jobs','my'].includes(page) && !initialBrowse.current && !messages.some(m=>m.data?.stage==='choose_job' || (m.data?.stage==='no_results' && m.data?.search_summary)) && !inFlight.current){
       initialBrowse.current=true;
       send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session));
     }
@@ -138,6 +146,7 @@ export function CareerApp({page='chat',adminChat=false}) {
 
   async function send(payload, text) {
     if (inFlight.current) return;
+    if(payload.action==='search' && !payload.search_plan && payload.message)payload={...payload,message:withResume(payload.message,library)};
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};
     if(payload.action==='search' && !adminChat && window.location.hash==='#jobs')payload={...payload,page_size:20};
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null);setStepRecovery(null); setPending(null);
@@ -250,7 +259,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   const exploring=unlocked && !adminChat && page!=='chat';
   return <div className={`app${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}`}>
     {savedOpen&&<SavedAnswersPanel data={savedData} busy={busy} error={savedError} onClose={()=>{if(!busy){setSavedOpen(false);setSavedData(null);}}} onRefresh={loadSavedAnswers} onRevise={reviseSaved} onRemember={rememberAll}/>}
-    <aside className="sidebar"><a className="brand" href={adminChat?'#admin-chat':'#jobs'}>ROUNDUP<span>CAREER</span></a><nav className="rail-nav" aria-label="빠른 이동"><a href="#jobs" aria-label="공고 탐색">▣<small>공고</small></a><a href="#training" aria-label="교육 탐색">▤<small>교육</small></a><button type="button" onClick={revealConsultation} aria-label="AI 상담">✳<small>상담</small></button></nav><button disabled={busy} onClick={()=>{reset();if(!adminChat)revealConsultation();window.location.hash=adminChat?'#admin-chat':'#jobs';}}>＋ 새 대화</button><div className="sidebar-bottom">내 조건에 맞는 다음 기회<p>공고 검색 · 지원 조건 확인</p></div></aside>
+    <aside className="sidebar"><a className="brand" href={adminChat?'#admin-chat':'#jobs'}>ROUNDUP<span>CAREER</span></a><nav className="rail-nav" aria-label="빠른 이동"><a href="#jobs" aria-label="공고 탐색">▣<small>공고</small></a><a href="#training" aria-label="교육 탐색">▤<small>교육</small></a><a href="#my" aria-label="내 페이지">♡<small>내 페이지</small></a><button type="button" onClick={revealConsultation} aria-label="AI 상담">✳<small>상담</small></button></nav><button disabled={busy} onClick={()=>{reset();if(!adminChat)revealConsultation();window.location.hash=adminChat?'#admin-chat':'#jobs';}}>＋ 새 대화</button><div className="sidebar-bottom">내 조건에 맞는 다음 기회<p>공고 검색 · 지원 조건 확인</p></div></aside>
     <div className="workspace"><header><span>커리어 도우미 <span className="model">Sonnet</span></span>{unlocked && !adminChat && <WorkspaceNavigation page={page}/>}{unlocked && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{adminChat ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
         <div className="workspace-body"><button className="copilot-toggle" type="button" aria-expanded={copilotOpen} onClick={()=>setCopilotOpen(!copilotOpen)}>{copilotOpen?'AI 패널 닫기':'AI에게 조건 말하기'}</button><div className="chat-view"><div className="copilot-heading"><strong>{new URLSearchParams(window.location.search).get('agentcore')==='1'?'AgentCore 관리자 실험':'AI 검색 도우미'}</strong><span>조건을 말하고 함께 찾아보세요</span></div>
@@ -266,8 +275,10 @@ export function CareerApp({page='chat',adminChat=false}) {
           <div className="composer-bottom"><span>{noteOnly ? '설명은 선택 사항입니다' : '원하는 조건을 자연스럽게 입력하세요'}</span>{!noteOnly && <button className="send" aria-label="메시지 보내기" disabled={busy || !!pending || !draft.trim()}>↑</button>}</div></form>
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </div>
-      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} onRead={loadJobDetail} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
-      <div hidden={page!=='training'}><ExplorationPreview target="training" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} onRead={loadTrainingDetail} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
+      {libraryError && <p role="alert">{libraryError}</p>}
+      {page==='my' && <MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/>}
+      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
+      <div hidden={page!=='training'}><ExplorationPreview target="training" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
       </div>
       </>}
     </div>

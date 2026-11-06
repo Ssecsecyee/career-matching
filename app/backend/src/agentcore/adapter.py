@@ -43,7 +43,7 @@ class HarnessAdapter:
         runtime=state.setdefault('agentcore_runtime_session',str(uuid4()))
         # Fresh DB facts are authoritative even when remote memory is stale.
         snapshot={'selected_job':{k:(state.get('selected') or {}).get(k) for k in ('title','source_id','source_version')},'stage':state.get('stage'),'search_plan':(state.get('search_navigation') or {}).get('plan'),'training_topics':(state.get('learning_context') or {}).get('topics',[])}
-        messages=[{'role':'user','content':[{'text':json.dumps({'message':message[:2000],'server_context':snapshot},ensure_ascii=False)}]}]
+        messages=[{'role':'user','content':[{'text':json.dumps({'message':message[:4000],'server_context':snapshot},ensure_ascii=False)}]}]
         usage={'model_id':self.model_id,'region':self.region,'prompt_version':VERSION,'input_tokens':0,'output_tokens':0,'cache_read_input_tokens':0,'cache_write_input_tokens':0}
         start=time.monotonic();last_result=None;seen=set();trace=[]
         try:
