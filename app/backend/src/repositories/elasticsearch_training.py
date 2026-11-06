@@ -3,7 +3,7 @@ import os
 import re
 from src.repositories.search_failover import SearchFailover, SearchUnavailable
 from src.repositories.job_search_factory import LocalElasticTransport
-from src.repositories.mysql_training import MySQLTrainingRepository, card
+from src.repositories.mysql_training import MySQLTrainingRepository, card, LIST_FIELDS
 
 TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,'
                   'curriculum,learning_topics,tech_stacks,eligibility,preferred_conditions,benefits,'
@@ -11,7 +11,7 @@ TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_u
                   'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
 
 
-def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or", browse_all=False):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or", browse_all=False, catalog_filters=None):
     from src.services.training_navigation import training_operator
     training_operator(topic_operator)
     if (not isinstance(topics, list) or not (0 if browse_all else 1) <= len(topics) <= 8 or
@@ -34,6 +34,17 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidat
     if candidates_only:
         extra.extend([{'range': {'training_start_at': {'gt': 'now'}}},
                       {'bool': {'must_not': [{'term': {'recruitment_status': 'closed'}}]}}])
+    if catalog_filters is not None:
+        from src.schemas.catalog import TrainingCatalogFilters
+        f=TrainingCatalogFilters.model_validate(catalog_filters)
+        if f.region or f.field=='ncs_code':raise ValueError('catalog_filter_requires_mysql')
+        if f.keyword.strip():
+            fields={'title':['title'],'provider_name':['provider_name'],'curriculum':['curriculum'],'learning_topics':['learning_topics']}
+            extra.append({'multi_match':{'query':f.keyword.strip(),'fields':fields.get(f.field,['title^4','provider_name^2','curriculum','eligibility','learning_topics','tech_stacks']),'operator':'and'}})
+        if f.delivery_mode=='unknown':
+            extra.append({'bool':{'must_not':[{'terms':{'delivery_mode':['online','offline']}}]}})
+        if f.service=='boottent':extra.append({'term':{'source':'boottent'}})
+        elif f.service!='any':extra.append({'prefix':{'source_id':f.service+':'}})
     if delivery_mode:extra.append({'term':{'delivery_mode':delivery_mode}})
     return {'size': 100, 'track_total_hits': True, 'timeout': '5s',
             '_source': ['source', 'source_id', 'source_version'],
@@ -52,12 +63,12 @@ class ElasticsearchTrainingRepository:
     def get(self, identity):
         return MySQLTrainingRepository(self.factory).get(identity)
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or", browse_all=False):
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or", browse_all=False, catalog_filters=None):
         from src.services.training_groups import grouped,exclusions
         exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,
-                                     delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator, browse_all=browse_all)
-        if browse_all and not topics:
+                                     delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator, browse_all=browse_all, catalog_filters=catalog_filters)
+        if browse_all and not topics and not catalog_filters:
             import secrets
             query['query']={'function_score':{'query':query['query'],'random_score':{'seed':secrets.randbits(31),'field':'_seq_no'},'boost_mode':'replace'}}
         self.search_limited = False
@@ -92,7 +103,7 @@ class ElasticsearchTrainingRepository:
             try:
                 with conn.cursor() as cursor:
                     params = [v for pair in identities for v in pair]
-                    cursor.execute('SELECT ' + TRAINING_FIELDS + ' FROM training_offerings WHERE (' +
+                    cursor.execute('SELECT ' + LIST_FIELDS + ' FROM training_offerings WHERE (' +
                                    ' OR '.join(['(source=%s AND source_id=%s)'] * len(candidates)) +
                                    ") AND recruitment_status IN ('active','unknown','closed')", params)
                     for row in cursor.fetchall():current[row['source'], row['source_id']] = row

@@ -65,3 +65,17 @@ class CatalogSearchTests(unittest.TestCase):
   self.assertEqual(jobs.plan.roles,('프론트엔드',))
   self.assertEqual(jobs.plan.owned_skills,('React',))
   self.assertEqual(jobs.plan.regions,('경기',))
+
+ def test_training_direct_uses_search_index_and_keeps_column_scope(self):
+  from src.repositories.elasticsearch_training import build_training_query
+  q=build_training_query([],browse_all=True,candidates_only=True,catalog_filters={'keyword':'Python','field':'provider_name','service':'card'})
+  filters=q['query']['bool']['filter']
+  self.assertIn({'prefix':{'source_id':'card:'}},filters)
+  self.assertTrue(any(x.get('multi_match',{}).get('fields')==['provider_name'] for x in filters))
+  with self.assertRaises(ValueError):build_training_query([],browse_all=True,catalog_filters={'region':'경기'})
+ def test_mysql_catalog_sets_comparison_collation_and_uses_light_metadata(self):
+  from src.repositories.mysql_training import LIST_FIELDS
+  parts,_=training_clauses({'keyword':'Python','region':'경기'})
+  self.assertTrue(all('COLLATE utf8mb4_0900_ai_ci' in x for x in parts))
+  self.assertIn('JSON_OBJECT',LIST_FIELDS)
+  self.assertNotIn('raw_detail',LIST_FIELDS)

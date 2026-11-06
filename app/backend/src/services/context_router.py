@@ -244,7 +244,8 @@ class ContextRouter:
         else:
             kwargs={'exclude_groups':navigation['shown_groups']} if navigation.get('shown_groups') else {}
             if state.get('training_catalog_filters') is not None:
-                repository=getattr(repository,'fallback',repository)
+                filters=state['training_catalog_filters']
+                if filters.get('region') or filters.get('field')=='ncs_code':repository=getattr(repository,'fallback',repository)
                 kwargs['catalog_filters']=state['training_catalog_filters']
 
             if not topics or state.get('training_browse'):kwargs['browse_all']=True

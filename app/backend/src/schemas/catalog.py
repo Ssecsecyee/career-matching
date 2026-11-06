@@ -18,11 +18,11 @@ def training_clauses(value):
     columns={'title':'title','provider_name':'provider_name','curriculum':'curriculum','learning_topics':'CAST(learning_topics AS CHAR CHARACTER SET utf8mb4)','ncs_code':"JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.collection_metadata.ncs_code'))"}
     if filters.keyword.strip():
         expression=columns.get(filters.field) or "CONCAT_WS(' ',title,provider_name,curriculum,eligibility,CAST(learning_topics AS CHAR CHARACTER SET utf8mb4),CAST(tech_stacks AS CHAR CHARACTER SET utf8mb4))"
-        clauses.append('LOWER('+expression+") LIKE LOWER(%s) ESCAPE '='");params.append(literal_like(filters.keyword.strip()))
+        clauses.append('LOWER('+expression+") COLLATE utf8mb4_0900_ai_ci LIKE LOWER(%s) COLLATE utf8mb4_0900_ai_ci ESCAPE '='");params.append(literal_like(filters.keyword.strip()))
     if filters.region:
         from src.services.search_terms import region_terms
         terms=region_terms([filters.region])
-        clauses.append('('+' OR '.join(["CAST(addresses AS CHAR CHARACTER SET utf8mb4) LIKE %s ESCAPE '='"]*len(terms))+')');params.extend(literal_like(t) for t in terms)
+        clauses.append('('+' OR '.join(["CAST(addresses AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_0900_ai_ci LIKE %s COLLATE utf8mb4_0900_ai_ci ESCAPE '='"]*len(terms))+')');params.extend(literal_like(t) for t in terms)
     if filters.delivery_mode=='unknown':clauses.append("COALESCE(delivery_mode,'unknown') NOT IN ('online','offline')")
     if filters.service=='boottent':
         clauses.append('source=%s');params.append('boottent')

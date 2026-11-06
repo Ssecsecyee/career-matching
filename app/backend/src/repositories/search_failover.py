@@ -15,8 +15,9 @@ class SearchFailover:
     def get(self, identity):
         return self.fallback.get(identity)
 
-    def search(self, query, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or",browse_all=False):
+    def search(self, query, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or",browse_all=False,catalog_filters=None):
         kwargs = {'exclude_ids': exclude_ids} if exclude_ids else {}
+        if catalog_filters is not None:kwargs['catalog_filters']=catalog_filters
         if browse_all:
             if self.entity!='training':raise ValueError('Browse mode is for training only')
             kwargs['browse_all']=True

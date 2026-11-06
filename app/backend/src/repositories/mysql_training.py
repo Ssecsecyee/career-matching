@@ -13,7 +13,7 @@ def card(row, topics, *, now=None):
     before_start, start_reason = start_visibility(row, now=now)
     arrays={key:decode(row.get(key),[]) for key in ('learning_topics','tech_stacks','addresses')}
     extra=decode(row.get('additional_sections'),{})
-    dates=extra.get('date_precision',{})
+    dates=extra.get('date_precision') or {}
     deadline=row.get('application_deadline')
     valid_deadline=False
     if isinstance(deadline,datetime):
@@ -42,6 +42,15 @@ def card(row, topics, *, now=None):
     result['course_group_key']=identity(row,extra)
     return refresh_card_status(result,now=now)
 
+
+# Only card metadata crosses the DB connection; full original detail remains in get().
+LIST_FIELDS=("offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,"
+ "LEFT(curriculum,500) AS curriculum,learning_topics,tech_stacks,LEFT(eligibility,400) AS eligibility,"
+ "delivery_mode,addresses,tuition,currency,LEFT(cost_description,250) AS cost_description,recruitment_status,"
+ "JSON_OBJECT('date_precision',JSON_EXTRACT(additional_sections,'$.date_precision'),"
+ "'recommendation_eligible',JSON_EXTRACT(additional_sections,'$.recommendation_eligible'),"
+ "'collection_metadata',JSON_OBJECT('institution_id',JSON_UNQUOTE(JSON_EXTRACT(additional_sections,'$.collection_metadata.institution_id')))) AS additional_sections,"
+ "application_deadline,starts_at,ends_at,content_hash")
 
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
@@ -72,7 +81,7 @@ class MySQLTrainingRepository:
             extra_clauses,extra_params=training_clauses(catalog_filters)
             if extra_clauses:extra+=' AND ('+') AND ('.join(extra_clauses)+')'
             params.extend(extra_params)
-        fields='offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
+        fields=LIST_FIELDS
         conn=self.factory()
         try:
             with conn.cursor() as cur:
