@@ -28,6 +28,8 @@ test('filters distinguish teaching modes and skills; numbered pages never duplic
 import {clampChatWidth,catalogColumns} from './workspaceLayout.js';
 test('desktop layout defaults to three columns and stops shrinking at two cards',()=>{
  assert.equal(catalogColumns(1920,340),3);
+ assert.equal(catalogColumns(1524,340),3);
+ assert.equal(catalogColumns(1280,340),3);
  assert.equal(catalogColumns(1280,500),2);
  assert.equal(catalogColumns(2560,340),4);
  assert.equal(catalogColumns(800,260),1);
