@@ -82,6 +82,14 @@ export function CareerApp({page='chat',adminChat=false}) {
   const [result, setResult] = useState(null);
   const [draft, setDraft] = useState('');
   const [jobDetails,setJobDetails]=useState({}),[detailError,setDetailError]=useState('');
+  const [trainingDetails,setTrainingDetails]=useState({});
+  async function loadTrainingDetail(course){
+    if(!session || inFlight.current)return;
+    setDetailError('');inFlight.current=true;setBusy(true);
+    try{const r=await postChat({payload:requestPayload('view_training',{source:course.source,source_id:course.source_id,source_version:String(course.source_version)},session),accessCode:code,ownerToken:owner.current});if(!r.ok)throw new Error();setTrainingDetails(old=>({...old,[course.source+':'+course.source_id]:r.body.training_detail}));}
+    catch{setDetailError('교육 상세 정보를 불러오지 못했습니다. 원문을 확인하거나 목록에서 다시 선택해 주세요.');}
+    finally{inFlight.current=false;setBusy(false);}
+  }
   const detailRequest=useRef(null);
   async function loadJobDetail(job){
     if(!session || inFlight.current)return;
@@ -121,7 +129,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   }, [messages,busy,error,page]);
 
   function reset() {
-    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
+    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
   }
 
   async function send(payload, text) {
@@ -246,7 +254,7 @@ export function CareerApp({page='chat',adminChat=false}) {
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </div>
       <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} onRead={loadJobDetail} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onAssess={select} results={latestSearchResults(messages,'jobs')}/></div>
-      <div hidden={page!=='training'}><ExplorationPreview target="training" loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onExplain={explainTraining} results={latestSearchResults(messages,'training')}/></div>
+      <div hidden={page!=='training'}><ExplorationPreview target="training" trainingDetails={trainingDetails} detailError={detailError} onRead={loadTrainingDetail} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onExplain={explainTraining} results={latestSearchResults(messages,'training')}/></div>
       </div>
       </>}
     </div>

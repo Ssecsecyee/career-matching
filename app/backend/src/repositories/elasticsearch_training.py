@@ -49,6 +49,9 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
+    def get(self, identity):
+        return MySQLTrainingRepository(self.factory).get(identity)
+
     def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or", browse_all=False):
         from src.services.training_groups import grouped,exclusions
         exclusions(exclude_groups)

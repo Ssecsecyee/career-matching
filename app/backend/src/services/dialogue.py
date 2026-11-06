@@ -84,6 +84,14 @@ class DialogueFlow:
             plan=SearchPlan.parse(payload['search_plan'])
             return self.execute_search(state,plan,plan.to_dict(),payload)
 
+        if action == 'view_training':
+            courses=list((state.get('training_displayed') or {}).values())+(state.get('learning_context') or {}).get('courses',[])
+            reference=next((c for c in courses if c['source']==payload['source'] and c['source_id']==payload['source_id'] and str(c.get('source_version'))==payload['source_version']),None)
+            if reference is None:raise FlowError('training_reference_changed',409)
+            course=self.training.get({'source':payload['source'],'source_id':payload['source_id']}) if self.training else None
+            if not course or str(course.get('source_version'))!=payload['source_version']:raise FlowError('training_reference_changed',409)
+            if not course.get('start_window_eligible') or course.get('recruitment_status')=='closed':raise FlowError('training_reference_changed',409)
+            return state,{'stage':'training_detail','training_detail':course},evidence
         if action == 'view_job':
             allowed=set(state.get('candidate_ids',[])) | set((state.get('search_navigation') or {}).get('shown_ids',[]))
             if payload['source_id'] not in allowed:raise FlowError('job_not_in_session_candidates',409)

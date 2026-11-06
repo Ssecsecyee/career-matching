@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -61,7 +61,7 @@ def validate_payload(value):
         profile = value.get("profile", {})
         if not isinstance(profile, dict) or len(json.dumps(profile, ensure_ascii=False)) > 4000:
             raise ValueError("Invalid profile")
-    elif action == "explain_training":
+    elif action in {"explain_training","view_training"}:
         if value.get('source') not in {'boottent','goyong24_training'}:raise ValueError('Invalid education source')
         for key,maximum in [('source_id',128),('source_version',80)]:
             if not isinstance(value.get(key),str) or not 1<=len(value[key])<=maximum:raise ValueError('Invalid education reference')

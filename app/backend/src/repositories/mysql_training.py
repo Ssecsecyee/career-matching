@@ -81,3 +81,19 @@ class MySQLTrainingRepository:
             self.search_limited=len(rows)>=1000
             return grouped(cards,exclude_groups=exclude_groups,limit=20 if browse_all else 3)
         finally:conn.close()
+
+    def get(self, identity):
+        if not isinstance(identity,dict) or identity.get('source') not in {'boottent','goyong24_training'} or not isinstance(identity.get('source_id'),str) or not 1<=len(identity['source_id'])<=128:
+            raise ValueError('Invalid training identity')
+        fields='offering_id,course_key,cohort_name,source,source_id,source_url,source_version,title,provider_name,curriculum,learning_topics,tech_stacks,eligibility,preferred_conditions,benefits,selection_process,application_notes,delivery_mode,addresses,tuition,currency,cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash'
+        conn=self.factory()
+        try:
+            with conn.cursor() as cur:
+                cur.execute('SELECT '+fields+' FROM training_offerings WHERE source=%s AND source_id=%s',(identity['source'],identity['source_id']))
+                row=cur.fetchone()
+            if not row:return None
+            result=card(row,[])
+            for key in ('curriculum','eligibility','preferred_conditions','benefits','selection_process','application_notes','cost_description'):
+                result[key]=row.get(key) or ''
+            return result
+        finally:conn.close()
