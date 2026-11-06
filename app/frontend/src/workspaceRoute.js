@@ -18,13 +18,15 @@ export function latestSearchResults(messages, target) {
     }
     return list;
   }
-  for (let i=messages.length-1;i>=0;i--) {
-    const data=messages[i].role==='assistant' && messages[i].data;
-    if(!data)continue;
-    if(target==='jobs' && data.stage==='no_results' && data.search_summary)return {items:[],total:0,summary:data.search_summary};
-    if(target==='jobs' && data.stage==='choose_job')return {items:data.candidate_jobs || [],total:data.total,summary:data.search_summary,continuation:data.search_continuation};
-    if(target==='training' && data.learning_search && !['training_search_review','training_no_results'].includes(data.stage))
-      return {items:data.learning_opportunities || []};
+  let list={items:[],hasMore:false};
+  for(const message of messages){
+    const d=message.role==='assistant' && message.data;if(!d)continue;
+    if(d.stage==='training_no_results'){list={items:[],hasMore:false,summary:d.search_summary};continue;}
+    if(d.learning_search && !['training_search_review','training_no_results'].includes(d.stage)){
+      const cards=d.learning_opportunities || [];
+      const items=d.training_continuation?[...list.items,...cards]:cards;
+      list={items:[...new Map(items.map(c=>[`${c.source}:${c.source_id}`,c])).values()],hasMore:d.training_has_more ?? cards.length>0,summary:d.search_summary || (d.training_continuation?list.summary:undefined)};
+    }
   }
-  return {items:[]};
+  return list;
 }

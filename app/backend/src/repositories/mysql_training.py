@@ -46,8 +46,8 @@ def card(row, topics, *, now=None):
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="or"):
-        if not isinstance(topics,list) or not 1<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="or",browse_all=False):
+        if not isinstance(topics,list) or not (0 if browse_all else 1)<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
         from src.services.training_navigation import training_operator
         training_operator(topic_operator)
@@ -71,7 +71,7 @@ class MySQLTrainingRepository:
         conn=self.factory()
         try:
             with conn.cursor() as cur:
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions)+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000",params)
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000",params)
                 rows=cur.fetchall()
                 cards=[card(row,topics) for row in rows]
                 if candidates_only:
@@ -79,5 +79,5 @@ class MySQLTrainingRepository:
             cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
             from src.services.training_groups import grouped
             self.search_limited=len(rows)>=1000
-            return grouped(cards,exclude_groups=exclude_groups)
+            return grouped(cards,exclude_groups=exclude_groups,limit=20 if browse_all else 3)
         finally:conn.close()

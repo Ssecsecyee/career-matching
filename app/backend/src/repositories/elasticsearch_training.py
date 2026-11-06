@@ -11,10 +11,10 @@ TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_u
                   'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
 
 
-def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or"):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or", browse_all=False):
     from src.services.training_navigation import training_operator
     training_operator(topic_operator)
-    if (not isinstance(topics, list) or not 1 <= len(topics) <= 8 or
+    if (not isinstance(topics, list) or not (0 if browse_all else 1) <= len(topics) <= 8 or
             any(not isinstance(t, str) or not 1 <= len(t) <= 60 for t in topics)):
         raise ValueError('Invalid training topics')
     clauses = []
@@ -39,7 +39,7 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidat
             '_source': ['source', 'source_id', 'source_version'],
             'query': {'bool': {'filter': [{'terms': {'source': ['boottent', 'goyong24_training']}},
                                           {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}]+extra,
-                               'should': clauses, 'minimum_should_match': len(clauses) if topic_operator=='and' else 1}},
+                               'should': clauses, 'minimum_should_match': (len(clauses) if topic_operator=='and' else 1) if clauses else 0}},
             'sort': ['_score', {'document_key': 'asc'}]}
 
 
@@ -49,11 +49,11 @@ class ElasticsearchTrainingRepository:
             raise ValueError('Invalid training index')
         self.factory, self.request, self.index = connection_factory, request, index
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or"):
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or", browse_all=False):
         from src.services.training_groups import grouped,exclusions
         exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,
-                                     delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator)
+                                     delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator, browse_all=browse_all)
         self.search_limited = False
         self.last_candidate_total = None
         courses, seen = [], set()
@@ -99,14 +99,14 @@ class ElasticsearchTrainingRepository:
                 value['retrieval_basis'] = 'elasticsearch_fulltext_and_topics_db_verified'
                 courses.append((not value['recommendation_eligible'], rank + offset, value))
             rank += len(candidates)
-            if len(grouped([v[2] for v in courses],exclude_groups=exclude_groups)) >= 3 or len(page_hits) < query['size'] or rank >= hits['total']['value']:break
+            if len(grouped([v[2] for v in courses],exclude_groups=exclude_groups,limit=20 if browse_all else 3)) >= (20 if browse_all else 3) or len(page_hits) < query['size'] or rank >= hits['total']['value']:break
             after = page_hits[-1].get('sort')
             if not isinstance(after, list) or len(after)!=2 or after==query.get('search_after'):raise RuntimeError('invalid_training_cursor')
             query = dict(query, search_after=after)
         else:
             self.search_limited = True
         courses.sort(key=lambda value: value[:2])
-        return grouped([value[2] for value in courses],exclude_groups=exclude_groups)
+        return grouped([value[2] for value in courses],exclude_groups=exclude_groups,limit=20 if browse_all else 3)
 
 
 

@@ -51,6 +51,16 @@ class DialogueFlow:
         if action in {'next_results','assessment_control','explain_training'}:
             from src.services.context_router import ContextRouter
             return ContextRouter(self).advance(state,payload,invoke)
+        if action == 'browse_training':
+            from src.services.context_router import ContextRouter
+            state.pop('training_search_context',None)
+            state['training_browse']=True
+            state['training_displayed']={}
+            state['training_navigation']={'topics':[],'delivery_mode':None,'shown_ids':[],'shown_groups':[],'topic_operator':'or'}
+            state['stage']='conversation'
+            state,result,evidence=ContextRouter(self).training(state,None,reset=False)
+            result['training_continuation']=False
+            return state,result,evidence
         if action == 'review_answers':
             state.setdefault('stage','conversation')
             from src.services.saved_answers import review

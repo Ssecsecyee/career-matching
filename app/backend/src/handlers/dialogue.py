@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"browse_training": set(), "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if action not in fields or set(value) - common - fields[action]:
@@ -38,7 +38,7 @@ def validate_payload(value):
     UUID(value.get("request_id", ""))
     if value.get("session_id"):
         UUID(value["session_id"])
-    if action != "search" and not value.get("session_id"):
+    if action not in {"search","browse_training"} and not value.get("session_id"):
         raise ValueError("Session required")
     if action in {'review_answers','revise_answer'}:
         if type(value.get('offset',0)) is not int or not 0<=value.get('offset',0)<=1000 or value.get('offset',0)%10:
@@ -48,6 +48,8 @@ def validate_payload(value):
             if not isinstance(value.get('review_version'),str) or not re.fullmatch('[a-f0-9]{64}',value['review_version']):raise ValueError('Invalid saved answer revision')
             if value.get('assessment') not in {'met','unmet','unknown'}:raise ValueError('Invalid revised assessment')
             if not isinstance(value.get('detail',''),str) or len(value.get('detail',''))>2000:raise ValueError('Invalid revised detail')
+    elif action == "browse_training":
+        pass
     elif action == "search":
         if "page_size" in value and (type(value["page_size"]) is not int or value["page_size"] != 20):
             raise ValueError("Invalid browse page size")

@@ -39,7 +39,7 @@ class MySQLChatStore:
             connection.begin()
             with connection.cursor() as cur:
                 if not payload.get("session_id"):
-                    if payload["action"] != "search":
+                    if payload["action"] not in {"search","browse_training"}:
                         raise FlowError("search_required_to_start_session")
                     cur.execute("INSERT IGNORE INTO chat_sessions(session_id,owner_scope,requirement_answers,expires_at) VALUES(%s,%s,%s,%s)",
                                 (session_id, owner, "{}", now() + timedelta(hours=self.hours)))

@@ -20,3 +20,10 @@ test('scroll pages append unique jobs and exhausted results stop loading',()=>{
  m.push({role:'assistant',data:{stage:'choose_job',total:1,candidate_jobs:[{source_id:'9'}]}});
  assert.deepEqual(latestSearchResults(m,'jobs').items.map(c=>c.source_id),['9']);
 });
+
+test('education scroll accumulates groups and stops on exhausted page',()=>{
+ const m=[{role:'assistant',data:{learning_search:{status:'found'},learning_opportunities:[{source:'work24',source_id:'1'}],training_has_more:true}},{role:'assistant',data:{learning_search:{status:'found'},learning_opportunities:[{source:'work24',source_id:'2'}],training_continuation:true,training_has_more:true}}];
+ assert.equal(latestSearchResults(m,'training').items.length,2);
+ m.push({role:'assistant',data:{learning_search:{status:'no_match'},learning_opportunities:[],training_continuation:true,training_has_more:false}});
+ assert.equal(latestSearchResults(m,'training').items.length,2);assert.equal(latestSearchResults(m,'training').hasMore,false);
+});

@@ -17,7 +17,7 @@ class ContextRouter:
             if on_decision:on_decision(None,{'direct_action':'confirm_search','target':'training'})
             return self.confirm_training(state,payload['search_id'])
         if payload['action']=='explain_training':
-            courses=(state.get('learning_context') or {}).get('courses',[])
+            courses=list((state.get('training_displayed') or {}).values())+(state.get('learning_context') or {}).get('courses',[])
             course=next((c for c in courses if c['source']==payload['source'] and c['source_id']==payload['source_id']
                          and str(c.get('source_version'))==payload['source_version']),None)
             if course is None:raise FlowError('training_reference_changed',409)
@@ -155,8 +155,8 @@ class ContextRouter:
                 retrieval=learning or {'status':'unavailable','courses':[],'topics':[]}
                 focus=state.get('training_focus')
                 if focus and learning:
-                    focused=[c for c in learning.get('courses',[]) if c['source']==focus['source'] and c['source_id']==focus['source_id'] and str(c.get('source_version'))==focus['source_version']]
-                    if focused:retrieval=dict(learning,courses=focused)
+                    focused=[c for c in list((state.get('training_displayed') or {}).values())+learning.get('courses',[]) if c['source']==focus['source'] and c['source_id']==focus['source_id'] and str(c.get('source_version'))==focus['source_version']]
+                    if focused:retrieval=dict(learning,courses=[refresh_card_status(focused[0])])
                 history['training_retrieval']=retrieval
                 history['conversation_focus']={'kind':'training'}
                 state['conversation_target']='training'
@@ -188,6 +188,7 @@ class ContextRouter:
         repository=self.flow.training
         if repository is None:return self.clarify(state,'현재 교육 검색 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.')
         options={'topic_operator':operator} if operator!='or' else {}
+        if state.get('training_browse'):options['browse_all']=True
         courses=repository.search(topics,exclude_ids=[],delivery_mode=mode,candidates_only=True,**options)
         result=remember_review(state,topics,mode,courses,repository,learning_goals=goals,topic_operator=operator)
         record(state,result['message'],'assistant')
@@ -201,6 +202,7 @@ class ContextRouter:
         repository=self.flow.training
         if repository is None:return self.clarify(state,'현재 교육 검색 연결을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.')
         options={'topic_operator':context['topic_operator']} if context.get('topic_operator','or')!='or' else {}
+        if state.get('training_browse'):options['browse_all']=True
         courses=repository.search(context['topics'],exclude_ids=[],delivery_mode=context['delivery_mode'],candidates_only=True,**options)
         expected=[tuple(x) for x in context['candidate_versions']]
         if signatures(courses)!=expected:
@@ -214,7 +216,7 @@ class ContextRouter:
         state['training_navigation']={'topics':context['topics'],'delivery_mode':context['delivery_mode'],'shown_ids':[],'topic_operator':context.get('topic_operator','or'),'learning_goals':context.get('learning_goals',[])}
         state['stage']='conversation'
         state,result,evidence=self.training(state,None,reset=False,confirmed=courses)
-        result.update(search_id=search_id,search_target='training')
+        result.update(search_id=search_id,search_target='training',training_continuation=False,search_summary=context['summary'])
         return state,result,evidence
 
     def training(self,state,d,*,reset,confirmed=None):
@@ -234,15 +236,19 @@ class ContextRouter:
             return self.clarify(state,'이어서 볼 교육 검색이 없습니다. 먼저 배우고 싶은 주제를 알려주세요.')
         topics=navigation['topics'];mode=navigation.get('delivery_mode')
         if len(navigation['shown_ids'])>=1000:
-            return self.clarify(state,'교육 탐색 한도에 도달했습니다. 주제를 좁혀 새로 찾아주세요.')
+            return state,{'stage':'conversation','message':'교육 탐색 한도에 도달했습니다. 주제를 좁혀주세요.','learning_search':{'status':'no_match'},'learning_opportunities':[],'training_continuation':True,'training_has_more':False},[]
         repository=self.flow.training
         if repository is None:
             courses=[];status='unavailable'
         else:
             kwargs={'exclude_groups':navigation['shown_groups']} if navigation.get('shown_groups') else {}
+            if not topics or state.get('training_browse'):kwargs['browse_all']=True
             if navigation.get('topic_operator','or')!='or':kwargs['topic_operator']=navigation['topic_operator']
             courses=confirmed if confirmed is not None else repository.search(topics,exclude_ids=navigation['shown_ids'],delivery_mode=mode,candidates_only=True,**kwargs)
             status='found' if courses else 'no_match'
+        if confirmed is not None:state['training_displayed']={}
+        displayed=state.setdefault('training_displayed',{})
+        for course in courses:displayed[course['source']+':'+course['source_id']]=course
         ids=[c['source']+':'+c['source_id'] for c in courses]
         if set(ids).intersection(navigation['shown_ids']) or len(set(ids))!=len(ids):
             raise FlowError('training_navigation_duplicate',502)
@@ -262,6 +268,6 @@ class ContextRouter:
             learning['search_limited']=True
             message+=' 조회 범위 제한이 있어 다른 과정이 더 있을 수 있습니다. 검색 조건을 좁혀 주세요.'
         record(state,message,'assistant')
-        result={'stage':'conversation','message':message,'memory':public_memory(state)}
+        result={'stage':'conversation','message':message,'memory':public_memory(state),'training_continuation':confirmed is None,'training_has_more':bool(courses),'training_candidate_total':getattr(repository,'last_candidate_total',None)}
         attach(result,learning)
         return state,result,[]
