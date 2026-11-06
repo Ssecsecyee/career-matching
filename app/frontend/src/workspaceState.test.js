@@ -54,7 +54,15 @@ test('actual tab changes preserve conversation draft and list selection without 
  assert.equal(container.querySelector('.assessment-stepper'),stepper);
  assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
  assert.equal(container.querySelector('.popup-open'),null);assert.equal(container.querySelector('.chat-launcher'),null);assert.equal(container.querySelector('[aria-label="상담창 고정"]'),null);
- await act(async()=>container.querySelector('[aria-label="AI 상담"]').click());
+ assert.equal(container.querySelector('.sidebar'),null);
+ const splitter=container.querySelector('[role="separator"]');assert.ok(splitter);
+ await act(async()=>splitter.dispatchEvent(new window.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true})));
+ assert.equal(container.querySelector('.app').style.getPropertyValue('--chat-width'),'360px');
+ await act(async()=>{splitter.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,clientX:100,pointerId:1,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointermove',{clientX:180,pointerId:1,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointerup',{pointerId:1,bubbles:true}));});
+ assert.equal(container.querySelector('.app').style.getPropertyValue('--chat-width'),'440px');
+ await act(async()=>{splitter.dispatchEvent(new window.PointerEvent('pointerdown',{button:0,clientX:0,pointerId:2,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointermove',{clientX:10000,pointerId:2,bubbles:true}));splitter.dispatchEvent(new window.PointerEvent('pointerup',{pointerId:2,bubbles:true}));});
+ assert.ok(Number(container.querySelector('.app').style.getPropertyValue('--chat-width').replace('px',''))<=window.innerWidth-468);
+
  assert.equal(window.location.hash,'#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(detail.value,'Keep this answer detail');assert.equal(met.getAttribute('aria-pressed'),'true');
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
  // A fresh explorer session loads bounded all-jobs data without asking the model.

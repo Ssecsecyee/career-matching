@@ -149,3 +149,33 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .browse-detail .detail-header .detail-close,.browse-detail .detail-header .detail-close:hover:not(:disabled){background:transparent;border:0;border-radius:0;box-shadow:none;color:#29466b}
 
 .browse-scroll-sentinel{height:2px;width:100%}
+
+/* Unified dashboard: chat + draggable divider + a shared catalog panel. */
+.unified-workspace>.workspace{margin-left:0;width:100%}
+.unified-workspace.explorer-layout{height:100dvh;overflow:hidden;min-height:0}
+.unified-workspace.explorer-layout .workspace{height:100%;min-height:0}
+.unified-workspace.explorer-layout .workspace>header{height:72px;min-height:72px;flex-shrink:0;padding:0 22px}
+.unified-workspace.explorer-layout .workspace-body{display:grid;grid-template-columns:var(--chat-width,340px) 8px minmax(0,1fr);align-items:stretch;height:calc(100dvh - 72px);min-height:0;overflow:hidden}
+.unified-workspace.explorer-layout .chat-view{grid-column:1;grid-row:1;position:relative;inset:auto;width:100%;height:100%;max-height:none;min-height:0;display:flex;border-right:0}
+.unified-workspace.explorer-layout .workspace-body>div:not(.chat-view):not(.workspace-resizer){grid-column:3;grid-row:1;min-width:0;height:100%;overflow:auto;}
+.unified-workspace.explorer-layout .workspace-body>.my-page-host{grid-column:3}
+.unified-workspace.explorer-layout .workspace-resizer{grid-column:2;grid-row:1;background:#f1f5fa;cursor:col-resize;touch-action:none;display:flex;justify-content:center;align-items:center;z-index:2}
+.workspace-resizer>span{height:44px;width:3px;border-radius:3px;background:#bdcce0}
+.workspace-resizer:hover,.workspace-resizer:focus-visible{background:#dceaff;outline:2px solid #6ca2ed;outline-offset:-2px}
+.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:repeat(var(--catalog-columns,2),minmax(0,1fr));gap:14px}
+
+.unified-workspace .copilot-heading{position:relative;padding-right:90px}
+.unified-workspace .new-conversation{position:absolute;right:10px;top:12px;font-size:11px;padding:5px}
+.unified-workspace .browse-detail{width:min(510px,calc(100vw - 30px))}
+@media(max-width:800px){
+ .unified-workspace.explorer-layout{height:auto;overflow:visible}
+ .unified-workspace.explorer-layout .workspace{height:auto}
+ .unified-workspace.explorer-layout .workspace-body{display:flex;height:auto;overflow:visible;flex-direction:column}
+ .unified-workspace.explorer-layout .workspace-resizer{display:none}
+ .unified-workspace.explorer-layout .chat-view{height:420px;max-height:60dvh;flex:none}
+ .unified-workspace.explorer-layout .workspace-body>div:not(.chat-view):not(.workspace-resizer){height:auto;overflow:visible;width:100%}
+ .unified-workspace.explorer-layout .copilot-toggle{display:none}
+ .unified-workspace.explorer-layout .workspace>header{height:auto;min-height:72px;padding:10px 14px;flex-wrap:wrap}
+}
+
+@media(max-width:800px){.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:minmax(0,1fr)}}
