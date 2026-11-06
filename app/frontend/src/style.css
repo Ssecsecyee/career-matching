@@ -162,7 +162,7 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .unified-workspace.explorer-layout .workspace-resizer{grid-column:2;grid-row:1;background:#f1f5fa;cursor:col-resize;touch-action:none;display:flex;justify-content:center;align-items:center;z-index:2}
 .workspace-resizer>span{height:44px;width:3px;border-radius:3px;background:#bdcce0}
 .workspace-resizer:hover,.workspace-resizer:focus-visible{background:#dceaff;outline:2px solid #6ca2ed;outline-offset:-2px}
-.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:repeat(var(--catalog-columns,2),minmax(0,1fr));gap:14px}
+.unified-workspace.explorer-layout .browse-card-grid{grid-template-columns:repeat(var(--catalog-columns,3),minmax(0,var(--catalog-card-width,400px)));gap:14px}
 
 .unified-workspace .copilot-heading{position:relative;padding-right:90px}
 .unified-workspace .new-conversation{position:absolute;right:10px;top:12px;font-size:11px;padding:5px}
