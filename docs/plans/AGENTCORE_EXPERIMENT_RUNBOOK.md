@@ -14,7 +14,6 @@
 
 ## 제한과 비용
 
-사용자 승인 추가 실험 예산은 5 USD다. 소량 합성 smoke 이후 서버의 영속 파일에 전체 관리자 실험 자유 입력을 6턴까지만 예약한다. 실패도 예약 횟수를 소비하며 자동으로 환불·초기화하지 않는다. Harness 왕복은 사용자 입력당 최대 3회, 도구 최대 3개, 각 호출 루프 최대 3반복, 출력 900토큰, 시간 45초, 최근 메시지 6개로 제한한다. 플랫폼 청구액 자체를 실시간 차단하는 결제 한도는 아니며, 실제 청구는 AWS 계측으로 별도 확인한다. 추가 호출 확대는 비용 확인 및 사용자 승인 후에만 한다.
 
 메모리 보존은 서비스 최소값인 3일이다. Browser·Code Interpreter·셸·파일 도구는 허용하지 않는다. 조회·스크롤·선택·답변 저장은 모델을 호출하지 않는다. AgentCore 도구 오류 후 기존 엔진으로 같은 요청을 자동 재실행하지 않는다.
 
@@ -50,3 +49,7 @@ infra/agentcore/setup.py는 create/status, activate.py는 실험 전용 역할 �
 Combined assessment and education requests follow: clarify role if needed -> search jobs -> user selects a card -> existing source-condition assessment -> saved-answer-based education search. Once the role is known, stop the independent Python/framework survey. Question counts have no fixed UX limit; avoid duplicate questions. This is model guidance, not an enforced state transition or completed live quality evaluation.
 
 The approved USD 5 experiment budget and global six-turn reservation remain unchanged. Check remaining allowance before additional live evaluations.
+
+## Turn ceiling removed with explicit cost approval
+
+The user explicitly approved exceeding the previous USD 5 experiment budget and removing the six-turn ceiling. Existing reserved_turns values remain counters and do not block requests. Failures also increment the counter. The file lock prevents concurrent writes. There is no real-time dollar billing cutoff. Administrator-only access and per-request execution/time/output safety limits remain. No paid model verification was run for this change.

@@ -32,11 +32,13 @@ class AgentCoreTests(unittest.TestCase):
   class Client:
    def invoke_harness(self,**kw):return {'stream':[{'messageStop':{'stopReason':'max_tokens'}}]}
   with self.assertRaises(HarnessFailure):self.adapter(Client()).run('test',{'profile':{}},{'message':'test'})
- def test_global_allowance_reserves_failures_and_stops(self):
+ def test_counter_continues_after_previous_six_turn_limit(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'budget.json'
-   for _ in range(6):reserve(p)
-   with self.assertRaises(FlowError):reserve(p)
+   p.write_text('{"reserved_turns":6}')
+   for _ in range(20):reserve(p)
+   import json
+   self.assertEqual(json.loads(p.read_text())['reserved_turns'],26)
  def test_contract_has_no_execution_or_write_tools(self):
   self.assertEqual([t['name'] for t in tools()],['get_saved_answers','search_jobs','search_training'])
  def test_engine_is_only_explicit_free_text_search(self):
