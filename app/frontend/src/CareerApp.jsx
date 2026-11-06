@@ -89,6 +89,13 @@ export function CareerApp({page='chat',adminChat=false}) {
   const [messages, setMessages] = useState([]);
   const [result, setResult] = useState(null);
   const [draft, setDraft] = useState('');
+  useEffect(()=>{
+    if(adminChat || !result)return;
+    if(result.learning_search || result.search_target==='training' || ['training_search_review','training_no_results'].includes(result.stage)){
+      initialTraining.current=true;window.location.hash='#training';
+    }else if(result.stage==='choose_job')window.location.hash='#jobs';
+  },[result,adminChat]);
+
   const [jobDetails,setJobDetails]=useState({}),[detailError,setDetailError]=useState('');
   const [trainingDetails,setTrainingDetails]=useState({});
   async function loadTrainingDetail(course){
@@ -149,7 +156,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   async function send(payload, text) {
     if (inFlight.current) return;
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};
-    if(payload.action==='search' && !adminChat && window.location.hash==='#jobs')payload={...payload,page_size:20};
+    if(payload.action==='search' && !adminChat && ['#jobs','#training','#my'].includes(window.location.hash))payload={...payload,page_size:20};
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null);setStepRecovery(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {

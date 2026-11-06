@@ -196,6 +196,9 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         def decided(raw, decision):
             if audit:audit.classified(ticket, decision_id, raw, decision)
         state=ticket['state']
+        if payload.get('page_size') == 20:
+            state['browse_page_size']=20
+            state['training_browse']=True
         if payload['action']=='search' and payload.get('search_plan') is None:
             requested=payload.get('engine') or state.get('conversation_engine','legacy')
             if requested=='agentcore' and (role!='admin' or os.getenv('ENABLE_AGENTCORE_EXPERIMENT')!='true'):

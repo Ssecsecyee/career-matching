@@ -21,6 +21,17 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
  const filtered=filterItems(results.items,{keyword,region,extra,jobs});
  const visible=pageItems(filtered,page);
  const pageCount=Math.max(1,Math.ceil(filtered.length/20));
+ const scrollSentinel=useRef(null);
+ useEffect(()=>{
+   if(personal || !active || busy || loadError || keyword || region || extra || (!results.hasMore && page>=pageCount) || !onNext || typeof IntersectionObserver==='undefined')return;
+   let near=false,scrolled=false,requested=false;
+   const request=()=>{if(near && scrolled && !requested){requested=true;nextPage();}};
+   const onScroll=()=>{scrolled=true;request();};
+   const observer=new IntersectionObserver(entries=>{near=entries.some(e=>e.isIntersecting);request();},{rootMargin:'0px 0px 120px 0px'});
+   if(scrollSentinel.current)observer.observe(scrollSentinel.current);
+   window.addEventListener('scroll',onScroll,true);
+   return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);};
+ },[personal,active,busy,loadError,keyword,region,extra,page,pageCount,results.hasMore,results.items.length,onNext]);
  function nextPage(){if(page<pageCount)setPage(page+1);else if(results.hasMore && !keyword && !region && !extra && onNext){pendingPage.current=page+1;onNext();}}
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
   {!personal && <><div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
@@ -48,6 +59,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    })}</section>}
   {!personal && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
   {!initialLoading && <nav className="numbered-pages" aria-label="목록 페이지"><button disabled={page===1 || busy} onClick={()=>setPage(page-1)}>← 이전</button>{Array.from({length:pageCount},(_,i)=>i+1).filter(n=>n===1 || n===pageCount || Math.abs(n-page)<=2).map(n=><button key={n} aria-current={page===n?'page':undefined} disabled={busy} onClick={()=>setPage(n)}>{n}</button>)}<button disabled={busy || (page>=pageCount && (!results.hasMore || !!keyword || !!region || !!extra))} onClick={nextPage}>다음 →</button><small>{page}페이지 · 한 페이지 20개</small></nav>}
+  {!personal && <div ref={scrollSentinel} className="browse-scroll-sentinel" aria-hidden="true"/>}
   {loadError && <div role="alert"><p>다음 목록을 불러오지 못했습니다.</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}
   {active && current && <button className="detail-backdrop" aria-label="빈 공간을 눌러 상세 닫기" onClick={()=>setSelected(null)}/>}
   {active && current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
