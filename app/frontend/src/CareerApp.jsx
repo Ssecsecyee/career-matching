@@ -104,9 +104,9 @@ export function CareerApp({page='chat',adminChat=false}) {
     if(unlocked && apiEnabled && !adminChat && page==='training' && !initialTraining.current && !inFlight.current){initialTraining.current=true;send(requestPayload('browse_training',{},session));}
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(()=>{
-    if(unlocked && apiEnabled && !adminChat && page==='jobs' && !session && !initialBrowse.current && !inFlight.current){
+    if(unlocked && apiEnabled && !adminChat && page==='jobs' && !initialBrowse.current && !messages.some(m=>m.data?.stage==='choose_job' || (m.data?.stage==='no_results' && m.data?.search_summary)) && !inFlight.current){
       initialBrowse.current=true;
-      send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},null));
+      send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session));
     }
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(() => {

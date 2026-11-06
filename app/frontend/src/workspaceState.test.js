@@ -58,6 +58,14 @@ test('actual tab changes preserve conversation draft and list selection without 
  assert.equal(sent.length,1);assert.equal(sent[0].search_plan.limit,20);assert.equal(sent[0].search_plan.keyword,'');assert.match(container.querySelector('.browse-heading').textContent,/50/);
  await fill(container.querySelector('#message'),'React jobs');await submit(container.querySelector('#message').closest('form'));
  assert.equal(sent.length,3);assert.equal(sent[2].action,'confirm_search');assert.equal(sent[2].session_id,'22222222-2222-4222-8222-222222222222');assert.match(container.querySelector('.browse-card-grid').textContent,/Filtered React job/);assert.match(container.querySelector('[aria-label="현재 적용한 검색 조건"]').textContent,/React/);
+ // Education-first sessions must still fetch jobs when entering the jobs tab.
+ await change('#admin-chat');await change('#training');
+ globalThis.fetch=async(url,options)=>{if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};const payload=JSON.parse(options.body);sent.push(payload);return {ok:true,status:200,json:async()=>payload.action==='browse_training'?{stage:'conversation',cached:true,session_id:'44444444-4444-4444-8444-444444444444',learning_search:{status:'found'},learning_opportunities:[],training_has_more:false}:{stage:'choose_job',cached:true,session_id:'44444444-4444-4444-8444-444444444444',total:1,candidate_jobs:[{source_id:'45',title:'Jobs after training',company_name:'Test'}]}};};
+ await fill(container.querySelector('#access-code'),'x'.repeat(32));await submit(container.querySelector('form'));
+ assert.equal(sent.at(-1).action,'browse_training');
+ await change('#jobs');assert.equal(sent.at(-1).action,'search');assert.equal(sent.at(-1).session_id,'44444444-4444-4444-8444-444444444444');assert.match(container.querySelector('.browse-card-grid').textContent,/Jobs after training/);
+ const count=sent.length;await change('#training');await change('#jobs');assert.equal(sent.length,count);
+
 
  }finally{await act(async()=>root.unmount());window.happyDOM.abort();}
 });
