@@ -42,15 +42,9 @@ test('actual tab changes preserve conversation draft and list selection without 
  await change('#jobs');await change('#training');await change('#chat');
  assert.equal(container.querySelector('.assessment-stepper'),stepper);
  assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
- await act(async()=>container.querySelector('.popup-open').click());
- assert.equal(window.location.hash,'#jobs');assert.ok(container.querySelector('.floating-chat'));
- assert.equal(container.querySelector('#message'),textarea);assert.equal(container.querySelector('.assessment-stepper'),stepper);
- await act(async()=>container.querySelector('[aria-label="상담창 최소화"]').click());assert.ok(container.querySelector('.chat-minimized'));
- await act(async()=>container.querySelector('.chat-launcher').click());assert.ok(!container.querySelector('.chat-minimized'));
- await act(async()=>container.querySelector('[aria-label="상담창 닫기"]').click());
- await act(async()=>container.querySelector('.chat-launcher').click());
- assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
- await act(async()=>container.querySelector('[aria-label="상담창 고정"]').click());assert.ok(!container.querySelector('.floating-chat'));assert.equal(container.querySelector('#message'),textarea);
+ assert.equal(container.querySelector('.popup-open'),null);assert.equal(container.querySelector('.chat-launcher'),null);assert.equal(container.querySelector('[aria-label="상담창 고정"]'),null);
+ await act(async()=>container.querySelector('[aria-label="AI 상담"]').click());
+ assert.equal(window.location.hash,'#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(detail.value,'Keep this answer detail');assert.equal(met.getAttribute('aria-pressed'),'true');
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
  // A fresh explorer session loads bounded all-jobs data without asking the model.
  let sent=[];globalThis.fetch=async(url,options)=>{if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};const payload=JSON.parse(options.body);sent.push(payload);return {ok:true,status:200,json:async()=>payload.action==='confirm_search'?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:1,candidate_jobs:[{source_id:'44',title:'Filtered React job',company_name:'Test',tech_stacks:['React']}],search_summary:{filters:['React'],ranking:[],limitations:[]}}:payload.search_plan?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:50,candidate_jobs:[{source_id:'43',title:'Initial all jobs',company_name:'Test'}]}:{stage:'search_review',cached:true,search_id:'33333333-3333-4333-8333-333333333333',session_id:'22222222-2222-4222-8222-222222222222',search_summary:{filters:['React'],ranking:[],limitations:[]}}};};
