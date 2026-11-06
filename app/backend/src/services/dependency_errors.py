@@ -17,6 +17,10 @@ def dependency_error(error):
         return 502, {'status':'model_output_truncated','error_type':type(error).__name__,
                      'error_code':code,'retryable':False,'retry_after_seconds':None,
                      'message':'답변이 출력 길이 한도에 도달했습니다. 기존 대화와 답변은 유지됩니다. 핵심부터 짧게 정리해 달라고 다시 요청해 주세요.'}
+    if code == 'ModelOutputFormatError':
+        return 502, {'status':'model_response_needs_clarification','error_type':type(error).__name__,
+                     'error_code':code,'retryable':False,'retry_after_seconds':None,
+                     'message':'요청을 처리하는 중 답변 구성을 확인하지 못했습니다. 기존 대화와 답변은 유지됩니다. 먼저 진행할 단계 하나를 선택해 주세요.'}
     retryable = code in RETRYABLE
     status = 429 if code == "ThrottlingException" else (503 if retryable else 502)
     return status, {"status": "model_temporarily_unavailable" if retryable else "dialogue_dependency_failed",

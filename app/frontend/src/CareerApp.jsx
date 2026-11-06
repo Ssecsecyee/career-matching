@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {needsStepRecovery,recoveryMessage} from './requestRecovery.js';
 import { clientToken, postChat, requestPayload, safeSourceUrl } from './api.js';
 import {latestSearchResults} from './workspaceRoute.js';
 import {WorkspaceNavigation} from './WorkspaceNavigation.jsx';
@@ -102,6 +103,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   const [busyAction, setBusyAction] = useState(null);
   const inFlight = useRef(false);
   const [error, setError] = useState(null);
+  const [stepRecovery,setStepRecovery]=useState(null);
   const [pending, setPending] = useState(null);
   const bottom = useRef(null);
   const conversation = useRef(null);
@@ -131,14 +133,14 @@ export function CareerApp({page='chat',adminChat=false}) {
   }, [messages,busy,error,page]);
 
   function reset() {
-    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null); setPending(null);
+    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null);setStepRecovery(null); setPending(null);
   }
 
   async function send(payload, text) {
     if (inFlight.current) return;
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};
     if(payload.action==='search' && !adminChat && window.location.hash==='#jobs')payload={...payload,page_size:20};
-    inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null); setPending(null);
+    inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null);setStepRecovery(null); setPending(null);
     if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
       let response = await postChat({ payload, accessCode: code, ownerToken: owner.current, onProgress: ({ text: partial }) => {
@@ -157,9 +159,10 @@ export function CareerApp({page='chat',adminChat=false}) {
       if (data.session_id) setSession(data.session_id);
       if (!response.ok) {
         setMessages(old => old.filter(m => m.id !== payload.request_id));
-        const hints = { agentcore_experiment_admin_only:'AgentCore 실험은 관리자 접속 코드로만 사용할 수 있습니다.',agentcore_experiment_budget_reached:'승인된 실험 호출 한도에 도달했습니다. 추가 비용 승인 전까지 중단합니다.',conversation_engine_changed_start_new:'실행 방식을 바꾸려면 새 대화를 시작해 주세요.',training_reference_changed:'교육 목록이 바뀌었습니다. 최신 목록에서 다시 선택해 주세요.', stale_training_search:'교육 검색 기준이 바뀌었습니다. 최신 교육 검색 설명을 확인해 주세요.', unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', consultation_summary_changed: '답변 정리가 바뀌었습니다. 최신 요약에서 다시 선택해 주세요.', consultation_requires_selected_job: '상담할 공고를 먼저 선택해 주세요.', saved_answers_changed_refresh:'다른 답변이 저장돼 내용이 바뀌었습니다. 다시 조회한 뒤 수정해 주세요.',saved_answer_not_found:'수정할 답변을 다시 조회해 주세요.',saved_answer_legacy_readonly:'이전 형식의 답변은 여기서 수정할 수 없습니다.',ModelOutputFormatError: '응답 형식을 확인하지 못했습니다.' };
+        const hints = { agentcore_experiment_admin_only:'AgentCore 실험은 관리자 접속 코드로만 사용할 수 있습니다.',agentcore_experiment_budget_reached:'승인된 실험 호출 한도에 도달했습니다. 추가 비용 승인 전까지 중단합니다.',conversation_engine_changed_start_new:'실행 방식을 바꾸려면 새 대화를 시작해 주세요.',training_reference_changed:'교육 목록이 바뀌었습니다. 최신 목록에서 다시 선택해 주세요.', stale_training_search:'교육 검색 기준이 바뀌었습니다. 최신 교육 검색 설명을 확인해 주세요.', unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', consultation_summary_changed: '답변 정리가 바뀌었습니다. 최신 요약에서 다시 선택해 주세요.', consultation_requires_selected_job: '상담할 공고를 먼저 선택해 주세요.', saved_answers_changed_refresh:'다른 답변이 저장돼 내용이 바뀌었습니다. 다시 조회한 뒤 수정해 주세요.',saved_answer_not_found:'수정할 답변을 다시 조회해 주세요.',saved_answer_legacy_readonly:'이전 형식의 답변은 여기서 수정할 수 없습니다.',ModelOutputFormatError: '요청을 처리하는 중 답변 구성을 확인하지 못했습니다. 기존 대화와 답변은 유지됩니다. 먼저 진행할 단계 하나를 선택해 주세요.' };
         const hint=hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`;
         setError(hint);
+        if(needsStepRecovery(data))setStepRecovery({message:payload.message || text || ''});
         if(['revise_answer','remember'].includes(payload.action))setSavedError(hint);
         if (data.retryable) setPending({ payload: { ...payload, request_id: crypto.randomUUID(), ...(data.session_id ? { session_id: data.session_id } : {}) }, retryAt: Date.now() + 10000 });
         else if (data.status === 'session_busy_retry_later') setPending({ payload, retryAt: Date.now() + 10000 });
@@ -256,7 +259,7 @@ export function CareerApp({page='chat',adminChat=false}) {
           {result?.active_job && <aside className="source" aria-label="현재 상담 공고"><strong>현재 상담 공고</strong><p>{result.active_job.company_name} · {result.active_job.title}</p><small>확인한 버전 {result.active_job.source_version} · 다른 목록을 보아도 새 공고 선택 전까지 이 공고의 답변을 유지합니다.</small></aside>}
           {messages.map((message, index) => message.backgroundList ? null : <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (!messages.slice(index + 1).some(m => !m.backgroundList) || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => !m.backgroundList && m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={(searchId, target) => send(requestPayload('confirm_search', { search_id: searchId }, session), target === 'training' ? '이 검색 기준으로 교육을 보여줘.' : '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} compact={exploring} onExplain={explainTraining} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={assessmentControl} />}</div></article>)}
           {busy && busyAction!=='next_results' && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
-          {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
+          {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}{stepRecovery?<div className="choices"><button disabled={busy} onClick={()=>{const message=recoveryMessage(stepRecovery.message,'assessment');send(requestPayload('search',{message},session),message);}}>역량 확인부터</button><button disabled={busy} onClick={()=>{const message=recoveryMessage(stepRecovery.message,'training');send(requestPayload('search',{message},session),message);}}>교육 찾기부터</button></div>:<button className="quiet" disabled={busy} onClick={reset}>새 대화</button>}</div>}
           <div ref={bottom} />
         </main>
         <div className={`composer-area${compactComposer ? " assessment-mode" : ""}`}>{session && <div className="memory-tools"><button className="quiet" type="button" disabled={busy || !!pending} onClick={() => loadSavedAnswers(0)}>내 답변 보기·수정</button><span className="fine">현재 대화 안에서 기억합니다</span></div>}{result?.memory?.facts?.length > 0 && <details className="memory-summary"><summary>기억한 내용 {result.memory.facts.length}개</summary>{result.memory.facts.map((fact, i) => <p key={i}><strong>{fact.subject}</strong> · {fact.quote}</p>)}</details>}<form className="composer" onSubmit={search}><label className="sr-only" htmlFor="message">{noteOnly ? '답변 보충 설명' : '찾고 싶은 공고'}</label><textarea id="message" value={draft} maxLength={question ? 2000 : 4000} disabled={busy || !!pending} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !noteOnly) { event.preventDefault(); event.currentTarget.form.requestSubmit(); } }} placeholder={noteOnly ? '보충 설명을 적고 대화 속 답변 버튼을 눌러 주세요.' : '예: React 교육을 찾아줘. 또는 역량 질문은 그만해줘.'} rows={compactComposer ? 1 : 2} />
