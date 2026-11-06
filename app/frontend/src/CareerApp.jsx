@@ -167,9 +167,10 @@ export function CareerApp({page='chat',adminChat=false}) {
         if(data.stage==='choose_job')window.location.hash='#jobs';
         else if(data.learning_search && !['training_search_review','training_no_results'].includes(data.stage))window.location.hash='#training';
       }
-      setResult(data);
+      const backgroundList=payload.action==='next_results' && ['#jobs','#training'].includes(window.location.hash);
+      if(!backgroundList)setResult(data);
       setMessages(old => {
-        const finished = { role: 'assistant', data, id: payload.request_id };
+        const finished = { role: 'assistant', data, id: payload.request_id, backgroundList };
         return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? finished : m) : [...old, finished];
       });
       return data;
@@ -249,8 +250,8 @@ export function CareerApp({page='chat',adminChat=false}) {
         <main ref={conversation} className="conversation" aria-label="대화 내용" aria-live="polite">
           {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
           {result?.active_job && <aside className="source" aria-label="현재 상담 공고"><strong>현재 상담 공고</strong><p>{result.active_job.company_name} · {result.active_job.title}</p><small>확인한 버전 {result.active_job.source_version} · 다른 목록을 보아도 새 공고 선택 전까지 이 공고의 답변을 유지합니다.</small></aside>}
-          {messages.map((message, index) => <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (index === messages.length - 1 || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={(searchId, target) => send(requestPayload('confirm_search', { search_id: searchId }, session), target === 'training' ? '이 검색 기준으로 교육을 보여줘.' : '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} compact={exploring} onExplain={explainTraining} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={assessmentControl} />}</div></article>)}
-          {busy && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
+          {messages.map((message, index) => message.backgroundList ? null : <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}>{message.role === 'assistant' && <div className="avatar">✳</div>}<div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} active={!pending && (!messages.slice(index + 1).some(m => !m.backgroundList) || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => !m.backgroundList && m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={(searchId, target) => send(requestPayload('confirm_search', { search_id: searchId }, session), target === 'training' ? '이 검색 기준으로 교육을 보여줘.' : '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} compact={exploring} onExplain={explainTraining} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={assessmentControl} />}</div></article>)}
+          {busy && busyAction!=='next_results' && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}<button className="quiet" disabled={busy} onClick={reset}>새 대화</button></div>}
           <div ref={bottom} />
         </main>
