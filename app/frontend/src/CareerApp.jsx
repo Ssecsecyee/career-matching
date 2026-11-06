@@ -130,6 +130,8 @@ export function CareerApp({page='chat',adminChat=false}) {
     }
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(() => {
+    if(page==='my')return;
+    if(page!=='chat'){const panel=conversation.current;if(panel)panel.scrollTop=panel.scrollHeight;return;}
     if(page!=='chat' && (busyAction==='next_results' || messages.at(-1)?.data?.search_continuation || messages.at(-1)?.data?.training_continuation))return;
     const stepper=conversation.current?.querySelector('.assessment-stepper');
     const summary=conversation.current?.querySelector('.message:last-of-type .assessment-summary');
@@ -275,7 +277,7 @@ export function CareerApp({page='chat',adminChat=false}) {
           <p className="disclaimer">수집된 공고로 테스트 중입니다. 현재 모집 여부는 원문에서 확인해 주세요.</p></div>
       </div>
       {libraryError && <p role="alert">{libraryError}</p>}
-      {page==='my' && <MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/>}
+      {page==='my' && <div className="my-page-host"><MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/></div>}
       <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
       <div hidden={page!=='training'}><ExplorationPreview target="training" loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
       </div>

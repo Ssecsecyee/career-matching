@@ -133,3 +133,9 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .my-page{padding:24px;min-width:0;width:100%;overflow:auto}.my-page h1{font-size:24px}.my-page .browse-page{padding:10px 0}
 .resume-editor{border:1px solid #dce5ef;border-radius:16px;padding:20px;margin:20px 0;background:#fbfcff}.resume-editor textarea{display:block;width:100%;min-height:160px;padding:14px;font:inherit;box-sizing:border-box;border:1px solid #cbd8e8;border-radius:10px}
 .resume-editor label{display:block;margin:14px 0}.resume-editor input[type="checkbox"]{width:auto}.personal-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+
+/* Detail backdrop must never inherit the opaque general button hover. */
+.detail-backdrop,.detail-backdrop:hover:not(:disabled),.detail-backdrop:active{background:#10243c18;transition:none;animation:none}
+.explorer-layout .sidebar{z-index:11}.explorer-layout .workspace>header{z-index:11}
+.explorer-layout .my-page-host{grid-column:2;grid-row:1;min-width:0}
+.personal-tabs button[aria-pressed="true"]{background:#edf4ff;color:#245994;border-color:#9abbe8}

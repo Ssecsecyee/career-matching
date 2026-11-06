@@ -35,12 +35,12 @@ test('actual tab changes preserve conversation draft and list selection without 
  const item=container.querySelector('.browse-result');assert.ok(item);await act(async()=>item.click());assert.match(container.querySelector('.browse-detail').textContent,/Synthetic developer/);assert.match(container.querySelector('.job-detail-sections').textContent,/Build software/);
  await act(async()=>{container.querySelector('.detail-backdrop').click();});assert.equal(container.querySelector('.browse-detail'),null);
  await act(async()=>{container.querySelector('[aria-label="스크랩 저장"]').click();});
- await change('#my');assert.match(container.querySelector('.personal-tabs').textContent,/최근 본 항목 \(1\)/);assert.match(container.querySelector('.personal-tabs').textContent,/스크랩 \(1\)/);
+ await change('#my');assert.ok(container.querySelector('.my-page-host'));assert.match(container.querySelector('.my-page').textContent,/Synthetic developer/);assert.match(container.querySelector('.personal-tabs').textContent,/최근 본 항목 \(1\)/);assert.match(container.querySelector('.personal-tabs').textContent,/스크랩 \(1\)/);
  await change('#jobs');await act(async()=>item.click());
  await change('#training');await change('#jobs');assert.equal(item.getAttribute('aria-pressed'),'true');await change('#chat');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.equal(requests,2);assert.match(container.querySelector('.conversation').textContent,/React jobs/);
  globalThis.fetch=async(url,options)=>{if(options?.body && JSON.parse(options.body).action==='browse_training')return {ok:true,status:200,json:async()=>({stage:'conversation',cached:true,learning_search:{status:'found'},learning_opportunities:[],training_has_more:false})};if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};requests++;return {ok:true,status:200,json:async()=>({stage:'checking_required',grouped:true,cached:true,session_id:'11111111-1111-4111-8111-111111111111',requirement_type:'required',source_url:'https://example.com/job',questions:[{question_id:'q1',quote:'React experience'},{question_id:'q2',quote:'Git experience'}],progress:{answered:0,total:2}})};};
  await change('#jobs');
- await act(async()=>{container.querySelector('.browse-actions button').click();});
+ await act(async()=>{container.querySelector('.browse-actions button:not([aria-pressed])').click();});
  const stepper=container.querySelector('.assessment-stepper');assert.ok(stepper);
  const met=stepper.querySelector('.assessment-options button');await act(async()=>met.click());
  const detail=stepper.querySelector('input');await fill(detail,'Keep this answer detail');

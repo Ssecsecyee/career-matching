@@ -2,7 +2,7 @@ import React,{useState} from 'react';
 import {ExplorationPreview} from './ExplorationPreview.jsx';
 import {emptyLibrary} from './personalLibrary.js';
 export function MyPage({library,onChange,...browse}){
- const [tab,setTab]=useState('recent'),[target,setTarget]=useState('jobs');
+ const [tab,setTab]=useState('saved'),[target,setTarget]=useState('jobs');
  const items=library[tab].filter(x=>x.target===target);
  return <section className="my-page"><h1>내 페이지</h1><p className="fine">이 브라우저에 저장됩니다. 같은 브라우저 프로필을 쓰는 사람과 공유될 수 있으며 다른 기기와 동기화되지 않습니다.</p>
  <div className="personal-tabs"><button aria-pressed={tab==='recent'} onClick={()=>setTab('recent')}>최근 본 항목 ({library.recent.length})</button><button aria-pressed={tab==='saved'} onClick={()=>setTab('saved')}>스크랩 ({library.saved.length})</button><button onClick={()=>{if(window.confirm('이 브라우저의 최근 본 항목·스크랩을 모두 삭제할까요?'))onChange(emptyLibrary());}}>로컬 기록 전체 삭제</button></div>
