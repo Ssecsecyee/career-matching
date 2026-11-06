@@ -203,3 +203,6 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .unified-workspace .composer:focus-within{border-color:#93b9f5;box-shadow:0 0 0 3px #2563eb0d}
 .unified-workspace .composer textarea{resize:none}
 .unified-workspace .copilot-heading strong{color:#2459a7}
+
+.browse-detail .detail-header{min-height:38px;padding:8px 16px;margin-bottom:14px;line-height:1.4}
+.browse-detail .detail-header strong{font-size:13px}
