@@ -19,6 +19,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  try{
  await act(async()=>{root.render(React.createElement(AppRouter));});
  await fill(container.querySelector('#access-code'),'x'.repeat(32));await submit(container.querySelector('form'));
+ assert.doesNotMatch(container.querySelector('.conversation').textContent,/다른 공고 보기/);
  const textarea=container.querySelector('#message');assert.ok(textarea);await fill(textarea,'React jobs');await submit(textarea.closest('form'));
  assert.equal(requests,2);assert.match(container.textContent,/Synthetic developer/);
  await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(!container.querySelector('.chat-view').hidden);assert.ok(container.querySelector('.app').classList.contains('explorer-layout'));
