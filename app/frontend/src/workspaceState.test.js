@@ -39,6 +39,12 @@ test('actual tab changes preserve conversation draft and list selection without 
  const stepper=container.querySelector('.assessment-stepper');assert.ok(stepper);
  const met=stepper.querySelector('.assessment-options button');await act(async()=>met.click());
  const detail=stepper.querySelector('input');await fill(detail,'Keep this answer detail');
+ assert.ok(container.querySelector('.assessment-modal[role="dialog"]'));
+ await act(async()=>container.querySelector('[aria-label="문답 창 닫기"]').click());
+ assert.equal(container.querySelector('.assessment-modal-backdrop').hidden,true);
+ assert.equal(container.querySelector('.assessment-stepper'),stepper);assert.equal(detail.value,'Keep this answer detail');
+ await act(async()=>container.querySelector('.assessment-resume button').click());
+ assert.equal(container.querySelector('.assessment-modal-backdrop').hidden,false);assert.equal(met.getAttribute('aria-pressed'),'true');
  await change('#jobs');await change('#training');await change('#chat');
  assert.equal(container.querySelector('.assessment-stepper'),stepper);
  assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
