@@ -1,4 +1,4 @@
-import {catalogColumns,defaultCardWidth} from './workspaceLayout.js';
+import {catalogColumns} from './workspaceLayout.js';
 import {SplitHandle,clampChatWidth} from './SplitHandle.jsx';
 import {MyPage} from './MyPage.jsx';
 import {readLibrary,writeLibrary,addRecent,toggleSaved,itemKey} from './personalLibrary.js';
@@ -285,7 +285,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   const compactComposer = sequential || !!result?.answer_summary;
   const noteOnly = false; // Free conversation and stopping questions stay available during assessments.
   const exploring=unlocked && !adminChat && page!=='chat';
-  return <div className={`app unified-workspace${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}`} style={{'--chat-width':chatWidth+'px','--catalog-columns':catalogColumns(viewport,chatWidth),'--catalog-card-width':defaultCardWidth(viewport)+'px'}}>
+  return <div className={`app unified-workspace${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}`} style={{'--chat-width':chatWidth+'px','--catalog-columns':catalogColumns(viewport,chatWidth)}}>
     {savedOpen&&<SavedAnswersPanel data={savedData} busy={busy} error={savedError} onClose={()=>{if(!busy){setSavedOpen(false);setSavedData(null);}}} onRefresh={loadSavedAnswers} onRevise={reviseSaved} onRemember={rememberAll}/>}
 
     <div className="workspace"><header><span>커리어 도우미 <span className="model">Sonnet</span></span>{unlocked && !adminChat && <WorkspaceNavigation page={page}/>}{unlocked && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
