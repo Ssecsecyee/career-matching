@@ -84,15 +84,18 @@ test('actual tab changes preserve conversation draft and list selection without 
  assert.equal(sent.at(-1).action,'browse_training');
  await change('#jobs');assert.equal(sent.at(-1).action,'search');assert.equal(sent.at(-1).session_id,'44444444-4444-4444-8444-444444444444');assert.match(container.querySelector('.browse-card-grid').textContent,/Jobs after training/);
  const count=sent.length;await change('#training');await change('#jobs');assert.equal(sent.length,count);
+ const chatCount=container.querySelectorAll('article.message').length;
  const manualForm=container.querySelector('form[aria-label="공고 직접 검색"]');
  await fill(manualForm.querySelector('input[type="search"]'),'Company');
  await act(async()=>{const field=manualForm.querySelector('[aria-label="검색 컬럼"]');field.value='company_name';field.dispatchEvent(new window.Event('change',{bubbles:true}));});
  await submit(manualForm);
+ assert.equal(container.querySelectorAll('article.message').length,chatCount);
  assert.equal(sent.at(-1).search_plan.text_field,'company_name');assert.equal(sent.at(-1).search_plan.keyword,'Company');assert.equal(sent.at(-1).message,undefined);
  await change('#training');
  const educationForm=container.querySelector('form[aria-label="교육 직접 검색"]');
  await fill(educationForm.querySelector('input[type="search"]'),'Python');
  await submit(educationForm);
+ assert.equal(container.querySelectorAll('article.message').length,chatCount);
  assert.equal(sent.at(-1).action,'browse_training');assert.equal(sent.at(-1).filters.keyword,'Python');assert.equal(sent.at(-1).message,undefined);
 
 

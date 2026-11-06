@@ -58,7 +58,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
   {!personal && !onSearch && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
   {!personal && <div ref={scrollSentinel} className="browse-scroll-sentinel" aria-hidden="true"/>}
   {!personal && results.hasMore && <p className="fine" role="status">{busy?'목록을 더 불러오고 있어요…':'아래로 스크롤하면 더 불러옵니다'}</p>}
-  {loadError && <div role="alert"><p>다음 목록을 불러오지 못했습니다.</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}
+  {loadError && <div role="alert"><p>목록을 불러오지 못했습니다. {loadError}</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}
   {active && current && <button className="detail-backdrop" aria-label="빈 공간을 눌러 상세 닫기" onClick={()=>setSelected(null)}/>}
   {active && current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
    <header className="detail-header"><strong>{jobs?'공고 상세':'교육 상세'}</strong></header>

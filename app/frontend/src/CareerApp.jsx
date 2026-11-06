@@ -123,6 +123,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   const [busyAction, setBusyAction] = useState(null);
   const inFlight = useRef(false);
   const [error, setError] = useState(null);
+  const [catalogError,setCatalogError]=useState(null);
   const [stepRecovery,setStepRecovery]=useState(null);
   const [pending, setPending] = useState(null);
   const bottom = useRef(null);
@@ -170,17 +171,21 @@ export function CareerApp({page='chat',adminChat=false}) {
   },[unlocked,page]);
 
   function reset() {
-    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null);setStepRecovery(null); setPending(null);
+    initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setCatalogError(null); setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null);setStepRecovery(null); setPending(null);
   }
 
   async function send(payload, text) {
     if (inFlight.current) return;
+    const backgroundList=['#jobs','#training','#my'].includes(window.location.hash) && (payload.action==='browse_training' || payload.action==='next_results' || (payload.action==='search' && !!payload.search_plan));
+    const reportError=backgroundList?setCatalogError:setError;
+    setCatalogError(null);
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};
     if(payload.action==='search' && !adminChat && ['#jobs','#training','#my'].includes(window.location.hash))payload={...payload,page_size:20};
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null);setStepRecovery(null); setPending(null);
-    if (text) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
+    if (text && !backgroundList) setMessages(old => [...old, { role: 'user', text, id: crypto.randomUUID() }]);
     try {
       let response = await postChat({ payload, accessCode: code, ownerToken: owner.current, onProgress: ({ text: partial }) => {
+        if(backgroundList)return;
         setMessages(old => {
           const draft = { role: 'assistant', data: { stage: 'streaming', message: partial }, id: payload.request_id, partial: true };
           return old.some(m => m.id === payload.request_id) ? old.map(m => m.id === payload.request_id ? draft : m) : [...old, draft];
@@ -198,8 +203,9 @@ export function CareerApp({page='chat',adminChat=false}) {
         setMessages(old => old.filter(m => m.id !== payload.request_id));
         const hints = { agentcore_experiment_admin_only:'AgentCore 실험은 관리자 접속 코드로만 사용할 수 있습니다.',agentcore_experiment_budget_reached:'승인된 실험 호출 한도에 도달했습니다. 추가 비용 승인 전까지 중단합니다.',conversation_engine_changed_start_new:'실행 방식을 바꾸려면 새 대화를 시작해 주세요.',training_reference_changed:'교육 목록이 바뀌었습니다. 최신 목록에서 다시 선택해 주세요.', stale_training_search:'교육 검색 기준이 바뀌었습니다. 최신 교육 검색 설명을 확인해 주세요.', unauthorized: '접속 코드를 다시 확인해 주세요.', session_busy_retry_later: '이전 요청을 처리 중입니다. 잠시 뒤 다시 확인해 주세요.', session_not_found_or_expired: '대화가 만료됐습니다. 새 대화를 시작해 주세요.', source_changed_reselect_job: '공고 원문이 바뀌었습니다. 새 대화에서 다시 검색해 주세요.', session_model_budget_exceeded: '이 대화의 모델 호출 한도에 도달했습니다. 새 대화를 시작해 주세요.', search_confirmation_changed: '검색 기준이 바뀌었습니다. 최신 검색 설명을 확인해 주세요.', consultation_summary_changed: '답변 정리가 바뀌었습니다. 최신 요약에서 다시 선택해 주세요.', consultation_requires_selected_job: '상담할 공고를 먼저 선택해 주세요.', saved_answers_changed_refresh:'다른 답변이 저장돼 내용이 바뀌었습니다. 다시 조회한 뒤 수정해 주세요.',saved_answer_not_found:'수정할 답변을 다시 조회해 주세요.',saved_answer_legacy_readonly:'이전 형식의 답변은 여기서 수정할 수 없습니다.',ModelOutputFormatError: '요청을 처리하는 중 답변 구성을 확인하지 못했습니다. 기존 대화와 답변은 유지됩니다. 먼저 진행할 단계 하나를 선택해 주세요.' };
         const hint=hints[data.status] || hints[data.error_code] || data.message || `요청을 처리하지 못했습니다. (${response.status})`;
-        setError(hint);
-        if(needsStepRecovery(data))setStepRecovery({message:payload.message || text || ''});
+        reportError(hint);
+        if(backgroundList)setPending({payload,retryAt:0});
+        if(!backgroundList && needsStepRecovery(data))setStepRecovery({message:payload.message || text || ''});
         if(['revise_answer','remember'].includes(payload.action))setSavedError(hint);
         if (data.retryable) setPending({ payload: { ...payload, request_id: crypto.randomUUID(), ...(data.session_id ? { session_id: data.session_id } : {}) }, retryAt: Date.now() + 10000 });
         else if (data.status === 'session_busy_retry_later') setPending({ payload, retryAt: Date.now() + 10000 });
@@ -211,7 +217,7 @@ export function CareerApp({page='chat',adminChat=false}) {
         if(data.stage==='choose_job')window.location.hash='#jobs';
         else if(data.learning_search && !['training_search_review','training_no_results'].includes(data.stage))window.location.hash='#training';
       }
-      const backgroundList=payload.action==='next_results' && ['#jobs','#training'].includes(window.location.hash);
+      
       if(!backgroundList)setResult(data);
       setMessages(old => {
         const finished = { role: 'assistant', data, id: payload.request_id, backgroundList, initialBrowse:payload.action==='search' && !!payload.search_plan && !payload.search_plan.keyword && !payload.search_plan.region && !payload.search_plan.skills?.length };
@@ -221,7 +227,7 @@ export function CareerApp({page='chat',adminChat=false}) {
     } catch {
       if(['revise_answer','remember'].includes(payload.action))setSavedError('연결이 끊겼습니다. 저장 결과를 다시 확인해 주세요.');
       setMessages(old => old.filter(m => m.id !== payload.request_id));
-      setError('연결이 끊겼습니다. 같은 요청의 처리 결과를 다시 확인할 수 있습니다.');
+      reportError('연결이 끊겼습니다. 같은 요청의 처리 결과를 다시 확인할 수 있습니다.');
       setPending({ payload, retryAt: 0 });
     } finally { inFlight.current = false; setBusy(false); }
   }
@@ -306,8 +312,8 @@ export function CareerApp({page='chat',adminChat=false}) {
       <SplitHandle width={chatWidth} onResize={setChatWidth}/>
       {libraryError && <p role="alert">{libraryError}</p>}
       {page==='my' && <div className="my-page-host"><MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/></div>}
-      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
-      <div hidden={page!=='training'}><ExplorationPreview target="training" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={busyAction==='next_results'?error:null} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
+      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
+      <div hidden={page!=='training'}><ExplorationPreview target="training" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
       </div>
       </>}
     </div>
