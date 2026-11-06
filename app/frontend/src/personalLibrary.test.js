@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readLibrary,writeLibrary,emptyLibrary,addRecent,toggleSaved,withResume} from './personalLibrary.js';
+import {readLibrary,writeLibrary,emptyLibrary,addRecent,toggleSaved} from './personalLibrary.js';
 import {filterItems,pageItems} from './browseFilters.js';
 test('recent items deduplicate, cap history, and survive storage reload',()=>{
  let library=emptyLibrary();for(let n=0;n<110;n++)library=addRecent(library,{source:'jumpit',source_id:String(n),title:'Job'},'jobs');
@@ -14,11 +14,9 @@ test('scraps keep source identities separate and toggling removes them',()=>{
  library=toggleSaved(library,{source:'training',source_id:'1'},'training');assert.equal(library.saved.length,2);
  library=toggleSaved(library,{source:'jumpit',source_id:'1'},'jobs');assert.equal(library.saved.length,1);
 });
-test('resume is sent only after explicit opt-in and cleared resume is never sent',()=>{
- const library={...emptyLibrary(),resume:'PRIVATE CV'};
- assert.equal(withResume('hello',library),'hello');assert.match(withResume('hello',{...library,useResume:true}),/PRIVATE CV/);
- assert.equal(withResume('hello',{...library,resume:'',useResume:true}),'hello');
- assert.ok(withResume('x'.repeat(3500),{...library,resume:'y'.repeat(1000),useResume:true}).length<=4000);
+test('legacy resume data is not loaded into the personal library',()=>{
+ const storage={getItem:()=>JSON.stringify({recent:[],saved:[],resume:'PRIVATE CV',useResume:true})};
+ assert.deepEqual(readLibrary(storage),emptyLibrary());
 });
 test('filters distinguish teaching modes and skills; numbered pages never duplicate items',()=>{
  const jobs=Array.from({length:43},(_,i)=>({source_id:String(i),title:'Developer',tech_stacks:[i%2?'Python':'React'],addresses:['서울 강남구']}));

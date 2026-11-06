@@ -1,5 +1,5 @@
 import {MyPage} from './MyPage.jsx';
-import {readLibrary,writeLibrary,addRecent,toggleSaved,itemKey,withResume} from './personalLibrary.js';
+import {readLibrary,writeLibrary,addRecent,toggleSaved,itemKey} from './personalLibrary.js';
 import React, { useEffect, useRef, useState } from 'react';
 import {needsStepRecovery,recoveryMessage} from './requestRecovery.js';
 import { clientToken, postChat, requestPayload, safeSourceUrl } from './api.js';
@@ -146,7 +146,6 @@ export function CareerApp({page='chat',adminChat=false}) {
 
   async function send(payload, text) {
     if (inFlight.current) return;
-    if(payload.action==='search' && !payload.search_plan && payload.message)payload={...payload,message:withResume(payload.message,library)};
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};
     if(payload.action==='search' && !adminChat && window.location.hash==='#jobs')payload={...payload,page_size:20};
     inFlight.current = true; setBusy(true); setBusyAction(payload.action); setError(null);setStepRecovery(null); setPending(null);

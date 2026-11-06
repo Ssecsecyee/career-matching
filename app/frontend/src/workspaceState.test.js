@@ -22,7 +22,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  const textarea=container.querySelector('#message');assert.ok(textarea);await fill(textarea,'React jobs');await submit(textarea.closest('form'));
  assert.equal(requests,2);assert.match(container.textContent,/Synthetic developer/);
  await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(!container.querySelector('.chat-view').hidden);assert.ok(container.querySelector('.app').classList.contains('explorer-layout'));
- await change('#my');assert.match(container.querySelector('.my-page').textContent,/상담용 이력서/);await change('#jobs');
+ await change('#my');assert.doesNotMatch(container.querySelector('.my-page').textContent,/상담용 이력서/);assert.match(container.querySelector('.my-page').textContent,/최근 본 항목/);await change('#jobs');
  const searchField=container.querySelector('main[aria-label="채용공고 탐색"] input[type="search"]');
  await fill(searchField,'Python');assert.equal(container.querySelectorAll('.explore-card').length,1);
  assert.match(container.querySelector('.explore-card').textContent,/Python developer/);
