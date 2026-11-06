@@ -21,11 +21,11 @@ export function latestSearchResults(messages, target) {
   let list={items:[],hasMore:false};
   for(const message of messages){
     const d=message.role==='assistant' && message.data;if(!d)continue;
-    if(d.stage==='training_no_results'){list={items:[],hasMore:false,summary:d.search_summary};continue;}
+    if(d.stage==='training_no_results'){list={items:[],total:d.search_summary?.candidate_total,hasMore:false,summary:d.search_summary};continue;}
     if(d.learning_search && !['training_search_review','training_no_results'].includes(d.stage)){
       const cards=d.learning_opportunities || [];
       const items=d.training_continuation?[...list.items,...cards]:cards;
-      list={items:[...new Map(items.map(c=>[`${c.source}:${c.source_id}`,c])).values()],hasMore:d.training_has_more ?? cards.length>0,summary:d.search_summary || (d.training_continuation?list.summary:undefined)};
+      list={items:[...new Map(items.map(c=>[`${c.source}:${c.source_id}`,c])).values()],total:d.training_continuation?list.total:(d.training_candidate_total ?? d.search_summary?.candidate_total),hasMore:d.training_has_more ?? cards.length>0,summary:d.search_summary || (d.training_continuation?list.summary:undefined)};
     }
   }
   return list;

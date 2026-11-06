@@ -27,3 +27,11 @@ test('education scroll accumulates groups and stops on exhausted page',()=>{
  m.push({role:'assistant',data:{learning_search:{status:'no_match'},learning_opportunities:[],training_continuation:true,training_has_more:false}});
  assert.equal(latestSearchResults(m,'training').items.length,2);assert.equal(latestSearchResults(m,'training').hasMore,false);
 });
+
+test('education total stays at the original candidate count across scroll pages',()=>{
+ const m=[{role:'assistant',data:{learning_search:{status:'found'},learning_opportunities:[{source:'w',source_id:'1'}],training_candidate_total:2500,training_continuation:false}}];
+ m.push({role:'assistant',data:{learning_search:{status:'found'},learning_opportunities:[{source:'w',source_id:'2'}],training_candidate_total:2400,training_continuation:true}});
+ assert.equal(latestSearchResults(m,'training').total,2500);
+ m.push({role:'assistant',data:{learning_search:{status:'found'},learning_opportunities:[],training_candidate_total:42,training_continuation:false}});
+ assert.equal(latestSearchResults(m,'training').total,42);
+});
