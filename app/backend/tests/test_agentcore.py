@@ -19,7 +19,7 @@ class AgentCoreTests(unittest.TestCase):
     return {'stream':[{'contentBlockDelta':{'contentBlockIndex':0,'delta':{'text':'미확인입니다.'}}},{'messageStop':{'stopReason':'end_turn'}},{'metadata':{'usage':{'inputTokens':10,'outputTokens':4}}}]}
   c=Client();state={'profile':{}}
   result,usage=self.adapter(c).run('내 답변',state,{'message':'내 답변'})
-  self.assertEqual(result['engine'],'agentcore');self.assertEqual(usage['output_tokens'],4)
+  self.assertEqual(state['stage'],'conversation');self.assertEqual(result['engine'],'agentcore');self.assertEqual(usage['output_tokens'],4)
   self.assertEqual(c.calls[0]['runtimeSessionId'],c.calls[1]['runtimeSessionId'])
   self.assertTrue(all(x.startswith('@*/') for x in c.calls[0]['allowedTools']))
   self.assertEqual(c.calls[1]['messages'][0]['content'][0]['toolResult']['toolUseId'],'t1')
