@@ -88,7 +88,8 @@ class VerifiedElasticJobs:
                 continue
             rows.append(row)
         self.last_verification = {'matched': len(candidates), 'verified': len(rows), 'excluded': stale}
-        return len(rows), rows[:plan.limit]
+        from src.repositories.browse_order import shuffle_browse
+        return len(rows), shuffle_browse(rows,plan)[:plan.limit]
 
 
 def create_job_repository(connection_factory, *, include_unverified=False):

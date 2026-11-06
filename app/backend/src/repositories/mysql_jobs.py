@@ -58,6 +58,8 @@ class MySQLJobRepository:
         if excluded:
             conditions.append("source_id NOT IN (" + ",".join(["%s"] * len(excluded)) + ")")
             parameters.extend(excluded)
+        from src.repositories.browse_order import unfiltered_jobs
+        browse_random=unfiltered_jobs(plan)
         where = " AND ".join(conditions)
         connection = self.connection_factory()
         try:
@@ -66,7 +68,7 @@ class MySQLJobRepository:
                 total = int(cursor.fetchone()["total"])
                 cursor.execute("SELECT " + ",".join(SUMMARY_FIELDS) + " FROM job_postings WHERE " + where +
                                " ORDER BY " + (ranking + " DESC," if ranking else "") +
-                               "published_at DESC,job_id DESC LIMIT %s", parameters + rank_parameters + [plan.limit])
+                               ("RAND() LIMIT %s" if browse_random else "published_at DESC,job_id DESC LIMIT %s"), parameters + rank_parameters + [plan.limit])
                 rows = [decode_row(row) for row in cursor.fetchall()]
             return total, rows
         finally:

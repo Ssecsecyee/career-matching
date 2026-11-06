@@ -53,5 +53,6 @@ class JsonJobRepository:
             from src.services.search_terms import matches_skill
             results.sort(key=lambda row: sum(matches_skill(row.get('tech_stacks', []), s)
                          for s in dict.fromkeys(plan.owned_skills + plan.preferred_skills)), reverse=True)
-        return len(results), results[:plan.limit]
+        from src.repositories.browse_order import shuffle_browse
+        return len(results), shuffle_browse(results,plan)[:plan.limit]
 

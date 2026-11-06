@@ -57,6 +57,9 @@ class ElasticsearchTrainingRepository:
         exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,
                                      delivery_mode=delivery_mode, candidates_only=candidates_only, topic_operator=topic_operator, browse_all=browse_all)
+        if browse_all and not topics:
+            import secrets
+            query['query']={'function_score':{'query':query['query'],'random_score':{'seed':secrets.randbits(31),'field':'_seq_no'},'boost_mode':'replace'}}
         self.search_limited = False
         self.last_candidate_total = None
         courses, seen = [], set()

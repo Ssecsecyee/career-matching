@@ -71,12 +71,12 @@ class MySQLTrainingRepository:
         conn=self.factory()
         try:
             with conn.cursor() as cur:
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+" ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000",params)
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+(" ORDER BY RAND() LIMIT 1000" if browse_all and not topics else " ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000"),params)
                 rows=cur.fetchall()
                 cards=[card(row,topics) for row in rows]
                 if candidates_only:
                     cards=[c for c in cards if c['start_window_eligible'] and c['recruitment_status'] != 'closed']
-            cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
+            if topics or not browse_all:cards.sort(key=lambda c:(not c['recommendation_eligible'],-len(c['matched_topics']),c['offering_id']))
             from src.services.training_groups import grouped
             self.search_limited=len(rows)>=1000
             return grouped(cards,exclude_groups=exclude_groups,limit=20 if browse_all else 3)

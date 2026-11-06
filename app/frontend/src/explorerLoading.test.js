@@ -16,10 +16,10 @@ test('initial loading shows skeletons instead of empty result or zero total',()=
  assert.match(empty,/현재 조건에서 표시할 공고가 없습니다/);assert.doesNotMatch(empty,/skeleton-card/);
 });
 
-test('numbered pages expose navigation and only show retry after failure',()=>{
+test('infinite lists omit numbered navigation and show retry after failure',()=>{
  const props={target:'jobs',results:{items:[{source_id:'1',title:'Job',source_url:'https://example.com'}],hasMore:true,total:10}};
  const normal=renderToStaticMarkup(React.createElement(ExplorationPreview,props));
- assert.match(normal,/목록 페이지/);assert.match(normal,/다음 →/);assert.doesNotMatch(normal,/아래로 스크롤/);assert.doesNotMatch(normal,/다시 불러오기/);
+ assert.doesNotMatch(normal,/목록 페이지|다음 →/);assert.match(normal,/아래로 스크롤/);assert.doesNotMatch(normal,/다시 불러오기/);
  const failed=renderToStaticMarkup(React.createElement(ExplorationPreview,{...props,loadError:'failed'}));
  assert.match(failed,/다시 불러오기/);assert.doesNotMatch(failed,/다음 공고 보기/);
 });
@@ -38,4 +38,11 @@ test('each catalog card has exactly one source shortcut',()=>{
  const footer=html.match(/<div class="explore-card-footer">([\s\S]*?)<\/div>/)[1];
  assert.equal((footer.match(/<a /g)||[]).length,1);
  }
+});
+
+test('infinite catalog retains cards beyond the first twenty',()=>{
+ const items=Array.from({length:43},(_,i)=>({source_id:String(i),title:'Job '+i}));
+ const html=renderToStaticMarkup(React.createElement(ExplorationPreview,{target:'jobs',results:{items,total:100,hasMore:true}}));
+ assert.equal((html.match(/class="explore-card"/g)||[]).length,43);
+ assert.doesNotMatch(html,/numbered-pages|한 페이지 20개/);
 });
