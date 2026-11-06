@@ -145,3 +145,5 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .detail-header{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid #e1e8f0;margin:0 -20px 20px;padding:10px 16px}
 .detail-header strong{font-size:14px;color:#243c58}
 .browse-detail .detail-header .detail-close{position:static;flex-shrink:0;width:44px;height:44px;font-size:30px}
+
+.browse-detail .detail-header .detail-close,.browse-detail .detail-header .detail-close:hover:not(:disabled){background:transparent;border:0;border-radius:0;box-shadow:none;color:#29466b}
