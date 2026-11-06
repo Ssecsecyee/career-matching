@@ -149,6 +149,21 @@ export function CareerApp({page='chat',adminChat=false}) {
     else bottom.current?.scrollIntoView({behavior:'smooth',block:'end'});
   }, [messages,busy,error,page]);
 
+  useEffect(()=>{
+    const panel=conversation.current;
+    if(!panel || !unlocked || page==='my' || typeof window.MutationObserver==='undefined')return;
+    let following=true,frame;
+    const onScroll=()=>{following=panel.scrollHeight-panel.clientHeight-panel.scrollTop<80;};
+    const observer=new window.MutationObserver(()=>{
+      if(!following)return;
+      if(frame)window.cancelAnimationFrame(frame);
+      frame=window.requestAnimationFrame(()=>{if(following)panel.scrollTop=panel.scrollHeight;});
+    });
+    observer.observe(panel,{childList:true,subtree:true,characterData:true});
+    panel.addEventListener('scroll',onScroll,{passive:true});
+    return()=>{observer.disconnect();panel.removeEventListener('scroll',onScroll);if(frame)window.cancelAnimationFrame(frame);};
+  },[unlocked,page]);
+
   function reset() {
     initialBrowse.current=false;initialTraining.current=false; setJobDetails({});setTrainingDetails({});setDetailError('');detailRequest.current=null; setSession(null); setMessages([]); setResult(null); setDraft(''); setSavedOpen(false); setSavedData(null); setSavedError(''); setError(null);setStepRecovery(null); setPending(null);
   }

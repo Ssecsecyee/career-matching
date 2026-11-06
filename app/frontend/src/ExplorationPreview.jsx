@@ -6,7 +6,6 @@ import {filterItems,pageItems} from './browseFilters.js';
 import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
-function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
 export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false,personal=false}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState(''),[extra,setExtra]=useState(''),[page,setPage]=useState(1);
  const pendingPage=useRef(null);
@@ -26,11 +25,13 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    if(personal || !active || busy || loadError || keyword || region || extra || (!results.hasMore && page>=pageCount) || !onNext || typeof IntersectionObserver==='undefined')return;
    let near=false,scrolled=false,requested=false;
    const request=()=>{if(near && scrolled && !requested){requested=true;nextPage();}};
-   const onScroll=()=>{scrolled=true;request();};
+   const onScroll=event=>{if(event.target?.closest?.('.chat-view,.browse-detail'))return;scrolled=true;request();};
    const observer=new IntersectionObserver(entries=>{near=entries.some(e=>e.isIntersecting);request();},{rootMargin:'0px 0px 120px 0px'});
    if(scrollSentinel.current)observer.observe(scrollSentinel.current);
    window.addEventListener('scroll',onScroll,true);
-   return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);};
+   window.addEventListener('wheel',onScroll,{capture:true,passive:true});
+   window.addEventListener('touchmove',onScroll,{capture:true,passive:true});
+   return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);window.removeEventListener('wheel',onScroll,true);window.removeEventListener('touchmove',onScroll,true);};
  },[personal,active,busy,loadError,keyword,region,extra,page,pageCount,results.hasMore,results.items.length,onNext]);
  function nextPage(){if(page<pageCount)setPage(page+1);else if(results.hasMore && !keyword && !region && !extra && onNext){pendingPage.current=page+1;onNext();}}
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
@@ -54,7 +55,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
       <div className="explore-card-brand"><CompanyBadge name={name}/><div><span className="explore-company">{name}</span><small>{regionOf(item) || '지역 미확인'}{!jobs?' · '+(item.delivery_mode==='online'?'온라인':item.delivery_mode==='offline'?'오프라인':'방식 미확인'):''}</small></div></div>
       <h2>{item.title}</h2><p className="explore-card-description">{jobs?(item.tech_stacks || []).slice(0,7).join(' · ') || '상세 조건은 원문에서 확인해 주세요.':item.curriculum || (item.source==='goyong24_training'?'API 자료에 상세 교육 내용이 없습니다. 고용24 원문에서 확인해 주세요.':'세부 커리큘럼은 교육 원문에서 확인해 주세요.')}</p>
      </button>
-     <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><a className="original-button" href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'모집 원문 확인 ↗':'교육 원문 ↗'}</a><button type="button" aria-label={isSaved(item)?'스크랩 해제':'스크랩 저장'} aria-pressed={isSaved(item)} onClick={()=>onSave?.(item)}>{isSaved(item)?'♥ 저장됨':'♡ 스크랩'}</button></div>
+     <div className="explore-card-footer"><a className="original-button" href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'모집 원문 확인 ↗':'교육 원문 ↗'}</a><button type="button" aria-label={isSaved(item)?'스크랩 해제':'스크랩 저장'} aria-pressed={isSaved(item)} onClick={()=>onSave?.(item)}>{isSaved(item)?'♥ 저장됨':'♡ 스크랩'}</button></div>
     </article>;
    })}</section>}
   {!personal && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}

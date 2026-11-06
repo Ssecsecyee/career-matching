@@ -31,3 +31,11 @@ test('personal lists omit browse controls and job search has no small skill inpu
  const jobs=renderToStaticMarkup(React.createElement(ExplorationPreview,props));
  assert.doesNotMatch(jobs,/예: Python|현재 목록 기술/);assert.match(jobs,/현재 목록 지역/);
 });
+
+test('each catalog card has exactly one source shortcut',()=>{
+ for(const target of ['jobs','training']){
+ const html=renderToStaticMarkup(React.createElement(ExplorationPreview,{target,results:{items:[{source_id:'1',title:'Example',source_url:'https://example.com/one'}],total:1}}));
+ const footer=html.match(/<div class="explore-card-footer">([\s\S]*?)<\/div>/)[1];
+ assert.equal((footer.match(/<a /g)||[]).length,1);
+ }
+});
