@@ -24,7 +24,7 @@ class HarnessAdapter:
         if name=='get_saved_answers':
             if args:raise ValueError('No identity arguments allowed')
             selected=state.get('selected') or {}
-            return {'selected_job':{k:selected.get(k) for k in ('title','company_name','source_id','source_version')},'assessment_facts':assessment_facts(state)},None
+            return {'selected_job':{k:selected.get(k) for k in ('title','company_name','source_id','source_version')},'assessment_facts':assessment_facts(state),'answer_details':[{'condition_id':c.get('condition_id'),'assessment':c.get('assessment'),'detail':str(c.get('detail',''))[:300]} for c in state.get('checks',[])[:12]]},None
         if name=='search_jobs':
             plan=SearchPlan.parse(args)
             if any(term.casefold() not in payload['message'].casefold() for term in plan.required_skills):raise ValueError('Required skills need explicit current user evidence')
