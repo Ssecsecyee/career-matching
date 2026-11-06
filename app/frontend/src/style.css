@@ -121,3 +121,15 @@
 
 /* Native modal top layer keeps site navigation behind the questionnaire. */
 dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max-width:none;max-height:none;box-sizing:border-box;outline:none}dialog.assessment-modal-backdrop::backdrop{background:transparent}.assessment-modal .assessment-secondary{justify-content:flex-end}
+
+/* Browsing controls and personal library */
+.detail-backdrop{position:fixed;inset:0;z-index:8;background:#10243c22;border:0;border-radius:0;cursor:default}
+.browse-detail{z-index:9}.browse-detail .detail-close{width:48px;height:48px;right:10px;top:10px;font-size:34px;display:grid;place-items:center;background:#edf3fa;color:#29466b;border-radius:12px}
+.browse-detail>.company-badge{margin-top:10px}
+.numbered-pages{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:22px 0}
+.numbered-pages [aria-current="page"]{background:#2563eb;color:white;border-color:#2563eb}
+.browse-toolbar input{max-width:220px}.explore-card-footer{flex-wrap:wrap}.explore-card-footer .original-button{color:#245994;background:#edf4ff;padding:5px 8px;border-radius:6px}
+.explore-card-footer button[aria-pressed="true"]{color:#ce3870;background:#fff0f5}
+.my-page{padding:24px;min-width:0;width:100%;overflow:auto}.my-page h1{font-size:24px}.my-page .browse-page{padding:10px 0}
+.resume-editor{border:1px solid #dce5ef;border-radius:16px;padding:20px;margin:20px 0;background:#fbfcff}.resume-editor textarea{display:block;width:100%;min-height:160px;padding:14px;font:inherit;box-sizing:border-box;border:1px solid #cbd8e8;border-radius:10px}
+.resume-editor label{display:block;margin:14px 0}.resume-editor input[type="checkbox"]{width:auto}.personal-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}

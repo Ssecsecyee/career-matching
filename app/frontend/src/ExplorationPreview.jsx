@@ -2,30 +2,31 @@ import React, {useEffect,useRef,useState} from 'react';
 import {safeSourceUrl} from './api.js';
 import {TrainingStatus} from './TrainingStatus.jsx';
 import {TrainingCohorts} from './TrainingCohorts.jsx';
+import {filterItems,pageItems} from './browseFilters.js';
 import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
 function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
-export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead}) {
- const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState('');
+export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false}) {
+ const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState(''),[extra,setExtra]=useState(''),[page,setPage]=useState(1);
+ const pendingPage=useRef(null);
  const jobs=target==='jobs';
  const initialLoading=active && loading && !results.items.length;
- const sentinel=useRef(null);
- useEffect(()=>{
-   if(!active || busy || loadError || !results.hasMore || keyword || region || !onNext || typeof IntersectionObserver==='undefined')return;
-   const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();onNext();}},{rootMargin:'0px 0px 200px 0px'});
-   if(sentinel.current)observer.observe(sentinel.current);
-   return ()=>observer.disconnect();
- },[active,jobs,busy,loadError,results.items.length,results.hasMore,keyword,region,onNext]);
+ useEffect(()=>{setPage(1);pendingPage.current=null;},[keyword,region,extra,results.items[0]?.source_id]);
+ useEffect(()=>{if(pendingPage.current && results.items.length>=pendingPage.current*20-19){setPage(pendingPage.current);pendingPage.current=null;}},[results.items.length]);
+ useEffect(()=>{if(!selected || !active)return;const close=e=>{if(e.key==='Escape')setSelected(null);};window.addEventListener('keydown',close);return()=>window.removeEventListener('keydown',close);},[selected,active]);
  const current=results.items.find(item=>`${item.source || 'jumpit'}:${item.source_id}`===selected);
  const trainingDetail=current && trainingDetails[current.source+':'+current.source_id];
  const regions=[...new Set(results.items.map(regionOf).filter(Boolean))];
- const filtered=results.items.filter(item=>(!region || regionOf(item)===region) &&
-   (!keyword.trim() || [item.title,item.company_name,item.provider_name,...(item.tech_stacks || [])].filter(Boolean).join(' ').toLocaleLowerCase().includes(keyword.trim().toLocaleLowerCase())));
+ const filtered=filterItems(results.items,{keyword,region,extra,jobs});
+ const visible=pageItems(filtered,page);
+ const pageCount=Math.max(1,Math.ceil(filtered.length/20));
+ function nextPage(){if(page<pageCount)setPage(page+1);else if(results.hasMore && !keyword && !region && !extra && onNext){pendingPage.current=page+1;onNext();}}
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
   <div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
    <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>
-   {(keyword || region) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');}}>필터 초기화</button>}
+   <label className="list-region"><span>{jobs?'기술':'수강 방식'}</span>{jobs?<input aria-label="현재 목록 기술" placeholder="예: Python" value={extra} onChange={e=>setExtra(e.target.value)}/>:<select aria-label="현재 목록 수강 방식" value={extra} onChange={e=>setExtra(e.target.value)}><option value="">전체 방식</option><option value="online">온라인</option><option value="offline">오프라인</option><option value="unknown">미확인</option></select>}</label>
+   {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);}}>필터 초기화</button>}
   </div>
   <div className="browse-heading"><h1>{'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
    <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. AI에게 조건을 말하면 전체 검색 대상에서 좁혀집니다.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
@@ -34,19 +35,21 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
   {jobs && results.continuation && <p className="fine">앞서 본 공고를 제외한 남은 후보 수입니다.</p>}
   {initialLoading ? <section className="browse-initial-loading" role="status" aria-label="목록 불러오는 중"><div className="loading-caption"><span className="loading-dot"/><strong>{jobs?'공고':'교육'}를 불러오고 있어요</strong><p>목록이 준비되면 이곳에 표시됩니다.</p></div><div className="browse-card-grid" aria-hidden="true">{Array.from({length:6},(_,i)=><div className="explore-card skeleton-card" key={i}><div className="skeleton-brand"><span className="skeleton-avatar"/><div><span className="skeleton-line short"/><span className="skeleton-line tiny"/></div></div><span className="skeleton-line"/><span className="skeleton-line"/><span className="skeleton-line short"/><div className="skeleton-footer"/></div>)}</div></section> : !results.items.length ? <section className="browse-empty"><span className="browse-empty-symbol">⌕</span><h2>{jobs?'현재 조건에서 표시할 공고가 없습니다':'상담창에서 원하는 조건을 알려주세요'}</h2><p>{jobs?'관심 직무·기술·지역으로 공고를 찾아보세요.':'배우고 싶은 분야와 필요한 조건으로 교육을 찾아보세요.'}</p><button type="button" className="source-link" onClick={onChat}>상담창 열기 →</button></section> :
    !filtered.length ? <section className="browse-empty"><h2>현재 목록에 맞는 항목이 없어요</h2><p>필터를 바꾸거나 상담창에서 새로운 검색을 시작해 주세요.</p></section> :
-   <section className="browse-card-grid" aria-label="최근 검색 결과">{filtered.map(item=>{
+   <section className="browse-card-grid" aria-label="최근 검색 결과">{visible.map(item=>{
     const key=`${item.source || 'jumpit'}:${item.source_id}`,name=jobs?item.company_name:item.provider_name;
     return <article className="explore-card" key={key}>
      <button type="button" className="browse-result" aria-pressed={selected===key} onClick={()=>{setSelected(key);onRead?.(item);}}>
       <div className="explore-card-brand"><CompanyBadge name={name}/><div><span className="explore-company">{name}</span><small>{regionOf(item) || '지역 미확인'}{!jobs?' · '+(item.delivery_mode==='online'?'온라인':item.delivery_mode==='offline'?'오프라인':'방식 미확인'):''}</small></div></div>
       <h2>{item.title}</h2><p className="explore-card-description">{jobs?(item.tech_stacks || []).slice(0,7).join(' · ') || '상세 조건은 원문에서 확인해 주세요.':item.curriculum || (item.source==='goyong24_training'?'API 자료에 상세 교육 내용이 없습니다. 고용24 원문에서 확인해 주세요.':'세부 커리큘럼은 교육 원문에서 확인해 주세요.')}</p>
      </button>
-     <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><span>{jobs?'모집 원문 확인':item.schedule_label || '일정 미확인'}</span></div>
+     <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><a className="original-button" href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'모집 원문 확인 ↗':'교육 원문 ↗'}</a><button type="button" aria-label={isSaved(item)?'스크랩 해제':'스크랩 저장'} aria-pressed={isSaved(item)} onClick={()=>onSave?.(item)}>{isSaved(item)?'♥':'♡'}</button></div>
     </article>;
    })}</section>}
-  {!initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>입력창·지역 필터는 현재 페이지에만 적용됩니다. 전체 검색은 AI 상담을 이용하세요.</small></div>}
-  {!initialLoading && <div ref={sentinel} className="browse-load-status" role="status">{loadError?<><p>목록을 추가로 불러오지 못했습니다.</p><button type="button" disabled={busy} onClick={onRetry}>다시 불러오기</button></>:busy?'목록을 불러오고 있어요…':results.hasMore?'아래로 스크롤하면 더 불러옵니다':'현재 조건의 목록을 모두 확인했습니다'}</div>}
-  {current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
+  {!initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
+  {!initialLoading && <nav className="numbered-pages" aria-label="목록 페이지"><button disabled={page===1 || busy} onClick={()=>setPage(page-1)}>← 이전</button>{Array.from({length:pageCount},(_,i)=>i+1).filter(n=>n===1 || n===pageCount || Math.abs(n-page)<=2).map(n=><button key={n} aria-current={page===n?'page':undefined} disabled={busy} onClick={()=>setPage(n)}>{n}</button>)}<button disabled={busy || (page>=pageCount && (!results.hasMore || !!keyword || !!region || !!extra))} onClick={nextPage}>다음 →</button><small>{page}페이지 · 한 페이지 20개</small></nav>}
+  {loadError && <div role="alert"><p>다음 목록을 불러오지 못했습니다.</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}
+  {active && current && <button className="detail-backdrop" aria-label="빈 공간을 눌러 상세 닫기" onClick={()=>setSelected(null)}/>}
+  {active && current && <section className="browse-detail" role="dialog" aria-modal="false" aria-label="선택한 항목 정보">
    <button type="button" className="detail-close" onClick={()=>setSelected(null)} aria-label="상세 닫기">×</button>
    <CompanyBadge name={jobs?current.company_name:current.provider_name}/><p className="muted">{jobs?current.company_name:current.provider_name}</p><h2>{current.title}</h2>
    <p>{(current.addresses || []).join(' · ') || '지역 미확인'}</p>
