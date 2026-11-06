@@ -1,6 +1,6 @@
 # AgentCore 사용감 실험 v1
 
-상태: 구현 · 관리자 제한 실험 배포 준비
+상태: 구현 · 관리자 제한 실험 배포 완료
 기준일: 2026-11-06
 
 ## 제공 범위
@@ -31,3 +31,15 @@
 ## 운용·복구
 
 infra/agentcore/setup.py는 create/status, activate.py는 실험 전용 역할 호출 권한과 기존 config의 실험 키를 설정한다. config-before-agentcore.json에 최초 설정을 보존한다. 실제 ARN·명령 ID는 Git 제외 infra/.build에 보관한다. 일반 서비스 주소에는 실험 쿼리를 붙이지 않는다. 실험 비활성화는 ENABLE_AGENTCORE_EXPERIMENT=false 후 작업자 재시작으로 수행하며, DB·ES 원본을 변경하거나 삭제하지 않는다. 역할·Harness·Memory의 정리 절차는 실험 종료 후 별도 실행한다.
+
+## 사용감 테스트 주소와 배포 확인
+
+주소: https://d1elpjlek4sj83.cloudfront.net/previews/agentcore-f0669a4/index.html?agentcore=1#jobs
+
+기존 관리자 접속 코드로 사용한다. 일반 코드는 실험 자유 입력을 거절한다. 일반 서비스 기본 주소는 기존 화면·엔진을 유지한다. 이 미리보기는 UI/엔진 선택만 분리하며 운영 데이터의 조회·문답 저장을 사용한다.
+
+2026-11-06 backend release 20261106T023534Z 적용 Success. 실제 API에서 인사 http=200, engine=agentcore 확인. 실제 React 프론트엔드 도구 검색에서 http=200, search_review, 후보 27건 확인. 합성 DB 답변 조회 왕복 확인. 초기 서버 쓰기 보호 및 새 대화 stage 초기화 실패를 수정했다. 실패 원인 분석과 함께 기록하며 무오류 운영 또는 정식 품질 평가 완료로 주장하지 않는다.
+
+현재 전역 예약 3턴 사용, 3턴 남음(확인 시점 기준). 실패 1턴·인사 검증 1턴·실제 검색 검증 1턴이 포함된다. 개발자 로컬 합성 smoke는 별도 소량 사용량이며 5 USD 승인 범위에 합산해야 한다. AWS 실제 청구 총액을 확정한 수치는 아니다. 사용자 테스트 후 추가 호출은 한도에 의해 중단된다.
+
+기존 배포 config 백업은 유지하고 systemd에서 /opt/career/agentcore-experiment에만 쓰기를 허용한다. 실험 종료 시 기능 플래그 비활성화·역할 추가 정책 제거·Harness/Memory 종료 및 보존 자료 처리를 검토한다. 삭제는 사용자의 대화 보존 요구와 함께 별도 실행한다.

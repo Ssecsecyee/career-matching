@@ -1,13 +1,13 @@
 # AgentCore Harness 문맥·도구 실행 전환 계획
 
-상태: 제안 · 문서화 완료 / 구현·AWS 생성·유료 실험 전
+상태: 관리자 제한 실험 구현·배포 / 일반 사용자 전환·정식 비교 평가 전
 기준일: 2026-11-06
 
 ## 목표와 판단 원칙
 
 현재 EC2 작업자의 자유 입력 문맥 분류와 상태별 기능 연결 일부를 Amazon Bedrock AgentCore Harness의 도구 선택으로 대체할 수 있는지 비교한다. 목표는 대화 문맥 품질과 유지보수성 개선이며, 조건식 수나 프롬프트 파일 길이 감소 자체를 성공으로 보지 않는다. 실제 실행·토큰·비용·지연 감소는 측정 전까지 주장하지 않는다.
 
-현재 운영은 Bedrock Sonnet + ContextRouter + Pydantic 계약 + 서버 실행 검증이다. Harness는 아직 운영에 연결되지 않았다. 임베딩·벡터 검색, 전체 AI 조건 백필, 고용24 자동화, MySQL/ES의 서버리스 이전은 이번 실험 범위가 아니다.
+현재 운영은 Bedrock Sonnet + ContextRouter + Pydantic 계약 + 서버 실행 검증이다. Harness는 별도 관리자 실험 경로에 연결했으며 일반 사용자 기본 경로는 기존 방식이다. [실험 운영 기록](AGENTCORE_EXPERIMENT_RUNBOOK.md)을 따른다. 임베딩·벡터 검색, 전체 AI 조건 백필, 고용24 자동화, MySQL/ES의 서버리스 이전은 이번 실험 범위가 아니다.
 
 ## 목표 구조
 
@@ -134,4 +134,4 @@ Harness 세션/Memory의 actor·사용자·세션 범위는 서버에서 바인�
 - [AWS 리전 지원](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agentcore-regions.html)
 - [AWS 보안·접근 통제](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness-security.html)
 
-미확정: 실제 계정 권한/모델, 비용 상한, Harness 실행 제한의 API별 설정 위치, DDL·보존 기간·사용량 연결, 기능 플래그 이름, 전환 비율. 현재 코드/API에 존재하는 것으로 간주하지 않는다.
+미확정: 실제 계정 권한/모델, 정식 비교 평가의 비용 상한, DDL·보존 기간·사용량 연결, 기능 플래그 이름, 전환 비율. 현재 코드/API에 존재하는 것으로 간주하지 않는다.
