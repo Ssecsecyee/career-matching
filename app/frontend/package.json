@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test src/api.test.js src/adminUsage.test.js src/assessmentDraft.test.js src/searchReview.test.js src/conditionStructure.test.js src/consultationRequest.test.js src/controlRequest.test.js src/intentAudit.test.js src/savedAnswers.test.js src/trainingStatus.test.js src/trainingCohorts.test.js src/trainingExplain.test.js src/markdownAnswer.test.js src/workspaceRoute.test.js src/workspaceState.test.js src/companyBadge.test.js"
+    "test": "node --test src/api.test.js src/adminUsage.test.js src/assessmentDraft.test.js src/searchReview.test.js src/conditionStructure.test.js src/consultationRequest.test.js src/controlRequest.test.js src/intentAudit.test.js src/savedAnswers.test.js src/trainingStatus.test.js src/trainingCohorts.test.js src/trainingExplain.test.js src/markdownAnswer.test.js src/workspaceRoute.test.js src/workspaceState.test.js src/companyBadge.test.js src/explorerLoading.test.js"
   },
   "dependencies": {
     "react": "^19.0.0",
