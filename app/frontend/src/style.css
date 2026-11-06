@@ -139,3 +139,9 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .explorer-layout .sidebar{z-index:11}.explorer-layout .workspace>header{z-index:11}
 .explorer-layout .my-page-host{grid-column:2;grid-row:1;min-width:0}
 .personal-tabs button[aria-pressed="true"]{background:#edf4ff;color:#245994;border-color:#9abbe8}
+
+/* Keep detail title and dismissal visible while its contents scroll. */
+.browse-detail{padding-top:0}
+.detail-header{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid #e1e8f0;margin:0 -20px 20px;padding:10px 16px}
+.detail-header strong{font-size:14px;color:#243c58}
+.browse-detail .detail-header .detail-close{position:static;flex-shrink:0;width:44px;height:44px;font-size:30px}
