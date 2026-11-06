@@ -20,7 +20,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  await act(async()=>{root.render(React.createElement(AppRouter));});
  await fill(container.querySelector('#access-code'),'x'.repeat(32));await submit(container.querySelector('form'));
  const textarea=container.querySelector('#message');assert.ok(textarea);await fill(textarea,'React jobs');await submit(textarea.closest('form'));
- assert.equal(requests,1);assert.match(container.textContent,/Synthetic developer/);
+ assert.equal(requests,2);assert.match(container.textContent,/Synthetic developer/);
  await fill(textarea,'Keep my draft');await change('#jobs');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.ok(!container.querySelector('.chat-view').hidden);assert.ok(container.querySelector('.app').classList.contains('explorer-layout'));
  const searchField=container.querySelector('main[aria-label="채용공고 탐색"] input[type="search"]');
  await fill(searchField,'Python');assert.equal(container.querySelectorAll('.explore-card').length,1);
@@ -30,9 +30,9 @@ test('actual tab changes preserve conversation draft and list selection without 
  await act(async()=>{region.value='부산';region.dispatchEvent(new window.Event('change',{bubbles:true}));});
  assert.equal(container.querySelectorAll('.explore-card').length,1);
  await act(async()=>{container.querySelector('.browse-toolbar .quiet').click();});
- assert.equal(container.querySelectorAll('.explore-card').length,2);assert.equal(requests,1);
+ assert.equal(container.querySelectorAll('.explore-card').length,2);assert.equal(requests,2);
  const item=container.querySelector('.browse-result');assert.ok(item);await act(async()=>item.click());assert.match(container.querySelector('.browse-detail').textContent,/Synthetic developer/);assert.match(container.querySelector('.job-detail-sections').textContent,/Build software/);
- await change('#training');await change('#jobs');assert.equal(item.getAttribute('aria-pressed'),'true');await change('#chat');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.equal(requests,1);assert.match(container.querySelector('.conversation').textContent,/React jobs/);
+ await change('#training');await change('#jobs');assert.equal(item.getAttribute('aria-pressed'),'true');await change('#chat');assert.equal(container.querySelector('#message'),textarea);assert.equal(textarea.value,'Keep my draft');assert.equal(requests,2);assert.match(container.querySelector('.conversation').textContent,/React jobs/);
  globalThis.fetch=async(url,options)=>{if(options?.body && JSON.parse(options.body).action==='browse_training')return {ok:true,status:200,json:async()=>({stage:'conversation',cached:true,learning_search:{status:'found'},learning_opportunities:[],training_has_more:false})};if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};requests++;return {ok:true,status:200,json:async()=>({stage:'checking_required',grouped:true,cached:true,session_id:'11111111-1111-4111-8111-111111111111',requirement_type:'required',source_url:'https://example.com/job',questions:[{question_id:'q1',quote:'React experience'},{question_id:'q2',quote:'Git experience'}],progress:{answered:0,total:2}})};};
  await change('#jobs');
  await act(async()=>{container.querySelector('.browse-actions button').click();});
@@ -41,7 +41,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  const detail=stepper.querySelector('input');await fill(detail,'Keep this answer detail');
  await change('#jobs');await change('#training');await change('#chat');
  assert.equal(container.querySelector('.assessment-stepper'),stepper);
- assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
+ assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
  await act(async()=>container.querySelector('.popup-open').click());
  assert.equal(window.location.hash,'#jobs');assert.ok(container.querySelector('.floating-chat'));
  assert.equal(container.querySelector('#message'),textarea);assert.equal(container.querySelector('.assessment-stepper'),stepper);
@@ -49,8 +49,8 @@ test('actual tab changes preserve conversation draft and list selection without 
  await act(async()=>container.querySelector('.chat-launcher').click());assert.ok(!container.querySelector('.chat-minimized'));
  await act(async()=>container.querySelector('[aria-label="상담창 닫기"]').click());
  await act(async()=>container.querySelector('.chat-launcher').click());
- assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,2);
- await act(async()=>container.querySelector('[aria-label="상담창 고정"]').click());assert.ok(!container.querySelector('.floating-chat'));
+ assert.equal(met.getAttribute('aria-pressed'),'true');assert.equal(detail.value,'Keep this answer detail');assert.equal(requests,3);
+ await act(async()=>container.querySelector('[aria-label="상담창 닫기"]').click());assert.ok(container.querySelector('.chat-minimized'));assert.equal(container.querySelector('[aria-label="상담창 고정"]'),null);
  await change('#admin-chat');assert.ok(container.querySelector('#access-code'));assert.equal(container.querySelector('#access-code').value,'');
  // A fresh explorer session loads bounded all-jobs data without asking the model.
  let sent=[];globalThis.fetch=async(url,options)=>{if(url==='/deploy-config.json')return {ok:true,json:async()=>({apiEnabled:true})};const payload=JSON.parse(options.body);sent.push(payload);return {ok:true,status:200,json:async()=>payload.action==='confirm_search'?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:1,candidate_jobs:[{source_id:'44',title:'Filtered React job',company_name:'Test',tech_stacks:['React']}],search_summary:{filters:['React'],ranking:[],limitations:[]}}:payload.search_plan?{stage:'choose_job',cached:true,session_id:'22222222-2222-4222-8222-222222222222',total:50,candidate_jobs:[{source_id:'43',title:'Initial all jobs',company_name:'Test'}]}:{stage:'search_review',cached:true,search_id:'33333333-3333-4333-8333-333333333333',session_id:'22222222-2222-4222-8222-222222222222',search_summary:{filters:['React'],ranking:[],limitations:[]}}};};

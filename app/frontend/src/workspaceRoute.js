@@ -1,7 +1,7 @@
 export function workspaceRoute(hash) {
   if (hash === '#admin') return {mode:'admin',page:'admin'};
   if (hash === '#admin-chat') return {mode:'admin-chat',page:'chat'};
-  return {mode:'user',page:hash === '#jobs' ? 'jobs' : hash === '#training' ? 'training' : 'chat'};
+  return {mode:'user',page:hash === '#jobs' ? 'jobs' : hash === '#training' ? 'training' : 'jobs'};
 }
 
 export function latestSearchResults(messages, target) {
