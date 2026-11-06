@@ -23,3 +23,11 @@ test('numbered pages expose navigation and only show retry after failure',()=>{
  const failed=renderToStaticMarkup(React.createElement(ExplorationPreview,{...props,loadError:'failed'}));
  assert.match(failed,/다시 불러오기/);assert.doesNotMatch(failed,/다음 공고 보기/);
 });
+
+test('personal lists omit browse controls and job search has no small skill input',()=>{
+ const props={target:'jobs',results:{items:[{source_id:'1',title:'Job'}],hasMore:false,total:1}};
+ const personal=renderToStaticMarkup(React.createElement(ExplorationPreview,{...props,personal:true}));
+ assert.doesNotMatch(personal,/browse-toolbar|browse-heading|전체 공고로 초기화|현재 목록에서 검색/);
+ const jobs=renderToStaticMarkup(React.createElement(ExplorationPreview,props));
+ assert.doesNotMatch(jobs,/예: Python|현재 목록 기술/);assert.match(jobs,/현재 목록 지역/);
+});

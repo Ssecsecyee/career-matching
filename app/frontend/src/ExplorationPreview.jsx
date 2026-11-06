@@ -7,7 +7,7 @@ import {CompanyBadge} from './CompanyBadge.jsx';
 
 function regionOf(item){return (item.addresses || [])[0]?.trim().split(/\s+/)[0] || '';}
 function hostOf(url){try{return new URL(url).hostname;}catch{return '원문 보기';}}
-export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false}) {
+export function ExplorationPreview({target,results,busy=false,loading=false,loadError=null,onRetry,onChat,onExplain,onAssess,onNext,onReset,active=true,details={},trainingDetails={},detailError='',onRead,onSave,isSaved=()=>false,personal=false}) {
  const [selected,setSelected]=useState(null),[keyword,setKeyword]=useState(''),[region,setRegion]=useState(''),[extra,setExtra]=useState(''),[page,setPage]=useState(1);
  const pendingPage=useRef(null);
  const jobs=target==='jobs';
@@ -23,14 +23,15 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
  const pageCount=Math.max(1,Math.ceil(filtered.length/20));
  function nextPage(){if(page<pageCount)setPage(page+1);else if(results.hasMore && !keyword && !region && !extra && onNext){pendingPage.current=page+1;onNext();}}
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
-  <div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
+  {!personal && <><div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
    <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>
-   <label className="list-region"><span>{jobs?'기술':'수강 방식'}</span>{jobs?<input aria-label="현재 목록 기술" placeholder="예: Python" value={extra} onChange={e=>setExtra(e.target.value)}/>:<select aria-label="현재 목록 수강 방식" value={extra} onChange={e=>setExtra(e.target.value)}><option value="">전체 방식</option><option value="online">온라인</option><option value="offline">오프라인</option><option value="unknown">미확인</option></select>}</label>
+   {!jobs && <label className="list-region"><span>수강 방식</span><select aria-label="현재 목록 수강 방식" value={extra} onChange={e=>setExtra(e.target.value)}><option value="">전체 방식</option><option value="online">온라인</option><option value="offline">오프라인</option><option value="unknown">미확인</option></select></label>}
    {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);}}>필터 초기화</button>}
   </div>
   <div className="browse-heading"><h1>{'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
    <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. AI에게 조건을 말하면 전체 검색 대상에서 좁혀집니다.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
   </div>
+  </>}
   {jobs && results.summary && <section className="source" aria-label="현재 적용한 검색 조건"><strong>현재 적용한 조건</strong>{results.summary.filters?.length?<ul>{results.summary.filters.map(t=><li key={t}>{t}</li>)}</ul>:<p>지역·직무·필수 기술 제한 없음</p>}{results.summary.ranking?.length>0 && <p>관련성 순위: {results.summary.ranking.join(' · ')}</p>}</section>}
   {jobs && results.continuation && <p className="fine">앞서 본 공고를 제외한 남은 후보 수입니다.</p>}
   {initialLoading ? <section className="browse-initial-loading" role="status" aria-label="목록 불러오는 중"><div className="loading-caption"><span className="loading-dot"/><strong>{jobs?'공고':'교육'}를 불러오고 있어요</strong><p>목록이 준비되면 이곳에 표시됩니다.</p></div><div className="browse-card-grid" aria-hidden="true">{Array.from({length:6},(_,i)=><div className="explore-card skeleton-card" key={i}><div className="skeleton-brand"><span className="skeleton-avatar"/><div><span className="skeleton-line short"/><span className="skeleton-line tiny"/></div></div><span className="skeleton-line"/><span className="skeleton-line"/><span className="skeleton-line short"/><div className="skeleton-footer"/></div>)}</div></section> : !results.items.length ? <section className="browse-empty"><span className="browse-empty-symbol">⌕</span><h2>{jobs?'현재 조건에서 표시할 공고가 없습니다':'상담창에서 원하는 조건을 알려주세요'}</h2><p>{jobs?'관심 직무·기술·지역으로 공고를 찾아보세요.':'배우고 싶은 분야와 필요한 조건으로 교육을 찾아보세요.'}</p><button type="button" className="source-link" onClick={onChat}>상담창 열기 →</button></section> :
@@ -45,7 +46,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
      <div className="explore-card-footer"><a href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">↗ {hostOf(item.source_url)}</a><a className="original-button" href={safeSourceUrl(item.source_url)} target="_blank" rel="noopener noreferrer">{jobs?'모집 원문 확인 ↗':'교육 원문 ↗'}</a><button type="button" aria-label={isSaved(item)?'스크랩 해제':'스크랩 저장'} aria-pressed={isSaved(item)} onClick={()=>onSave?.(item)}>{isSaved(item)?'♥ 저장됨':'♡ 스크랩'}</button></div>
     </article>;
    })}</section>}
-  {!initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
+  {!personal && !initialLoading && <div className="browse-pagination"><button type="button" className="quiet" disabled={busy} onClick={()=>{setKeyword('');setRegion('');setExtra('');setPage(1);onReset?.();}}>전체 {jobs?'공고':'교육'}로 초기화</button><small>필터는 불러온 목록에 적용됩니다. 전체 데이터 검색은 AI 상담을 이용하세요.</small></div>}
   {!initialLoading && <nav className="numbered-pages" aria-label="목록 페이지"><button disabled={page===1 || busy} onClick={()=>setPage(page-1)}>← 이전</button>{Array.from({length:pageCount},(_,i)=>i+1).filter(n=>n===1 || n===pageCount || Math.abs(n-page)<=2).map(n=><button key={n} aria-current={page===n?'page':undefined} disabled={busy} onClick={()=>setPage(n)}>{n}</button>)}<button disabled={busy || (page>=pageCount && (!results.hasMore || !!keyword || !!region || !!extra))} onClick={nextPage}>다음 →</button><small>{page}페이지 · 한 페이지 20개</small></nav>}
   {loadError && <div role="alert"><p>다음 목록을 불러오지 못했습니다.</p><button disabled={busy} onClick={onRetry}>다시 불러오기</button></div>}
   {active && current && <button className="detail-backdrop" aria-label="빈 공간을 눌러 상세 닫기" onClick={()=>setSelected(null)}/>}
