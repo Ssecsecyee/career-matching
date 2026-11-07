@@ -468,6 +468,7 @@ class DialogueFlow:
     def search_response(self, state):
         return {'stage': state.get('stage', 'no_results'), 'candidate_jobs': state.get('candidate_jobs', []),
                 'total': state.get('total', 0), 'memory': public_memory(state),
+                'applied_search_plan':(state.get('search_navigation') or {}).get('plan'),
                 'search_backend':state.get('search_backend','mysql'), 'search_degraded':state.get('search_degraded',False),
                 'snapshot_warning': self.include_unverified,
                 **({'search_id':state['search_context']['search_id'], 'search_summary':state['search_context']['summary']}

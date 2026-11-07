@@ -9,13 +9,13 @@ export function latestSearchResults(messages, target) {
     let list={items:[],total:0,hasMore:false};
     for(const message of messages){
       const d=message.role==='assistant' && message.data;if(!d)continue;
-      if(d.stage==='no_results' && (d.search_summary || Array.isArray(d.candidate_jobs))){list={items:[],total:0,hasMore:false,summary:d.search_summary};continue;}
+      if(d.stage==='no_results' && (d.search_summary || Array.isArray(d.candidate_jobs))){list={items:[],total:0,hasMore:false,summary:d.search_summary,plan:d.applied_search_plan};continue;}
       if(d.stage==='choose_job' || d.search_continuation){
         const cards=d.candidate_jobs || [];
         const items=d.search_continuation?[...list.items,...cards]:cards;
         const unique=[...new Map(items.map(c=>[(c.source || 'jumpit')+':'+c.source_id,c])).values()];
         const exhausted=d.search_continuation && cards.length===0 && d.total===0;
-        list={items:unique,total:exhausted?unique.length:d.search_continuation?list.total:d.total,summary:d.search_summary || (d.search_continuation?list.summary:undefined),hasMore:cards.length>0 && d.total>cards.length};
+        list={items:unique,plan:d.applied_search_plan || (d.search_continuation?list.plan:undefined),total:exhausted?unique.length:d.search_continuation?list.total:d.total,summary:d.search_summary || (d.search_continuation?list.summary:undefined),hasMore:cards.length>0 && d.total>cards.length};
       }
     }
     return list;
@@ -23,7 +23,7 @@ export function latestSearchResults(messages, target) {
   let list={items:[],hasMore:false};
   for(const message of messages){
     const d=message.role==='assistant' && message.data;if(!d)continue;
-    if(d.stage==='training_no_results'){list={items:[],total:d.search_summary?.candidate_total,hasMore:false,summary:d.search_summary};continue;}
+    if(d.stage==='training_no_results'){list={items:[],total:d.search_summary?.candidate_total,hasMore:false,summary:d.search_summary,plan:d.applied_search_plan};continue;}
     if(d.learning_search && !['training_search_review','training_no_results'].includes(d.stage)){
       const cards=d.learning_opportunities || [];
       const items=d.training_continuation?[...list.items,...cards]:cards;

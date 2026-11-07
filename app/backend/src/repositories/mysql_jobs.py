@@ -38,12 +38,13 @@ class MySQLJobRepository:
         conditions = ["source=%s", "recruitment_status IN (%s" + (",%s" if self.include_unverified else "") + ")",
                       VISIBLE_SQL]
         parameters = ["jumpit", "active"] + (["unknown"] if self.include_unverified else [])
-        if plan.keyword:
+        keyword=plan.keyword or plan.text_query
+        if keyword:
             conditions.append("LOWER(CONCAT_WS(' ',title,company_name,responsibilities,qualifications,preferred_requirements,CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci)) LIKE LOWER(%s) ESCAPE '='")
             if plan.text_field!='all':
                 field="CAST(COALESCE(tech_stacks,JSON_ARRAY()) AS CHAR CHARACTER SET utf8mb4)" if plan.text_field=='tech_stacks' else plan.text_field
                 conditions[-1]="LOWER("+field+") LIKE LOWER(%s) ESCAPE '='"
-            parameters.append(literal_like(plan.keyword))
+            parameters.append(literal_like(keyword))
         if plan.region:
             from src.services.search_terms import region_terms
             variants=region_terms([plan.region])

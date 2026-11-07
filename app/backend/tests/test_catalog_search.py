@@ -79,3 +79,11 @@ class CatalogSearchTests(unittest.TestCase):
   self.assertTrue(all('COLLATE utf8mb4_0900_ai_ci' in x for x in parts))
   self.assertIn('JSON_OBJECT',LIST_FIELDS)
   self.assertNotIn('raw_detail',LIST_FIELDS)
+
+ def test_category_keyword_combines_with_structured_filters(self):
+  p=SearchPlan.parse({'schema_version':2,'text_query':'platform','roles':['백엔드'],'regions':['경기'],'required_skills':['Python'],'career':{'levels':['entry']}})
+  q=build_query(p)
+  self.assertEqual(q['query']['bool']['must'][0]['multi_match']['query'],'platform')
+  from src.repositories.browse_order import unfiltered_jobs
+  self.assertFalse(unfiltered_jobs(SearchPlan.parse({'schema_version':2,'text_query':'platform'})))
+  with self.assertRaises(ValueError):SearchPlan.parse({'schema_version':1,'text_query':'platform'})

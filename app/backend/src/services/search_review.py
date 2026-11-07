@@ -8,6 +8,7 @@ def execution_summary(plan, total, backend, degraded):
     if plan.schema_version == 1:
         return {'filters': [], 'ranking': [], 'limitations': ['이전 검색 형식의 조건입니다.']}
     filters, ranking, limits = [], [], []
+    if plan.text_query:filters.append('검색어: '+plan.text_query)
     if plan.regions:
         filters.append('근무지역: ' + ' 또는 '.join(plan.regions))
     if plan.roles:
@@ -51,7 +52,7 @@ def remember_search(state, plan, raw_plan, payload, total, jobs):
 def review_response(state):
     data = state['search_context']
     return {'stage': state['stage'], 'search_id': data['search_id'], 'total': data['total'],
-            'search_summary': data['summary'], 'candidate_jobs': [],
+            'search_summary': data['summary'], 'candidate_jobs': [], 'applied_search_plan':data.get('executed_plan'),
             'message': ('검색 기준을 확인해 주세요. 이 기준으로 공고를 보여드릴까요?' if data['total'] else
                         '이 검색 기준에 맞는 저장 공고를 찾지 못했습니다. 적용한 조건을 확인하고 변경할 항목을 말씀해 주세요.'),
             'search_backend': state.get('search_backend'), 'search_degraded': state.get('search_degraded', False)}

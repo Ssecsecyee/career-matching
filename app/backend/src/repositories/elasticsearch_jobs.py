@@ -65,8 +65,9 @@ def structured_query(plan, filters):
     if os.getenv('ENABLE_AI_CONDITION_RANKING')=='true':
         for term in dict.fromkeys(plan.owned_skills+plan.preferred_skills):
             should.append({'multi_match':{'query':term,'fields':['required_condition_terms^2','preferred_condition_terms'],'type':'best_fields'}})
+    must=[{'multi_match':{'query':plan.text_query,'fields':['title^4','company_name^2','responsibilities','qualifications','preferred_requirements','skills_text'],'operator':'and'}}] if plan.text_query else []
     return {'size': plan.limit, 'track_total_hits': True,
-            'query': {'bool': {'filter': filters, 'should': should, 'minimum_should_match': 0}},
+            'query': {'bool': {'filter': filters, 'should': should, 'minimum_should_match': 0,**({'must':must} if must else {})}},
             'sort': ['_score', {'published_at': {'order': 'desc', 'missing': '_last'}}, {'document_key': 'asc'}]}
 
 

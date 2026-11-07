@@ -26,6 +26,7 @@ class SearchPlan(BaseModel):
     # Deprecated fields retain the original literal/AND meaning for old clients.
     text_field: Literal['all','title','company_name','responsibilities','qualifications','preferred_requirements','tech_stacks'] = 'all'
     keyword: Annotated[str, Field(max_length=120)] = ''
+    text_query: Annotated[StrictStr, Field(max_length=120)] = ''
     region: Annotated[str, Field(max_length=80)] = ''
     skills: Terms = ()
     limit: Annotated[int, Field(ge=1, le=30)] = 5
@@ -80,7 +81,7 @@ class SearchPlan(BaseModel):
     def no_mixed_contract(self):
         if self.schema_version == 2 and (self.keyword or self.region or self.skills):
             raise ValueError('Do not mix legacy filters with structured intent')
-        if self.schema_version == 1 and (self.regions or self.roles or self.owned_skills or
+        if self.schema_version == 1 and (self.text_query or self.regions or self.roles or self.owned_skills or
                 self.required_skills or self.preferred_skills or self.career.levels or self.career.max_years is not None):
             raise ValueError('Structured intent requires version 2')
         return self

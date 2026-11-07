@@ -36,7 +36,7 @@ class JsonJobRepository:
             stacks = {s.casefold() for s in row.get("tech_stacks", [])}
             from src.services.search_terms import region_terms
             keyword_text=text if plan.text_field=='all' else (' '.join(row.get('tech_stacks') or []) if plan.text_field=='tech_stacks' else str(row.get(plan.text_field) or '')).casefold()
-            if plan.keyword.casefold() not in keyword_text or (plan.region and not any(v.casefold() in address for v in region_terms([plan.region]))):
+            if (plan.keyword or plan.text_query).casefold() not in keyword_text or (plan.region and not any(v.casefold() in address for v in region_terms([plan.region]))):
                 continue
             if not all(skill.casefold() in stacks for skill in plan.skills):
                 continue

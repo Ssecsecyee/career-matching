@@ -32,7 +32,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);window.removeEventListener('wheel',onScroll,true);window.removeEventListener('touchmove',onScroll,true);};
  },[personal,active,busy,loadError,keyword,region,extra,results.hasMore,results.items.length,onNext]);
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
-  {!personal && <>{onSearch?<CatalogSearch target={target} busy={busy} onSearch={onSearch} onReset={onReset}/>:<div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
+  {!personal && <>{onSearch?<CatalogSearch target={target} currentPlan={results.plan} items={results.items} busy={busy} onSearch={onSearch} onReset={onReset}/>:<div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
    {jobs && <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>}
 
    {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');}}>필터 초기화</button>}
