@@ -13,7 +13,9 @@ export function latestSearchResults(messages, target) {
       if(d.stage==='choose_job' || d.search_continuation){
         const cards=d.candidate_jobs || [];
         const items=d.search_continuation?[...list.items,...cards]:cards;
-        list={items:[...new Map(items.map(c=>[`${c.source || 'jumpit'}:${c.source_id}`,c])).values()],total:d.search_continuation?list.total:d.total,summary:d.search_summary || (d.search_continuation?list.summary:undefined),hasMore:cards.length>0 && d.total>cards.length};
+        const unique=[...new Map(items.map(c=>[(c.source || 'jumpit')+':'+c.source_id,c])).values()];
+        const exhausted=d.search_continuation && cards.length===0 && d.total===0;
+        list={items:unique,total:exhausted?unique.length:d.search_continuation?list.total:d.total,summary:d.search_summary || (d.search_continuation?list.summary:undefined),hasMore:cards.length>0 && d.total>cards.length};
       }
     }
     return list;

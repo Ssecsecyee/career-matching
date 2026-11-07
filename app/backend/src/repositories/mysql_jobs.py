@@ -3,11 +3,11 @@ import json
 from src.services.deadlines import VISIBLE_SQL
 
 
-JSON_FIELDS = {"tech_stacks", "addresses", "original_categories", "field_status", "additional_sections"}
+JSON_FIELDS = {"tech_stacks", "addresses", "original_categories", "field_status", "additional_sections", "career_source"}
 SUMMARY_FIELDS = ("job_id", "source", "source_id", "source_url", "title", "company_name",
                   "tech_stacks", "addresses", "recruitment_status", "source_version", "last_seen_at")
 DETAIL_FIELDS = SUMMARY_FIELDS + ("responsibilities", "qualifications", "preferred_requirements",
-                                  "benefits", "hiring_process", "application_notes", "service_info",
+                                  "benefits", "hiring_process", "application_notes", "service_info", "career_source",
                                   "original_categories", "field_status", "deadline_at", "deadline_type", "additional_sections")
 
 
@@ -63,6 +63,7 @@ class MySQLJobRepository:
         if excluded:
             conditions.append("source_id NOT IN (" + ",".join(["%s"] * len(excluded)) + ")")
             parameters.extend(excluded)
+        strict_entry=plan.schema_version==2 and plan.career.levels==('entry',)
         from src.repositories.browse_order import unfiltered_jobs
         browse_random=unfiltered_jobs(plan)
         where = " AND ".join(conditions)
@@ -71,10 +72,14 @@ class MySQLJobRepository:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT COUNT(*) AS total FROM job_postings WHERE " + where, parameters)
                 total = int(cursor.fetchone()["total"])
-                cursor.execute("SELECT " + ",".join(SUMMARY_FIELDS) + " FROM job_postings WHERE " + where +
+                cursor.execute("SELECT " + ",".join(DETAIL_FIELDS if strict_entry else SUMMARY_FIELDS) + " FROM job_postings WHERE " + where +
                                " ORDER BY " + (ranking + " DESC," if ranking else "") +
-                               ("RAND() LIMIT %s" if browse_random else "published_at DESC,job_id DESC LIMIT %s"), parameters + rank_parameters + [plan.limit])
+                               ("RAND() LIMIT %s" if browse_random else "published_at DESC,job_id DESC LIMIT %s"), parameters + rank_parameters + [1000 if strict_entry else plan.limit])
                 rows = [decode_row(row) for row in cursor.fetchall()]
+            if strict_entry:
+                if total>1000:raise ValueError("career_verification_budget_exceeded")
+                from src.services.career_filter import filter_career
+                rows=filter_career(rows,plan);total=len(rows);rows=rows[:plan.limit]
             return total, rows
         finally:
             connection.close()

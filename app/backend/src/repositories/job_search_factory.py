@@ -87,6 +87,8 @@ class VerifiedElasticJobs:
                 stale += 1
                 continue
             rows.append(row)
+        from src.services.career_filter import filter_career
+        rows=filter_career(rows,plan)
         self.last_verification = {'matched': len(candidates), 'verified': len(rows), 'excluded': stale}
         from src.repositories.browse_order import shuffle_browse
         return len(rows), shuffle_browse(rows,plan)[:plan.limit]

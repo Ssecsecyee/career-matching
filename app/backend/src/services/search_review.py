@@ -25,7 +25,11 @@ def execution_summary(plan, total, backend, degraded):
         desired = ', '.join(labels[v] for v in plan.career.levels)
         if plan.career.max_years is not None:
             desired += (' / ' if desired else '') + str(plan.career.max_years) + '년 이하'
-        limits.append('희망 경력: ' + desired + '. 현재 경력 자동 필터는 적용하지 않았으며 공고별 요건을 확인해야 합니다.')
+        if plan.career.levels==('entry',):
+            filters.append('신입 지원 가능 또는 경력무관이 원본에서 확인된 공고')
+            limits.append('경력 정보가 미확인인 공고는 신입 검색에서 제외했습니다. 실제 지원 자격은 원문에서 확인하세요.')
+        else:
+            limits.append('희망 경력: ' + desired + '. 현재 경력 자동 필터는 적용하지 않았으며 공고별 요건을 확인해야 합니다.')
     limits.append('전공·기술 경험은 지원 자격 충족을 뜻하지 않습니다. 저장된 자료의 현재 모집 여부는 원문 확인이 필요합니다.')
     if degraded:
         limits.append('검색엔진 연결 장애로 MySQL에서 조회했습니다. 조건 의미는 유지하지만 검색 분석·순위는 다를 수 있습니다.')
