@@ -92,7 +92,7 @@ test('actual tab changes preserve conversation draft and list selection without 
  await fill(manualForm.querySelector('input[type="search"]'),'Company');
  await submit(manualForm);
  assert.equal(container.querySelectorAll('article.message').length,chatCount);
- assert.equal(sent.at(-1).search_plan.schema_version,2);assert.equal(sent.at(-1).search_plan.text_query,'Company');assert.equal(sent.at(-1).message,undefined);
+ assert.equal(sent.at(-1).catalog_plan.schema_version,2);assert.equal(sent.at(-1).catalog_plan.text_query,'');assert.equal(sent.at(-1).message,'Company');
  await change('#training');
  const educationForm=container.querySelector('form[aria-label="교육 직접 검색"]');
  await fill(educationForm.querySelector('input[type="search"]'),'Python');

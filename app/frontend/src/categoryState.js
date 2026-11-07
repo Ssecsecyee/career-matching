@@ -8,3 +8,8 @@ export function categoryRequest(value,base){
  required_skills:value.skills,owned_skills:previous.owned_skills || [],preferred_skills:previous.preferred_skills || [],
  career:value.entry?{levels:['entry']}:(previous.career?.levels?.includes('entry')?{levels:[]}:previous.career || {levels:[]})}}};
 }
+
+export function categoryTextRequest(value,base){
+ const request=categoryRequest(value,base);
+ return {action:'search',values:{page_size:20,message:value.keyword.trim(),catalog_plan:{...request.values.search_plan,text_query:''}}};
+}

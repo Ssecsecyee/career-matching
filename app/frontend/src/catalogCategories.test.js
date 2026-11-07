@@ -11,3 +11,12 @@ test('category changes preserve AI role and owned skills without a model message
  assert.deepEqual(categoryRequest(value,base).values.search_plan.regions,[]);
  assert.deepEqual(categoryRequest(value,base).values.search_plan.career.levels,[]);
 });
+
+test('keyword form uses AI interpretation while category changes remain direct',async()=>{
+ const {categoryTextRequest}=await import('./categoryState.js');
+ const value=categoryValues({schema_version:2,regions:['경기'],required_skills:['Git']});value.keyword='경기도 깃';
+ const r=categoryTextRequest(value);
+ assert.equal(r.values.message,'경기도 깃');assert.equal(r.values.search_plan,undefined);
+ assert.deepEqual(r.values.catalog_plan.regions,['경기']);
+ assert.deepEqual(r.values.catalog_plan.required_skills,['Git']);
+});

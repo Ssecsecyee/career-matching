@@ -261,6 +261,8 @@ class DialogueFlow:
     def execute_search(self, state, plan, raw_plan, payload, *, require_review=False, exclude_ids=()):
         """Execute a validated plan without any free-text interpretation."""
         evidence = []
+        from src.services.search_terms import normalize_search_plan
+        plan=normalize_search_plan(plan)
         if plan.schema_version==1:state.pop('search_context',None)
         if payload.get('page_size') == 20:
             state['browse_page_size'] = 20
@@ -469,6 +471,7 @@ class DialogueFlow:
         return {'stage': state.get('stage', 'no_results'), 'candidate_jobs': state.get('candidate_jobs', []),
                 'total': state.get('total', 0), 'memory': public_memory(state),
                 'applied_search_plan':(state.get('search_navigation') or {}).get('plan'),
+                'search_attempts':(state.get('search_context') or {}).get('search_attempts',[]),
                 'search_backend':state.get('search_backend','mysql'), 'search_degraded':state.get('search_degraded',False),
                 'snapshot_warning': self.include_unverified,
                 **({'search_id':state['search_context']['search_id'], 'search_summary':state['search_context']['summary']}

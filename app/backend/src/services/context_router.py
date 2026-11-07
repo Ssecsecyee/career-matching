@@ -32,7 +32,9 @@ class ContextRouter:
             decision=IntentDecision(target='selected',action='assessment_control',control=payload['control'],reason='Explicit assessment control button')
         elif payload['action']=='search' and payload.get('search_plan') is None:
             # Do not run expression matching, retrieval or legacy route() before classification.
-            value=invoke('intent_classification',self.flow.planner.classify,payload['message'],routing_context(state))
+            snapshot=routing_context(state)
+            if payload.get('catalog_plan') is not None:snapshot['catalog_search']={'active':True,'filters':payload['catalog_plan']}
+            value=invoke('intent_classification',self.flow.planner.classify,payload['message'],snapshot)
             decision=IntentDecision.model_validate(value['decision'])
             if on_decision:on_decision(value.get('raw_output',''),decision.to_dict())
         else:
@@ -79,11 +81,20 @@ class ContextRouter:
                 return self.clarify(state,'모두 필요한 기술로 제안된 조건의 요청 근거를 확인하지 못했습니다. 반드시 포함할 기술과 참고할 경험을 구분해서 알려주세요.')
             if d.search_basis=='assessment' and not any(c['assessment']=='met' for c in facts['items']):
                 return self.clarify(state,'추천에 사용할 충족 답변을 확인하지 못했습니다. 기준으로 삼을 경험을 알려주세요.')
+            if payload.get('catalog_plan') is not None:
+                from src.schemas.search import SearchPlan
+                fixed=SearchPlan.parse(payload['catalog_plan'])
+                merged=plan.to_dict()
+                for key in ('roles','regions','required_skills'):
+                    if getattr(fixed,key):merged[key]=list(getattr(fixed,key))
+                if fixed.career.levels:merged['career']=fixed.career.model_dump(mode='json')
+                plan=SearchPlan.parse(merged)
             excluded=[state['selected']['source_id']] if d.search_basis=='assessment' and state.get('selected') else []
             state['conversation_target']='jobs'
             # A schema-validated plan enters the existing search executor, never legacy classification.
             record(state,text,'search')
-            result=self.flow.execute_search(state,plan,raw_plan,payload,require_review=True,exclude_ids=excluded)
+            from src.services.search_repair import execute_with_repair
+            result=execute_with_repair(self.flow,state,plan,raw_plan,payload,invoke,exclude_ids=excluded)
             context=state.get('search_context')
             if context:
                 context['constraint_guard']=guard

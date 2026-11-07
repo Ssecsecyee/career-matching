@@ -178,7 +178,7 @@ export function CareerApp({page='chat',adminChat=false}) {
 
   async function send(payload, text) {
     if (inFlight.current) return;
-    const backgroundList=['#jobs','#training','#my'].includes(window.location.hash) && (payload.action==='browse_training' || payload.action==='next_results' || (payload.action==='search' && !!payload.search_plan));
+    const backgroundList=['#jobs','#training','#my'].includes(window.location.hash) && (payload.action==='browse_training' || payload.action==='next_results' || (payload.action==='search' && (!!payload.search_plan || !!payload.catalog_plan)));
     const reportError=backgroundList?setCatalogError:setError;
     setCatalogError(null);
     if(payload.action==='search' && !payload.search_plan && new URLSearchParams(window.location.search).get('agentcore')==='1')payload={...payload,engine:'agentcore'};

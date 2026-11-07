@@ -7,6 +7,7 @@ INTENT_VERSION = 'context-intent-v8'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
+    text_query: Annotated[str, Field(max_length=120)] | None = None
     regions: Terms | None = None
     roles: Terms | None = None
     owned_skills: Terms | None = None
@@ -31,6 +32,7 @@ class IntentJobPlan(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
     schema_version: Literal[2] = 2
     target: Literal['jobs'] = 'jobs'
+    text_query: Annotated[str, Field(max_length=120)] = ''
     regions: Terms = ()
     roles: Terms = ()
     owned_skills: Terms = ()

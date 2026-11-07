@@ -97,7 +97,7 @@ class StructuredSearchTests(unittest.TestCase):
         query=build_query(SearchPlan.parse(COMPLEX_PLAN))['query']['bool']
         self.assertEqual(len(query['should']),6)
         self.assertEqual(query['minimum_should_match'],0)
-        self.assertEqual(len(query['filter'][2]['bool']['should']),3)
+        self.assertEqual(len(query['filter'][2]['bool']['should']),4)
         self.assertEqual(query['filter'][2]['bool']['minimum_should_match'],1)
         self.assertNotIn('career',json.dumps(query))
 

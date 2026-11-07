@@ -14,6 +14,7 @@ def search_contract():
 
 SEARCH_RULES = (
     '검색 계획은 schema_version=2와 target=jobs로 반환하세요. '
+    '지역 정식명과 약칭은 같은 뜻으로 해석하고 기술의 한글 표기·오탈자는 공식명으로 정규화하세요(경기도→경기, 깃→Git, 깃허브→GitHub). Git과 GitHub는 다른 기술입니다. '
     'regions는 희망 지역의 OR 목록, roles는 희망 직무의 OR 목록입니다. 경남/부산을 하나의 문자열로 합치지 마세요. '
     'owned_skills는 사용자가 보유했다고 말한 기술이며 전부 필수 필터가 아닙니다. '
     'required_skills는 공고에 반드시/모두 있어야 한다고 명시한 기술만 넣고, 그 외 희망 기술은 preferred_skills에 넣으세요. '
@@ -69,4 +70,12 @@ CONTEXT_ROUTING_RULES += (
     ' training clarify로 Windows·문서 도구 기초 학습이 필요한지 확인하세요. 교육 수료가 경력 조건을 충족시키지는 않는다고 안내하세요.'
     ' 학습 주제가 이미 확인되면 같은 질문을 반복하지 말고 그 주제로 검색하세요.'
     ' search_basis=assessment는 채용 공고 검색 전용입니다. training에는 topics와 topic_operator를 사용하고 행동 스키마에 없는 필드를 추가하지 마세요.'
+)
+
+
+CONTEXT_ROUTING_RULES += (
+ ' catalog_search.active=true이면 공고 검색창 입력입니다. 지역이나 기술이 식별되면 반드시 jobs search의 완전한 plan을 반환하세요. 검색해달라는 동사를 요구하거나 직무를 추가로 묻지 마세요. 해석할 수 없는 입력만 clarify입니다.'
+ ' 검색창의 경기도·깃 같은 입력은 regions=[경기], text_query=Git처럼 의미별로 분리하세요.'
+ ' 검색어를 통째로 직무나 필수 기술 목록에 넣지 마세요. 단독 기술 검색은 text_query에 공식 표기로 남깁니다.'
+ ' 지역 별칭과 기술 한글 표기를 표준명으로 통일하되 명시된 지역·신입·기술 조건을 지우거나 Git을 GitHub로 바꾸지 마세요.'
 )

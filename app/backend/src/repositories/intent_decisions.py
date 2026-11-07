@@ -56,7 +56,7 @@ class IntentDecisionStore:
 
     def finish(self,ticket,identity,result=None,error=None):
         # Called after chat commit or before abort. Owner checked without requiring an active lease.
-        summary={k:(result or {}).get(k) for k in ('stage','total','remaining_total','search_backend','clarification_required')}
+        summary={k:(result or {}).get(k) for k in ('stage','total','remaining_total','search_backend','clarification_required','search_attempts')}
         summary['selected_job']={k:(result or {}).get('active_job',{}).get(k) for k in ('source_id','source_version')}
         summary['displayed_jobs']=len((result or {}).get('candidate_jobs',[]))
         summary['displayed_courses']=len((result or {}).get('learning_opportunities',[]))
