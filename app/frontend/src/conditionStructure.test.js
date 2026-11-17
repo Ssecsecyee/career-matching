@@ -45,3 +45,9 @@ test('AI reference selection keeps original text and reason without a met answer
  assert.match(html,/학력 제한이 없습니다/);assert.doesNotMatch(html,/<script>/);
  assert.equal(renderToStaticMarkup(React.createElement(ConditionReferences,{data:{}})),'');
 });
+
+
+test('education replies do not render cached job reference panels',()=>{
+ const data={stage:'training_no_results',search_target:'training',reference_conditions:[{condition_id:'one',quote:'공고 소개 문장'}]};
+ assert.equal(renderToStaticMarkup(React.createElement(ConditionReferences,{data})), '');
+});

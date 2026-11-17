@@ -47,8 +47,7 @@ def fallback(flow,state,plan,raw_plan,payload,*,exclude_ids=(),query=local_query
     state['vector_navigation']['original_plan']=plan.to_dict()
     result.update(retrieval_mode='section_vector_fallback',exact_match_total=0,
                   search_id=context['search_id'],vector_fallback=context['vector_fallback'])
-    result['message']=('AND 조건에 모두 일치하는 공고는 0건입니다. OR로 바꾸지 않고 같은 검색 내용의 의미를 비교해 '
-                       f'유사 후보 {result["total"]}건을 찾았습니다. 지역·명시적 필수 기술과 기존 신입 확인 정책은 유지했습니다. '
-                       '유사 후보는 모든 문구 일치나 지원 자격 충족을 뜻하지 않습니다. 공고별 조건을 확인해 주세요.' if result['total'] else
-                       'AND 조건 일치 공고는 0건이며, 벡터 유사 검색에서도 유지한 필터를 통과한 후보를 찾지 못했습니다. OR로 완화하지 않았습니다. 변경할 조건을 알려주세요.')
+    result['message']=(f'검색 내용과 관련 있는 공고 {result["total"]}건을 찾았습니다. '
+                       '모든 검색 문구의 일치나 지원 자격 충족을 뜻하지 않습니다. 공고별 조건을 확인해 주세요.' if result['total'] else
+                       '현재 검색 조건에 맞는 공고를 찾지 못했습니다. 변경할 조건을 알려주세요.')
     return state,result,evidence

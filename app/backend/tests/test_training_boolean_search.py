@@ -30,7 +30,7 @@ class TrainingBooleanTests(unittest.TestCase):
         repo=Mock();repo.search.return_value=[{'source':'goyong24_training','source_id':'one','source_version':1,'title':'Both'}]
         flow=DialogueFlow(Mock(),Mock(),None,training=repo)
         state,review,_=advance_intent(flow,{},'데이터분석과 포트폴리오 둘 다',dict(target='training',action='search',topics=['데이터분석','포트폴리오'],topic_operator='and'))
-        self.assertIn('AND',review['search_summary']['filters'][0])
+        self.assertIn('데이터분석',review['search_summary']['filters'][0]);self.assertNotIn('AND',review['search_summary']['filters'][0])
         state,_,_=flow.advance(state,{'action':'confirm_search','search_id':review['search_id']},None)
         self.assertEqual(state['training_navigation']['topic_operator'],'and')
         repo.search.return_value=[]

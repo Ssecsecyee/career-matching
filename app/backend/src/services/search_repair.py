@@ -42,7 +42,5 @@ def execute_with_repair(flow,state,plan,raw_plan,payload,invoke,*,exclude_ids=()
  context=state.get('search_context')
  if context:
   context['search_attempts']=attempts
-  if any(a.get('kind')=='equivalent_text_repair' for a in attempts):
-   context['summary']['limitations'].append('검색 결과가 없어 AI가 검색어 표현을 보정해 재검색했습니다. 지역·신입·필수 기술 조건은 유지했습니다.')
  result[1]['search_attempts']=attempts
  return result

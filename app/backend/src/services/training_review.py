@@ -13,7 +13,7 @@ def remember_review(state,topics,mode,courses,repository,*,learning_goals=(),top
     backend=getattr(repository,'last_search_backend',None)
     if not isinstance(backend,str):backend='unknown'
     topic_operator='and'
-    filters=['주제·기관 검색어 ('+'모두 포함 · AND'+'): '+' AND '.join(topics),'교육 시작일 이전 자료만 조회']
+    filters=['검색어: '+' · '.join(topics),'교육 시작 전 과정']
     if mode:filters.append('수강 방식: '+{'online':'온라인','offline':'오프라인'}[mode])
     limitations=['검색 후보 수에는 같은 과정의 여러 회차가 포함되며, 서로 다른 과정 수나 신청 가능·지원 자격 확인 건수가 아닙니다.',
         '신청 기간·현재 모집 여부·지원 대상은 고용24 또는 교육기관에서 확인해야 합니다.',

@@ -79,3 +79,22 @@ CONTEXT_ROUTING_RULES += (
  ' 검색어를 통째로 직무나 필수 기술 목록에 넣지 마세요. 단독 기술 검색은 text_query에 공식 표기로 남깁니다.'
  ' 지역 별칭과 기술 한글 표기를 표준명으로 통일하되 명시된 지역·신입·기술 조건을 지우거나 Git을 GitHub로 바꾸지 마세요.'
 )
+
+
+CONTEXT_ROUTING_RULES += (
+    ' 교육 검색에서 공고의 예시 도메인(커머스·마케팅·재무·SCM 등)은 모두 필수로 요구한 목록이 아닙니다.'
+    ' 부족 역량이 여러 대안 분야를 포함하고 우선 분야를 지정하지 않았으면 training clarify로 먼저 배울 분야 하나를 물으세요.'
+    ' 사용자가 마케팅을 선택하면 topics=[마케팅]입니다. 이전 공고에서 예로 든 SCM·커머스를 자동 추가하지 마세요.'
+    ' 교육 refine_search의 topics는 변경 후 전체 목록입니다. 조건 추가와 교체, 대안 수용을 구분하세요.'
+    ' 예: 기존 커머스·SCM 0건 뒤 마케팅도 좋아는 추가 AND 요구가 아니라 대안 수용입니다.'
+    ' 기존 조건이 사용자의 명시적 필수가 아니면 topics=[마케팅]으로 교체하고, 명시적 필수와 충돌하면 바꿀지 한 번 확인하세요.'
+    ' 마케팅과 SCM을 모두 배우는 교육처럼 둘 다 명시한 요청은 topics=[마케팅,SCM]이며 and를 유지하세요.'
+    ' 비즈니스 도메인을 이해하고 싶다의 도메인 이해는 학습 목적입니다. 검색 가능한 분야가 마케팅이면 topics=[마케팅], learning_goals=[비즈니스 도메인 이해]로 구분하세요.'
+    ' 분야가 막연하면 확인하고 임의로 여러 설명 문구를 검색어로 만들지 마세요. 그냥 비즈니스/도메인 빼고는 topics=[비즈니스]입니다.'
+    ' 난이도를 명시한 기초부터 배우고 싶어/기초 과정은 같은 요청입니다. AWS 문맥이면 topics=[AWS,기초]로 처리하세요.'
+    ' 심화 말고 기초는 심화를 제거하고 AWS와 기초를 유지합니다. 실제 난이도 적합성을 보증하지 마세요.'
+    ' training search/refine_search에는 topics,topic_operator,learning_goals,delivery_mode만 넣으세요. 공고용 changes/plan은 절대 넣지 말고 null 필드는 생략하세요.'
+    ' training next_results에는 target,action,reason만 넣으세요. 기존 주제·수강 방식은 서버가 유지합니다.'
+    ' assessment_control은 반드시 target=selected입니다. 선택 공고가 없으면 선택을 안내하는 clarify입니다.'
+    ' 거절·서비스 범위 안내도 target=general,action=chat 등 유효한 계약을 따르세요. unspecified chat은 금지입니다.'
+)

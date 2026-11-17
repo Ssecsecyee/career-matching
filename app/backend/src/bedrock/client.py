@@ -141,6 +141,8 @@ class BedrockPlanner:
         except (ValueError,ModelOutputFormatError) as exc:
             error=exc if isinstance(exc,ModelOutputFormatError) else ModelOutputFormatError(usage)
             error.intent_raw_output=raw[:12000]
+            error.intent_validation_errors=[{'field':'.'.join(str(v) for v in e['loc']), 'type':e['type']}
+                                            for e in exc.errors()][:8] if callable(getattr(exc,'errors',None)) else [{'type':'invalid_json_or_completion'}]
             raise error from None
         return {'decision':value,'raw_output':raw},usage
 

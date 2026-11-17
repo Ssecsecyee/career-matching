@@ -32,7 +32,7 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
   return <>
     <ConditionReferences data={data}/>
     {data.message && !data.answer_summary && <TypingText text={data.message} animate={active && !data.cached} streaming={data.stage === 'streaming'} />}
-    {data.search_summary && ['search_review', 'no_results', 'training_search_review', 'training_no_results'].includes(data.stage) && <SearchReview data={data} active={active} busy={busy} onConfirm={onConfirm} onModify={onModify} />}
+    {data.search_summary && !data.search_continuation && !data.training_continuation && <SearchReview data={data} active={active} busy={busy} onConfirm={onConfirm} onModify={onModify} />}
     {!compact && data.stage === 'choose_job' && <>{!data.message && <p>{data.search_continuation ? `앞서 보여드린 공고를 제외한 후보 ${data.remaining_total}건 중 ${data.candidate_jobs.length}건입니다.` : `조건에 맞는 공고가 총 ${data.total}건 있습니다. 먼저 살펴볼 공고를 골라 주세요.`}</p>}<div className="job-list">{data.candidate_jobs.map(job => <article className="job" key={job.source_id}>
       <p className="muted">{job.company_name}</p><h3>{job.title}</h3><p className="muted">{(job.addresses || []).join(' · ')}</p>
       <div className="tags">{(job.tech_stacks || []).slice(0, 8).map(skill => <span key={skill}>{skill}</span>)}</div>

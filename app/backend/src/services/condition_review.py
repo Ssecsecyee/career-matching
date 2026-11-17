@@ -109,6 +109,12 @@ def projection(job,envelope):
             'preferred_condition_terms':list(dict.fromkeys(terms['preferred']))}
 
 def attach_selection(state,result):
+    # Selected-job evidence stays in state, but is not a panel on every reply.
+    if (result.get('search_target')=='training' or result.get('learning_search') is not None
+            or str(result.get('stage','')).startswith('training_')):
+        return result
+    if result.get('stage') not in {'checking_required','checking_preferred','assessment_checkpoint','completed'} and not result.get('answer_summary'):
+        return result
     status=state.get('condition_review')
     if status:
         result['condition_review']=status

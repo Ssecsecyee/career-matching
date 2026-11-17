@@ -1,6 +1,7 @@
 import React from 'react';
 import {safeSourceUrl} from './api.js';
 export function ConditionReferences({data}) {
+  if (data.search_target==='training' || data.learning_search || data.stage?.startsWith('training_')) return null;
   const rows=data.reference_conditions||[];
   if (!rows.length) return null;
   return <details className="source"><summary>질문 대신 참고할 공고 내용 {rows.length}개</summary>

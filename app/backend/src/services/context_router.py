@@ -1,4 +1,5 @@
 """A single free-text intent gateway. Models propose, server state authorizes execution."""
+import json
 from src.schemas.intent import IntentDecision, merge_search
 from src.services.intent_context import routing_context, assessment_facts
 from src.services.search_constraints import guard_required_skills
@@ -34,7 +35,23 @@ class ContextRouter:
             # Do not run expression matching, retrieval or legacy route() before classification.
             snapshot=routing_context(state)
             if payload.get('catalog_plan') is not None:snapshot['catalog_search']={'active':True,'filters':payload['catalog_plan']}
-            value=invoke('intent_classification',self.flow.planner.classify,payload['message'],snapshot)
+            from src.bedrock.model_json import ModelOutputFormatError, ModelOutputTruncatedError
+            try:
+                value=invoke('intent_classification',self.flow.planner.classify,payload['message'],snapshot)
+            except ModelOutputTruncatedError:
+                raise
+            except ModelOutputFormatError as exc:
+                # One additional invocation is independently metered/audited by invoke.
+                # Reinterpret the original input, never append a new user instruction.
+                retry_snapshot=dict(snapshot,classification_retry={
+                    'attempt':2,'validation_errors':getattr(exc,'intent_validation_errors',[{'type':'invalid_contract'}]),
+                    'requirement':'원래 사용자 의도를 유지하고 행동별 허용 필드만 반환하세요. null 필드와 교육 검색의 changes/plan은 생략하세요.'})
+                if len(json.dumps(retry_snapshot,ensure_ascii=False))>16000:
+                    retry_snapshot['recent_messages']=list(retry_snapshot.get('recent_messages',[]))
+                    while retry_snapshot['recent_messages'] and len(json.dumps(retry_snapshot,ensure_ascii=False))>16000:
+                        retry_snapshot['recent_messages'].pop(0)
+                    if len(json.dumps(retry_snapshot,ensure_ascii=False))>16000:raise exc
+                value=invoke('intent_classification',self.flow.planner.classify,payload['message'],retry_snapshot)
             decision=IntentDecision.model_validate(value['decision'])
             if on_decision:on_decision(value.get('raw_output',''),decision.to_dict())
         else:
