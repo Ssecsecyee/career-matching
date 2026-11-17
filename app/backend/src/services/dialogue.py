@@ -57,7 +57,7 @@ class DialogueFlow:
             state['training_browse']=True
             state['training_catalog_filters']=payload.get('filters')
             state['training_displayed']={}
-            state['training_navigation']={'topics':[],'delivery_mode':(payload.get('filters') or {}).get('delivery_mode') if (payload.get('filters') or {}).get('delivery_mode') in {'online','offline'} else None,'shown_ids':[],'shown_groups':[],'topic_operator':'or'}
+            state['training_navigation']={'topics':[],'delivery_mode':(payload.get('filters') or {}).get('delivery_mode') if (payload.get('filters') or {}).get('delivery_mode') in {'online','offline'} else None,'shown_ids':[],'shown_groups':[],'topic_operator':'and'}
             state['stage']='conversation'
             state,result,evidence=ContextRouter(self).training(state,None,reset=False)
             result['training_continuation']=False
@@ -274,6 +274,12 @@ class DialogueFlow:
         total, jobs = self.jobs.search(plan, exclude_ids=exclude_ids) if exclude_ids else self.jobs.search(plan)
         state['search_backend'] = getattr(self.jobs, 'last_search_backend', 'mysql')
         state['search_degraded'] = getattr(self.jobs, 'search_degraded', False)
+        vector_failure=None
+        if total==0:
+            from src.services.zero_result_vectors import fallback
+            alternative=fallback(self,state,plan,raw_plan,payload,exclude_ids=exclude_ids)
+            if isinstance(alternative,tuple):return alternative
+            vector_failure=alternative
         cards = [{key: row.get(key) for key in
                   ('source_id', 'title', 'company_name', 'tech_stacks', 'addresses', 'source_url',
                    'source_version', 'recruitment_status', 'last_seen_at')} for row in jobs]
@@ -287,14 +293,24 @@ class DialogueFlow:
             state['candidate_ids'] = []
             if not jobs:
                 state['candidate_jobs'] = []
-                return state, review_response(state), evidence
+                response=review_response(state)
+                if vector_failure:
+                    state['search_context']['vector_fallback']=vector_failure['metadata']
+                    response['vector_fallback']=vector_failure['metadata']
+                    response['message']+=' 유사 검색은 일시적으로 사용할 수 없습니다. 기존 AND 조건은 유지했습니다.'
+                return state, response, evidence
             if require_review or plan.schema_version == 2:
                 state['stage'] = 'search_review'
                 state['candidate_jobs'] = []
                 return state, review_response(state), evidence
             state['candidate_ids'] = [j['source_id'] for j in jobs]
         mark_shown(state)
-        return state, self.search_response(state), evidence
+        response=self.search_response(state)
+        if vector_failure:
+            state.setdefault('search_context',{})['vector_fallback']=vector_failure['metadata']
+            response['vector_fallback']=vector_failure['metadata']
+            response['message']='AND 조건 일치 공고는 0건입니다. 유사 검색은 일시적으로 사용할 수 없습니다. 기존 조건은 유지했습니다.'
+        return state, response, evidence
 
     def more_jobs(self, state):
         page = state['search_navigation']

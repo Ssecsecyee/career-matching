@@ -1,5 +1,5 @@
 """Small versioned spelling expansions, shared by both search backends."""
-POLICY_VERSION = 'structured-search-v4'
+POLICY_VERSION = 'structured-search-and-v5'
 REGIONS = {'경남': ('경남', '경상남도'), '경상남도': ('경남', '경상남도'),
            '부산': ('부산',), '부산광역시': ('부산',)}
 for short,long in [('충북','충청북도'),('충남','충청남도'),('전북','전라북도'),('전남','전라남도'),('경북','경상북도'),('제주','제주특별자치도'),('강원','강원특별자치도')]:

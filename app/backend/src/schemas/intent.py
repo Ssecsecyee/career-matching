@@ -71,7 +71,7 @@ class IntentDecision(BaseModel):
     plan: IntentJobPlan | None = None
     changes: SearchChanges | None = None
     topics: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
-    topic_operator: Literal['and','or'] | None = None
+    topic_operator: Literal['and'] | None = None
     learning_goals: Annotated[tuple[Annotated[str, Field(min_length=1, max_length=60)], ...], Field(max_length=8)] | None = None
     delivery_mode: Literal['online','offline','any'] | None = None
     task: Literal['prepare','interview','learning_plan','explain_unknown','defer','general'] | None = None
@@ -100,8 +100,7 @@ class IntentDecision(BaseModel):
             elif self.target=='training':
                 allowed={'topics','topic_operator','learning_goals','delivery_mode'}
                 if 'topic_operator' in self.model_fields_set and self.topic_operator is None:raise ValueError('Explicit training operator required')
-                if self.action=='search' and self.topics and len(self.topics)>1 and self.topic_operator is None:
-                    raise ValueError('Multiple training topics require an explicit AND/OR relation')
+
             else:raise ValueError('Invalid search target')
         elif self.action=='next_results':
             if self.target not in {'jobs','training'}:raise ValueError('Invalid list target')

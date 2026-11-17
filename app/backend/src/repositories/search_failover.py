@@ -15,7 +15,7 @@ class SearchFailover:
     def get(self, identity):
         return self.fallback.get(identity)
 
-    def search(self, query, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or",browse_all=False,catalog_filters=None):
+    def search(self, query, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="and",browse_all=False,catalog_filters=None):
         kwargs = {'exclude_ids': exclude_ids} if exclude_ids else {}
         if catalog_filters is not None:kwargs['catalog_filters']=catalog_filters
         if browse_all:
@@ -25,9 +25,10 @@ class SearchFailover:
         if candidates_only:
             if self.entity != 'training':raise ValueError('Candidate mode is for training only')
             kwargs['candidates_only']=True
-        if topic_operator!='or':
-            if self.entity!='training':raise ValueError('Topic operator is for training only')
-            kwargs['topic_operator']=topic_operator
+        if self.entity=='training':
+            from src.services.training_navigation import training_operator
+            kwargs['topic_operator']=training_operator(topic_operator)
+        elif topic_operator not in ('and','or'):raise ValueError('Topic operator is for training only')
         if exclude_groups:
             if self.entity != 'training':raise ValueError('Group exclusions are for training only')
             kwargs['exclude_groups']=exclude_groups

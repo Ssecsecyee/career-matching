@@ -11,9 +11,9 @@ TRAINING_FIELDS = ('offering_id,course_key,cohort_name,source,source_id,source_u
                   'cost_description,recruitment_status,additional_sections,application_deadline,starts_at,ends_at,content_hash')
 
 
-def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="or", browse_all=False, catalog_filters=None):
+def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, topic_operator="and", browse_all=False, catalog_filters=None):
     from src.services.training_navigation import training_operator
-    training_operator(topic_operator)
+    topic_operator=training_operator(topic_operator)
     if (not isinstance(topics, list) or not (0 if browse_all else 1) <= len(topics) <= 8 or
             any(not isinstance(t, str) or not 1 <= len(t) <= 60 for t in topics)):
         raise ValueError('Invalid training topics')
@@ -50,7 +50,7 @@ def build_training_query(topics, *, exclude_ids=(), delivery_mode=None, candidat
             '_source': ['source', 'source_id', 'source_version'],
             'query': {'bool': {'filter': [{'terms': {'source': ['boottent', 'goyong24_training']}},
                                           {'terms': {'recruitment_status': ['active', 'unknown', 'closed']}}]+extra,
-                               'should': clauses, 'minimum_should_match': (len(clauses) if topic_operator=='and' else 1) if clauses else 0}},
+                               'should': clauses, 'minimum_should_match': len(clauses)}},
             'sort': ['_score', {'document_key': 'asc'}]}
 
 
@@ -63,7 +63,7 @@ class ElasticsearchTrainingRepository:
     def get(self, identity):
         return MySQLTrainingRepository(self.factory).get(identity)
 
-    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="or", browse_all=False, catalog_filters=None):
+    def search(self, topics, *, exclude_ids=(), delivery_mode=None, candidates_only=False, exclude_groups=(), topic_operator="and", browse_all=False, catalog_filters=None):
         from src.services.training_groups import grouped,exclusions
         exclusions(exclude_groups)
         query = build_training_query(topics, exclude_ids=exclude_ids,

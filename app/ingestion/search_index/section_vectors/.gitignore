@@ -1,0 +1,7 @@
+.venv-vector/
+model/
+models/
+*.onnx
+*.partial
+*.sqlite3
+synthetic-query-*.txt

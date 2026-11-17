@@ -46,21 +46,21 @@ def structured_query(plan, filters):
         return {'bool': {'should': [{'match': {'skills': {'query': s}}} for s in skill_terms(term)],
                          'minimum_should_match': 1}}
 
-    if plan.regions:
+    for requested_region in plan.regions:
         clauses = []
-        for region in region_terms(plan.regions):
+        for region in region_terms([requested_region]):
             value = region.replace('\\', '\\\\').replace('*', '\\*').replace('?', '\\?')
             clauses.append({'wildcard': {'location_search': {'value': '*' + value + '*'}}})
         filters.append({'bool': {'should': clauses, 'minimum_should_match': 1}})
-    if plan.roles:
+    for requested_role in plan.roles:
         filters.append({'bool': {'should': [
             {'multi_match': {'query': role, 'type': 'cross_fields', 'operator': 'and',
               'fields': ['title^4', 'responsibilities', 'qualifications^2']}}
-            for role in role_terms(plan.roles)], 'minimum_should_match': 1}})
+            for role in role_terms([requested_role])], 'minimum_should_match': 1}})
     filters += [skill(s) for s in plan.required_skills]
-    # Without a role or required skill, at least one owned skill anchors the search.
+    # Without a role or required skill, all requested owned-skill anchors apply.
     if plan.owned_skills and not plan.roles and not plan.required_skills:
-        filters.append({'bool': {'should': [skill(s,condition_anchor=True) for s in plan.owned_skills], 'minimum_should_match': 1}})
+        filters.extend(skill(s,condition_anchor=True) for s in plan.owned_skills)
     should = [skill(s) for s in dict.fromkeys(plan.owned_skills + plan.preferred_skills)]
     if os.getenv('ENABLE_AI_CONDITION_RANKING')=='true':
         for term in dict.fromkeys(plan.owned_skills+plan.preferred_skills):

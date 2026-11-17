@@ -8,8 +8,8 @@ from src.repositories.search_failover import SearchFailover,SearchUnavailable
 from routing_fixture import advance_intent
 
 class TrainingBooleanTests(unittest.TestCase):
-    def test_es_requires_all_topic_clauses_for_and_and_one_for_or(self):
-        for operator,minimum in [('and',2),('or',1)]:
+    def test_es_requires_all_topics_even_for_legacy_or(self):
+        for operator,minimum in [('and',2),('or',2)]:
             query=build_training_query(['데이터분석','포트폴리오'],topic_operator=operator)['query']['bool']
             self.assertEqual(query['minimum_should_match'],minimum)
             self.assertEqual(len(query['should']),2)
@@ -22,9 +22,9 @@ class TrainingBooleanTests(unittest.TestCase):
             MySQLTrainingRepository(lambda:conn).search(['A','B'],topic_operator=operator)
             sql,values=cur.execute.call_args.args
             self.assertEqual(values,['boottent','goyong24_training','A','A','B','B'])
-            self.assertIn((')) AND (JSON_CONTAINS' if operator=='and' else ')) OR (JSON_CONTAINS'),sql)
+            self.assertIn(')) AND (JSON_CONTAINS',sql)
             queries.append(sql)
-        self.assertNotEqual(*queries)
+        self.assertEqual(*queries)
 
     def test_and_survives_review_confirm_next_and_zero_never_relaxes(self):
         repo=Mock();repo.search.return_value=[{'source':'goyong24_training','source_id':'one','source_version':1,'title':'Both'}]
@@ -40,14 +40,13 @@ class TrainingBooleanTests(unittest.TestCase):
         self.assertTrue(all(c.kwargs['topic_operator']=='and' for c in repo.search.call_args_list))
         self.assertTrue(all(c.args[0]==['데이터분석','포트폴리오'] for c in repo.search.call_args_list))
 
-    def test_refine_preserves_operator_until_explicitly_changed(self):
+    def test_refine_is_always_and_and_model_or_is_rejected(self):
         repo=Mock();repo.search.return_value=[];flow=DialogueFlow(Mock(),Mock(),None,training=repo)
         state,_,_=advance_intent(flow,{},'둘 다',dict(target='training',action='search',topics=['A','B'],topic_operator='and'))
         state,_,_=advance_intent(flow,state,'온라인만',dict(target='training',action='refine_search',delivery_mode='online'))
         self.assertEqual(repo.search.call_args.kwargs['topic_operator'],'and')
-        state,_,_=advance_intent(flow,state,'둘 중 하나라도',dict(target='training',action='refine_search',topic_operator='or'))
-        self.assertNotIn('topic_operator',repo.search.call_args.kwargs)
-        self.assertEqual(state['training_search_context']['topic_operator'],'or')
+        with self.assertRaises(ValueError):
+            advance_intent(flow,state,'둘 중 하나라도',dict(target='training',action='refine_search',topic_operator='or'))
 
     def test_availability_fallback_preserves_and(self):
         primary=Mock();primary.search.side_effect=SearchUnavailable();fallback=Mock();fallback.search.return_value=[]
@@ -56,5 +55,7 @@ class TrainingBooleanTests(unittest.TestCase):
         with self.assertRaises(ValueError):IntentDecision(target='training',action='search',topics=['A'],topic_operator='xor',reason='test')
 
     def test_model_cannot_silently_default_multiple_topics_to_or(self):
-        with self.assertRaises(ValueError):
-            IntentDecision(target='training',action='search',topics=['데이터분석','포트폴리오'],reason='test')
+        decision=IntentDecision(target='training',action='search',topics=['데이터분석','포트폴리오'],reason='test')
+        self.assertIsNone(decision.topic_operator)
+        query=build_training_query(list(decision.topics))['query']['bool']
+        self.assertEqual(query['minimum_should_match'],2)

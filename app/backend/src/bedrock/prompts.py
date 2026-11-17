@@ -1,7 +1,7 @@
 import json
 from src.schemas.search import SearchPlan
 
-SEARCH_PROMPT_VERSION = "search-structured-v2"
+SEARCH_PROMPT_VERSION = "search-structured-and-v3"
 CONVERSATION_MAX_TOKENS = 4096
 CONSULTATION_PROMPT_VERSION = "consultation-text-v1"
 
@@ -15,12 +15,12 @@ def search_contract():
 SEARCH_RULES = (
     '검색 계획은 schema_version=2와 target=jobs로 반환하세요. '
     '지역 정식명과 약칭은 같은 뜻으로 해석하고 기술의 한글 표기·오탈자는 공식명으로 정규화하세요(경기도→경기, 깃→Git, 깃허브→GitHub). Git과 GitHub는 다른 기술입니다. '
-    'regions는 희망 지역의 OR 목록, roles는 희망 직무의 OR 목록입니다. 경남/부산을 하나의 문자열로 합치지 마세요. '
+    '검색에 적용하는 서로 다른 조건은 모두 AND입니다. regions와 roles도 배열의 모든 조건을 만족해야 합니다. 동의어나 표기 변형은 여러 필수 조건으로 늘리지 말고 하나의 대표 검색어로 정규화하세요. '
     'owned_skills는 사용자가 보유했다고 말한 기술이며 전부 필수 필터가 아닙니다. '
-    'required_skills는 공고에 반드시/모두 있어야 한다고 명시한 기술만 넣고, 그 외 희망 기술은 preferred_skills에 넣으세요. '
+    'required_skills에는 사용자가 검색 조건으로 요청한 기술을 모두 넣고 AND로 적용하세요. 단순 경험 소개는 owned_skills, 명시적인 선택적 선호만 preferred_skills에 넣으세요. '
     'React/Vue/Angular 경험 소개는 owned_skills에 넣고 required_skills를 비우세요. '
     'C/C++ 경험은 C와 C++로 분리하고 C/FFI 모듈 연동 경험은 FFI로 보존하되 별도 필수 태그로 만들지 마세요. '
-    '부산이나 경남의 백엔드/데이터 엔지니어링은 regions=[부산,경남], roles=[백엔드,데이터 엔지니어링]입니다. '
+    '사용자가 대안 중 아무거나라고 말하면 OR 검색을 만들지 말고 우선 검색할 한 조건을 확인하세요. 예: 부산이나 경남 중 선택을 요청합니다. 명시적으로 둘 다 요구한 조건은 배열에 각각 보존합니다. '
     'career.levels는 entry/junior/experienced, max_years는 사용자가 명시한 숫자만 넣으세요. 주니어를 임의 연수로 바꾸지 마세요. '
     '신입 공고를 명시하면 career.levels=[entry]로 기록하세요. 이전 search_preferences의 지역·직무·경력 조건은 사용자가 바꾸거나 해제하지 않으면 유지하세요. 지역 상관없다는 regions=[]로 해제합니다. '
     '기술 경험은 과거의 모든 기술을 필수로 누적하지 마세요. 검색 조건 수정 요청에는 수정한 항목만 바꾸고 나머지 선호를 유지하세요. '
@@ -39,10 +39,10 @@ CONTEXT_ROUTING_RULES = (
     '이전 상담 초점에서 더 구체적인 예시를 요구하면 같은 selected consult이며 새 검색이 아닙니다. '
     '교육기관·과정의 실제 선택지를 원하는 요청은 교육공고/찾아줘라는 단어가 없어도 training search입니다. '
     '예: React를 배우고 싶어, 어디서 배울 수 있어?, 다닐 만한 학원이 있을까?, 괜찮은 부트캠프 있어?는 문맥의 분야를 topics로 교육 검색합니다. '
-    '교육 topics에는 사용자가 과정에 요구한 모든 검색 조건을 보존하고 topic_operator를 명시하세요. 함께/동시에/도 요구하는 조건은 and, 대안·동의어·또는 관계는 or입니다. '
+    '교육 topics의 모든 검색 조건은 AND입니다. topic_operator는 and만 반환하세요. 동의어 나열로 검색 조건을 늘리지 마세요. '
     '데이터분석 교육을 듣고 포트폴리오도 만들고 싶다는 요청은 topics=[데이터분석,포트폴리오], topic_operator=and입니다. 필수 요청을 learning_goals로만 옮겨 검색에서 빼지 마세요. '
-    'learning_goals는 검색 조건을 대체하지 않는 참고 희망에만 사용합니다. 둘 중 아무거나라는 데이터분석 또는 웹개발은 topic_operator=or입니다. '
-    '0건을 피하려고 조건을 삭제·OR로 완화하지 마세요. AND/OR 혼합 관계를 한 연산자로 표현할 수 없거나 의미가 모호하면 확인 질문으로 관계를 확정하세요. '
+    'learning_goals는 검색 조건을 대체하지 않는 참고 희망에만 사용합니다. 대안 중 하나만 원하는 요청은 우선 검색할 주제를 확인하고 OR로 실행하지 마세요. '
+    '0건을 피하려고 조건을 삭제하거나 OR로 완화하지 마세요. 결과가 없으면 적용한 AND 조건을 알리고 사용자가 조건을 수정하도록 안내하세요. '
     '이전 교육 질문에 대한 짧은 분야·기관명 답변도 교육 탐색을 이어갑니다. 주제나 기관이 전혀 없으면 training clarify로 한 번만 묻습니다. '
     '반면 React 설명, 혼자 공부하는 순서, 이미 수료했다는 경험은 실제 과정 탐색을 요청하지 않으면 chat/consult이며 자동 검색하지 않습니다. '
     'training_review.pending이면 동의는 training confirm_search, 조건 변경은 training refine_search, 다음 요청은 아직 목록을 보지 않았다면 확인 안내입니다. '

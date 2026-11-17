@@ -34,7 +34,7 @@ class EducationFollowupTests(unittest.TestCase):
         state,result,_=advance_intent(flow,{'learning_context':previous},'교육 A 알려줘',dict(target='training',action='chat'))
         self.assertNotIn('learning_search',result)
         state,result,_=advance_intent(flow,state,'다음 교육',dict(target='training',action='next_results'))
-        repo.search.assert_called_once_with(['React'],exclude_ids=['fixture:first','fixture:second'],delivery_mode=None,candidates_only=True)
+        repo.search.assert_called_once_with(['React'],exclude_ids=['fixture:first','fixture:second'],delivery_mode=None,candidates_only=True,topic_operator='and')
         self.assertIn('learning_search',result)
         self.assertEqual(result['learning_opportunities'],[])
 
@@ -47,7 +47,7 @@ class EducationFollowupTests(unittest.TestCase):
     def test_new_education_topic_requeries_instead_of_reusing_react(self):
         repo=MagicMock();repo.search.return_value=[];flow=DialogueFlow(MagicMock(),MagicMock(),None,training=repo)
         _,result,_=advance_intent(flow,{'learning_context':self.context()},'Python 교육',dict(target='training',action='search',topics=['Python']))
-        repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None,candidates_only=True)
+        repo.search.assert_called_once_with(['Python'],exclude_ids=[],delivery_mode=None,candidates_only=True,topic_operator='and')
         self.assertEqual(result['learning_search']['topics'],['Python'])
 
     def test_completed_checklist_followup_retains_education_context_without_redisplaying_cards(self):

@@ -18,4 +18,4 @@ def training_mode(value):
 
 def training_operator(value):
     if value not in ('and','or'):raise ValueError('Invalid training topic operator')
-    return value
+    return 'and'

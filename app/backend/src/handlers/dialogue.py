@@ -28,7 +28,7 @@ def validate_payload(value):
     if not isinstance(value, dict):
         raise ValueError("Request must be an object")
     common = {"action", "session_id", "request_id", "model_tier"}
-    fields = {"view_training": {"source", "source_id", "source_version"}, "browse_training": {"filters"}, "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine", "preserve_current", "catalog_plan"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
+    fields = {"vector_search": {"text"}, "view_training": {"source", "source_id", "source_version"}, "browse_training": {"filters"}, "view_job": {"source_id"}, "explain_training": {"source", "source_id", "source_version"}, "review_answers": {"offset"}, "revise_answer": {"condition_id", "assessment", "detail", "review_version", "offset"}, "search": {"message", "search_plan", "profile", "page_size", "engine", "preserve_current", "catalog_plan"}, "select": {"source_id", "grouped", "assessment_checkpoint"},
               "answer": {"question_id", "assessment", "detail"}, "remember": {"message"}, "answer_batch": {"answers"}, "next_results": {"target"}, "assessment_control": {"control"}, "confirm_search": {"search_id"}, "consult": {"task", "message", "summary_id"}}
     action = value.get("action")
     if 'catalog_plan' in value:
@@ -43,7 +43,7 @@ def validate_payload(value):
     UUID(value.get("request_id", ""))
     if value.get("session_id"):
         UUID(value["session_id"])
-    if action not in {"search","browse_training"} and not value.get("session_id"):
+    if action not in {"search","browse_training","vector_search"} and not value.get("session_id"):
         raise ValueError("Session required")
     if action in {'review_answers','revise_answer'}:
         if type(value.get('offset',0)) is not int or not 0<=value.get('offset',0)<=1000 or value.get('offset',0)%10:
@@ -53,6 +53,9 @@ def validate_payload(value):
             if not isinstance(value.get('review_version'),str) or not re.fullmatch('[a-f0-9]{64}',value['review_version']):raise ValueError('Invalid saved answer revision')
             if value.get('assessment') not in {'met','unmet','unknown'}:raise ValueError('Invalid revised assessment')
             if not isinstance(value.get('detail',''),str) or len(value.get('detail',''))>2000:raise ValueError('Invalid revised detail')
+    elif action == "vector_search":
+        from src.services.vector_search import validate_text
+        validate_text(value.get("text"))
     elif action == "browse_training":
         if "filters" in value:
             from src.schemas.catalog import TrainingCatalogFilters
@@ -146,7 +149,9 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
     audit = None
     decision_id = None
     try:
-        ticket = store.begin(owner, payload)
+        from src.services.vector_search import audit_payload
+        stored_payload=audit_payload(payload)
+        ticket = store.begin(owner, stored_payload)
         if "cached" in ticket:
             return response(200, dict(ticket["cached"], cached=True))
         audit_enabled = os.getenv("INTENT_AUDIT_ENABLED", os.getenv("CONTEXT_ROUTING_ENABLED", "false")) == "true"
@@ -206,7 +211,10 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
         if payload.get('page_size') == 20:
             state['browse_page_size']=20
             state['training_browse']=True
-        if payload['action']=='search' and payload.get('search_plan') is None:
+        if payload['action']=='vector_search':
+            from src.services.vector_search import run
+            state,result,evidence=run(state,payload['text'],jobs,include_unverified=include_unverified)
+        elif payload['action']=='search' and payload.get('search_plan') is None:
             requested=payload.get('engine') or state.get('conversation_engine','legacy')
             if requested=='agentcore' and (role!='admin' or os.getenv('ENABLE_AGENTCORE_EXPERIMENT')!='true'):
                 raise FlowError('agentcore_experiment_admin_only',403)
@@ -232,7 +240,7 @@ def handle_request(event, *, jobs=None, store=None, planner=None, questioner=Non
             result["active_job"] = {k:state["selected"].get(k) for k in ("source_id","title","company_name","source_version")}
         if decision_id:result["intent_decision_id"] = decision_id
         result["snapshot_warning"] = include_unverified
-        delivered = store.finish(ticket, payload, state, result, evidence)
+        delivered = store.finish(ticket, stored_payload, state, result, evidence)
         if audit:audit.finish(ticket, decision_id, result=result)
         return response(200, delivered)
     except Exception as exc:

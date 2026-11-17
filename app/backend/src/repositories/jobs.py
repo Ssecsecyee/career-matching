@@ -42,13 +42,13 @@ class JsonJobRepository:
                 continue
             if plan.schema_version == 2:
                 from src.services.search_terms import region_terms, role_terms, matches_skill
-                if plan.regions and not any(s.casefold() in address for s in region_terms(plan.regions)):
+                if plan.regions and not all(any(s.casefold() in address for s in region_terms([region])) for region in plan.regions):
                     continue
-                if plan.roles and not any(s.casefold() in text for s in role_terms(plan.roles)):
+                if plan.roles and not all(any(s.casefold() in text for s in role_terms([role])) for role in plan.roles):
                     continue
                 if not all(matches_skill(stacks, s) for s in plan.required_skills):
                     continue
-                if plan.owned_skills and not plan.roles and not plan.required_skills and not any(matches_skill(stacks, s) for s in plan.owned_skills):
+                if plan.owned_skills and not plan.roles and not plan.required_skills and not all(matches_skill(stacks, s) for s in plan.owned_skills):
                     continue
             results.append(row)
         if plan.schema_version == 2:

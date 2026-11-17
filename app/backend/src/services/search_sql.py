@@ -18,12 +18,12 @@ def structured_clauses(plan):
             values.extend(aliases)
         return pieces, values
 
-    if plan.regions:
-        terms = region_terms(plan.regions)
+    for region in plan.regions:
+        terms = region_terms([region])
         clauses.append('(' + ' OR '.join(LOCATION + " LIKE %s ESCAPE '='" for _ in terms) + ')')
         params.extend(literal_like(s) for s in terms)
-    if plan.roles:
-        terms = role_terms(plan.roles)
+    for role in plan.roles:
+        terms = role_terms([role])
         clauses.append('(' + ' OR '.join(BODY + " LIKE LOWER(%s) ESCAPE '='" for _ in terms) + ')')
         params.extend(literal_like(s) for s in terms)
     pieces, values = group_skills(plan.required_skills)
@@ -31,7 +31,7 @@ def structured_clauses(plan):
     params.extend(values)
     if plan.owned_skills and not plan.roles and not plan.required_skills:
         pieces, values = group_skills(plan.owned_skills)
-        clauses.append('(' + ' OR '.join(pieces) + ')')
+        clauses.extend(pieces)
         params.extend(values)
     pieces, values = group_skills(tuple(dict.fromkeys(plan.owned_skills + plan.preferred_skills)))
     ranking = ' + '.join('CASE WHEN ' + s + ' THEN 1 ELSE 0 END' for s in pieces)

@@ -32,13 +32,14 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    return()=>{observer.disconnect();window.removeEventListener('scroll',onScroll,true);window.removeEventListener('wheel',onScroll,true);window.removeEventListener('touchmove',onScroll,true);};
  },[personal,active,busy,loadError,keyword,region,extra,results.hasMore,results.items.length,onNext]);
  return <main className="browse-page" aria-label={jobs?'채용공고 탐색':'교육과정 탐색'} aria-busy={loading}>
+
   {!personal && <>{onSearch?<CatalogSearch target={target} currentPlan={results.plan} items={results.items} busy={busy} onSearch={onSearch} onReset={onReset}/>:<div className="browse-toolbar"><label className="list-search"><span className="sr-only">현재 목록에서 검색</span><input type="search" value={keyword} onChange={e=>setKeyword(e.target.value)} placeholder="현재 목록에서 검색"/></label>
    {jobs && <label className="list-region"><span>지역</span><select aria-label="현재 목록 지역" value={region} onChange={e=>setRegion(e.target.value)}><option value="">전체 지역</option>{regions.map(r=><option key={r} value={r}>{r}</option>)}</select></label>}
 
    {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');}}>필터 초기화</button>}
   </div>}
-  <div className="browse-heading"><h1>{jobs?'검색 조건에 맞는':'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
-   <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. 전체 건수는 검색 조건을 통과한 후보 수이며, 아래로 내리면 나머지를 불러옵니다. 위 검색창이나 CAPI바라에게 조건을 말해 전체 검색 대상에서 좁혀보세요.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
+  <div className="browse-heading"><h1>{results.retrievalMode==='section_vector_fallback'?'AND 일치 0건 · 유사 검색 상위':results.retrievalMode==='section_vector'?'TXT 유사 검색 상위':jobs?'검색 조건에 맞는':'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
+   <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':results.retrievalMode?.startsWith('section_vector')?'전체 조건 일치 건수가 아닌 최대 20개 관련 후보입니다. 자격 충족 여부는 공고별 역량 문답으로 확인해 주세요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. 전체 건수는 검색 조건을 통과한 후보 수이며, 아래로 내리면 나머지를 불러옵니다. 위 검색창이나 CAPI바라에게 조건을 말해 전체 검색 대상에서 좁혀보세요.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
   </div>
   </>}
   {jobs && results.summary && <section className="source" aria-label="현재 적용한 검색 조건"><strong>현재 적용한 조건</strong>{results.summary.filters?.length?<ul>{results.summary.filters.map(t=><li key={t}>{t}</li>)}</ul>:<p>지역·직무·필수 기술 제한 없음</p>}{results.summary.ranking?.length>0 && <p>관련성 순위: {results.summary.ranking.join(' · ')}</p>}</section>}

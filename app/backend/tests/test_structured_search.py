@@ -30,8 +30,8 @@ def job(identity, title, address, skills):
 
 class Jobs:
     def __init__(self):
-        self.rows = [job('1','백엔드 개발자','부산',['AWS']),
-                     job('2','데이터 엔지니어','경상남도 창원',['Python']),
+        self.rows = [job('1','백엔드 데이터 엔지니어','부산 경남',['AWS']),
+                     job('2','백엔드 데이터 엔지니어','부산 경상남도 창원',['Python']),
                      job('3','백엔드 개발자','서울',['Python','C++','AWS','EC2'])]
         self.calls = 0
 
@@ -76,7 +76,7 @@ class StructuredSearchTests(unittest.TestCase):
         self.assertEqual(SearchPlan(regions=['부산','부산','경남']).regions,('부산','경남'))
         with self.assertRaises(ValueError): plan.limit=7
 
-    def test_or_regions_roles_owned_not_all_required(self):
+    def test_all_regions_roles_apply_while_profile_skills_remain_ranking(self):
         total,rows=Jobs().search(SearchPlan.parse(COMPLEX_PLAN))
         self.assertEqual(total,2)
         self.assertEqual({r['source_id'] for r in rows},{'1','2'})
@@ -85,28 +85,28 @@ class StructuredSearchTests(unittest.TestCase):
         plan=SearchPlan(regions=['부산','경남'], required_skills=['Python','AWS'])
         self.assertEqual(Jobs().search(plan)[0],0)
 
-    def test_owned_only_is_any_and_does_not_include_unrelated_jobs(self):
-        total,rows=Jobs().search(SearchPlan(owned_skills=['Python','FFI']))
-        self.assertEqual({r['source_id'] for r in rows},{'2','3'})
+    def test_owned_only_anchor_requires_all_skills(self):
+        total,rows=Jobs().search(SearchPlan(owned_skills=['Python','AWS']))
+        self.assertEqual({r['source_id'] for r in rows},{'3'})
 
     def test_region_is_never_silently_relaxed_and_empty_removes_it(self):
         self.assertEqual(Jobs().search(SearchPlan(regions=['제주'],roles=['백엔드']))[0],0)
-        self.assertEqual(Jobs().search(SearchPlan(regions=[],roles=['백엔드']))[0],2)
+        self.assertEqual(Jobs().search(SearchPlan(regions=[],roles=['백엔드']))[0],3)
 
     def test_elastic_optional_boosts_do_not_become_and_filters(self):
         query=build_query(SearchPlan.parse(COMPLEX_PLAN))['query']['bool']
         self.assertEqual(len(query['should']),6)
         self.assertEqual(query['minimum_should_match'],0)
-        self.assertEqual(len(query['filter'][2]['bool']['should']),4)
+        self.assertEqual(len(query['filter'][2]['bool']['should']),2)
         self.assertEqual(query['filter'][2]['bool']['minimum_should_match'],1)
         self.assertNotIn('career',json.dumps(query))
 
-    def test_mysql_clauses_are_parameterized_and_keep_or_groups(self):
+    def test_mysql_clauses_bind_values_and_keep_only_synonym_alternatives(self):
         plan=SearchPlan(regions=["부산' OR 1=1 --"],roles=['백엔드','데이터 엔지니어링'],
                         required_skills=['Python','AWS'], owned_skills=['C++'])
         clauses,values,ranking,rank_values=structured_clauses(plan)
         self.assertNotIn("부산'",' '.join(clauses))
-        self.assertEqual(len(clauses),4)
+        self.assertEqual(len(clauses),5)
         self.assertIn(' OR ',clauses[1])
         self.assertEqual(rank_values,['C++'])
         self.assertIn('CASE WHEN',ranking)

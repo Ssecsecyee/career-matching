@@ -55,11 +55,11 @@ LIST_FIELDS=("offering_id,course_key,cohort_name,source,source_id,source_url,sou
 class MySQLTrainingRepository:
     def __init__(self,connection_factory):self.factory=connection_factory
 
-    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="or",browse_all=False,catalog_filters=None):
+    def search(self,topics,*,exclude_ids=(),delivery_mode=None,candidates_only=False,exclude_groups=(),topic_operator="and",browse_all=False,catalog_filters=None):
         if not isinstance(topics,list) or not (0 if browse_all else 1)<=len(topics)<=8 or any(not isinstance(t,str) or not 1<=len(t)<=60 for t in topics):
             raise ValueError('Invalid training topics')
         from src.services.training_navigation import training_operator
-        training_operator(topic_operator)
+        topic_operator=training_operator(topic_operator)
         from src.services.training_groups import exclusions
         exclusions(exclude_groups)
         expressions=[];params=['boottent','goyong24_training']
@@ -86,9 +86,9 @@ class MySQLTrainingRepository:
         try:
             with conn.cursor() as cur:
                 if catalog_filters is not None:
-                    cur.execute("SELECT COUNT(*) AS n FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra,params)
+                    cur.execute("SELECT COUNT(*) AS n FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' AND '.join(expressions or ['1=1'])+")"+extra,params)
                     self.last_candidate_total=int(cur.fetchone()['n'])
-                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+(' AND ' if topic_operator=='and' else ' OR ').join(expressions or ['1=1'])+")"+extra+(" ORDER BY RAND() LIMIT 1000" if browse_all and not topics and not catalog_filters else " ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000"),params)
+                cur.execute('SELECT '+fields+" FROM training_offerings WHERE source IN (%s,%s) AND recruitment_status IN ('active','unknown','closed') AND ("+' AND '.join(expressions or ['1=1'])+")"+extra+(" ORDER BY RAND() LIMIT 1000" if browse_all and not topics and not catalog_filters else " ORDER BY (recruitment_status='active') DESC,offering_id DESC LIMIT 1000"),params)
                 rows=cur.fetchall()
                 cards=[card(row,topics) for row in rows]
                 if candidates_only:

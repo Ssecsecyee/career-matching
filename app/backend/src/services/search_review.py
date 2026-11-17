@@ -10,15 +10,15 @@ def execution_summary(plan, total, backend, degraded):
     filters, ranking, limits = [], [], []
     if plan.text_query:filters.append('검색어: '+plan.text_query)
     if plan.regions:
-        filters.append('근무지역: ' + ' 또는 '.join(plan.regions))
+        filters.append('근무지역: ' + ' AND '.join(plan.regions))
     if plan.roles:
-        filters.append('희망직무 관련 내용: ' + ' 또는 '.join(plan.roles))
+        filters.append('희망직무 관련 내용: ' + ' AND '.join(plan.roles))
     if plan.required_skills:
         filters.append('공고에 모두 필요한 기술: ' + ', '.join(plan.required_skills))
     if plan.owned_skills:
         ranking.append('보유 기술의 태그 일치: ' + ', '.join(plan.owned_skills))
         if not plan.roles and not plan.required_skills:
-            filters.append('보유 기술 중 하나 이상 태그 일치')
+            filters.append('보유 기술 모두 태그 일치')
     if plan.preferred_skills:
         ranking.append('선호 기술의 태그 일치: ' + ', '.join(plan.preferred_skills))
     if plan.career.levels or plan.career.max_years is not None:

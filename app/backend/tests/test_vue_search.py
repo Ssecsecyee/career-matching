@@ -23,7 +23,7 @@ class VueSearchTests(unittest.TestCase):
                 if baseline is None:baseline=current
                 else:self.assertEqual(current,baseline)
 
-    def test_required_skills_stay_and_owned_skills_stay_or(self):
+    def test_required_and_owned_only_anchors_are_and(self):
         rows=[{'source':'jumpit','source_id':str(i),'job_id':i,'source_version':1,
                'title':'Developer','company_name':'Synthetic','tech_stacks':tags,
                'recruitment_status':'unknown'}
@@ -33,4 +33,4 @@ class VueSearchTests(unittest.TestCase):
             repo=JsonJobRepository(path,include_unverified=True)
             self.assertEqual(repo.search(SearchPlan(owned_skills=['Vue']))[0],2)
             self.assertEqual(repo.search(SearchPlan(required_skills=['Vue','Python']))[0],1)
-            self.assertEqual(repo.search(SearchPlan(owned_skills=['Vue','React']))[0],3)
+            self.assertEqual(repo.search(SearchPlan(owned_skills=['Vue','React']))[0],0)

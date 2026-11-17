@@ -60,7 +60,7 @@ class ContinuationTests(unittest.TestCase):
         fallback.search.assert_called_once_with(plan,exclude_ids=['1'])
     def test_review_marks_only_after_confirmation(self):
         self.state,r,_=self.flow.advance(self.state,{'action':'search','message':'찾아줘',
-            'search_plan':{'schema_version':2,'owned_skills':['Python','AWS'],'limit':3}},self.invoke)
+            'search_plan':{'schema_version':2,'owned_skills':['Python'],'limit':3}},self.invoke)
         self.assertEqual(r['stage'],'search_review')
         self.assertEqual(self.state['search_navigation']['shown_ids'],[])
         self.repo.get=lambda i:next(r for r in self.repo.rows if r['source_id']==i)
@@ -98,7 +98,7 @@ class ContinuationTests(unittest.TestCase):
 
     def test_more_before_confirmation_keeps_same_review(self):
         self.state,r,_=self.flow.advance(self.state,{'action':'search','message':'찾아줘',
-            'search_plan':{'schema_version':2,'owned_skills':['Python','AWS'],'limit':3}},self.invoke)
+            'search_plan':{'schema_version':2,'owned_skills':['Python'],'limit':3}},self.invoke)
         search_id=r['search_id']
         for text in ['다른 거 추천해줘','딴거']:
             r=self.more(text)

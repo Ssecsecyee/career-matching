@@ -18,7 +18,7 @@ def tools():
  return [tool('next_results','Get unseen results under the existing search criteria. Use for other/more jobs or training, including after assessment. Keeps saved answers. Change criteria with search tools instead.',{'type':'object','properties':{'target':{'type':'string','enum':['jobs','training']}},'required':['target'],'additionalProperties':False}),
  tool('get_saved_answers','현재 상담 공고와 사용자가 실제 선택한 답변·원문을 조회합니다.',{'type':'object','properties':{},'additionalProperties':False}),
  tool('search_jobs','검증된 검색 조건으로 채용 후보를 조회합니다. 명시 제약을 보존하고 보유 기술은 우선순위로 사용합니다.',schema),
- tool('search_training','실제로 학습할 주제의 교육을 조회합니다. 경력·학위를 교육으로 대체하지 않습니다.',{'type':'object','properties':{'topics':{'type':'array','items':{'type':'string','maxLength':60},'minItems':1,'maxItems':8},'topic_operator':{'type':'string','enum':['and','or']},'delivery_mode':{'type':'string','enum':['online','offline','any']}},'required':['topics','topic_operator'],'additionalProperties':False})]
+ tool('search_training','실제로 학습할 주제의 교육을 조회합니다. 경력·학위를 교육으로 대체하지 않습니다.',{'type':'object','properties':{'topics':{'type':'array','items':{'type':'string','maxLength':60},'minItems':1,'maxItems':8},'topic_operator':{'type':'string','enum':['and']},'delivery_mode':{'type':'string','enum':['online','offline','any']}},'required':['topics','topic_operator'],'additionalProperties':False})]
 
 # Job-grounded discovery; question counts are not a UX gate.
 SYSTEM += (" For combined career assessment and education requests, clarify the target role only if unclear, then call search_jobs as soon as the role is known. "
