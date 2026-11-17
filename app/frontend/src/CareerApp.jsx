@@ -1,3 +1,4 @@
+import {MobileWorkspaceNavigation,MobileResultTabs} from './MobileWorkspaceNavigation.jsx';
 import {ChatAttachment} from './ChatAttachment.jsx';
 import {attachmentSearchText} from './chatAttachment.js';
 import {catalogColumns} from './workspaceLayout.js';
@@ -78,6 +79,34 @@ function Reply({ data, active, busy, onSelect, onAnswer, onBatch, onAssessment, 
 export function CareerApp({page='chat',adminChat=false}) {
   const [chatWidth,setChatWidth]=useState(()=>clampChatWidth(340,window.innerWidth));
   const [viewport,setViewport]=useState(window.innerWidth);
+  const [coarsePointer,setCoarsePointer]=useState(()=>window.matchMedia?.('(pointer: coarse)').matches || false);
+  useEffect(()=>{const media=window.matchMedia?.('(pointer: coarse)');if(!media)return;const update=()=>setCoarsePointer(media.matches);media.addEventListener?.('change',update);return()=>media.removeEventListener?.('change',update);},[]);
+  const isMobile=(viewport<=767 || (coarsePointer && viewport<=1000)) && !adminChat;
+  const [mobileScreen,setMobileScreen]=useState(()=>page==='my'?'my':'chat');
+  const lastCatalogTarget=useRef(page==='training'?'training':'jobs');
+  const mobileViewportBase=useRef({width:window.innerWidth,height:window.innerHeight});
+  const [mobileViewport,setMobileViewport]=useState(()=>({height:window.visualViewport?.height || window.innerHeight,top:window.visualViewport?.offsetTop || 0,keyboard:false}));
+  const conversationUpdate=useRef({messages:null,busy:null,error:null});
+  useEffect(()=>{if(page==='jobs' || page==='training')lastCatalogTarget.current=page;},[page]);
+  useEffect(()=>{
+    if(!isMobile)return;
+    const visual=window.visualViewport;
+    const update=()=>{
+      const height=visual?.height || window.innerHeight,base=mobileViewportBase.current;
+      if(base.width!==window.innerWidth){base.width=window.innerWidth;base.height=window.innerHeight;}
+      else base.height=Math.max(base.height,window.innerHeight,height);
+      setMobileViewport({height,top:visual?.offsetTop || 0,keyboard:height<base.height-120});
+    };
+    update();visual?.addEventListener('resize',update);visual?.addEventListener('scroll',update);window.addEventListener('resize',update);
+    return()=>{visual?.removeEventListener('resize',update);visual?.removeEventListener('scroll',update);window.removeEventListener('resize',update);};
+  },[isMobile]);
+  function openMobileResults(target=lastCatalogTarget.current){lastCatalogTarget.current=target;setMobileScreen('results');window.location.hash=target==='training'?'#training':'#jobs';}
+  function openMobileScreen(screen){
+    if(screen==='results'){openMobileResults();return;}
+    setMobileScreen(screen);
+    if(screen==='my')window.location.hash='#my';
+  }
+
   useEffect(()=>{const resize=()=>{setViewport(window.innerWidth);setChatWidth(old=>clampChatWidth(old,window.innerWidth));};window.addEventListener('resize',resize);return()=>window.removeEventListener('resize',resize);},[]);
   const [library,setLibrary]=useState(()=>readLibrary(window.localStorage));
   const [libraryError,setLibraryError]=useState('');
@@ -86,7 +115,7 @@ export function CareerApp({page='chat',adminChat=false}) {
   function readItem(item,target){updateLibrary(addRecent(library,item,target));if(target==='jobs')loadJobDetail(item);else loadTrainingDetail(item);}
   const isSaved=item=>library.saved.some(x=>itemKey(x)===itemKey(item));
   const [copilotOpen,setCopilotOpen]=useState(false);
-  function revealConsultation(){setCopilotOpen(true);document.getElementById('message')?.focus();}
+  function revealConsultation(){setCopilotOpen(true);setMobileScreen('chat');if(!isMobile)document.getElementById('message')?.focus();}
   const [apiEnabled, setApiEnabled] = useState(null);
   const [publicAccess,setPublicAccess]=useState(false);
   useEffect(() => { let active = true; fetch('/deploy-config.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error('Configuration unavailable'); return r.json(); }).then(config => { if (active) {setApiEnabled(config.apiEnabled === true);setPublicAccess(config.publicAccess===true);} }).catch(() => { if (active) setApiEnabled(false); }); return () => { active = false; }; }, []);
@@ -149,6 +178,14 @@ export function CareerApp({page='chat',adminChat=false}) {
     }
   },[unlocked,apiEnabled,page,session,adminChat,busy]);
   useEffect(() => {
+    const previous=conversationUpdate.current;
+    const changed=previous.messages!==messages || previous.busy!==busy || previous.error!==error;
+    conversationUpdate.current={messages,busy,error};
+    if(isMobile){
+      if(!messages.some(message=>!message.backgroundList))return;
+      if(changed && mobileScreen==='chat' && conversation.current)conversation.current.scrollTop=conversation.current.scrollHeight;
+      return;
+    }
     if(page==='my')return;
     if(page!=='chat'){const panel=conversation.current;if(panel)panel.scrollTop=panel.scrollHeight;return;}
     if(page!=='chat' && (busyAction==='next_results' || messages.at(-1)?.data?.search_continuation || messages.at(-1)?.data?.training_continuation))return;
@@ -305,16 +342,20 @@ export function CareerApp({page='chat',adminChat=false}) {
   const compactComposer = sequential || !!result?.answer_summary;
   const noteOnly = false; // Free conversation and stopping questions stay available during assessments.
   const exploring=unlocked && !adminChat && page!=='chat';
-  return <div className={`app unified-workspace${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}`} style={{'--chat-width':chatWidth+'px','--catalog-columns':catalogColumns(viewport,chatWidth)}}>
+  const mobileActive=isMobile && exploring;
+  const catalogTarget=page==='training'?'training':page==='jobs'?'jobs':lastCatalogTarget.current;
+  const mobileResults=latestSearchResults(messages,catalogTarget);
+  return <div className={`app unified-workspace${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}${mobileActive?' mobile-workspace mobile-screen-'+mobileScreen+(mobileViewport.height<520?' mobile-compact-height':'')+(mobileViewport.keyboard?' mobile-keyboard-open':''):''}`} style={{'--chat-width':chatWidth+'px','--catalog-columns':catalogColumns(viewport,chatWidth),'--mobile-height':mobileViewport.height+'px','--mobile-top':mobileViewport.top+'px'}}>
     {savedOpen&&<SavedAnswersPanel data={savedData} busy={busy} error={savedError} onClose={()=>{if(!busy){setSavedOpen(false);setSavedData(null);}}} onRefresh={loadSavedAnswers} onRevise={reviseSaved} onRemember={rememberAll}/>}
 
     <div className="workspace"><header><div className="educare-brand"><img src="/educare-logo-white.png" alt="해!듀케 EDU-CARE 로고" /><div><strong>해!듀케 <small>EDU-CARE</small></strong><span>당신의 진로와 학습을 안내하는 AI 가이드</span></div></div>{unlocked && !adminChat && <WorkspaceNavigation page={page}/>}{unlocked && (!publicAccess || adminChat) && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{adminChat ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
-        <div className="workspace-body"><button className="copilot-toggle" type="button" aria-expanded={copilotOpen} onClick={()=>setCopilotOpen(!copilotOpen)}>{copilotOpen?'AI 패널 닫기':'AI에게 조건 말하기'}</button><div className="chat-view"><div className="copilot-heading"><strong>{new URLSearchParams(window.location.search).get('agentcore')==='1'?'AgentCore 관리자 실험':'CAPI바라'}</strong><span>내게 맞는 공고와 교육, CAPI바라와 찾아보세요</span>{publicAccess && !adminChat && <small className="public-trial-note">체험 대화와 선택은 서비스 개선을 위해 기록됩니다. 연락처 등 개인정보는 입력하지 마세요.</small>}<button className="quiet new-conversation" type="button" disabled={busy || attachmentLoading} onClick={()=>{reset();if(!adminChat)window.location.hash='#jobs';}}>＋ 새 대화</button></div>
+        <div className="workspace-body">{mobileActive && <MobileResultTabs target={catalogTarget} onChange={openMobileResults}/>}<button className="copilot-toggle" type="button" aria-expanded={copilotOpen} onClick={()=>setCopilotOpen(!copilotOpen)}>{copilotOpen?'AI 패널 닫기':'AI에게 조건 말하기'}</button><div className="chat-view" inert={mobileActive && mobileScreen!=='chat' ? true : undefined}><div className="copilot-heading"><strong>{new URLSearchParams(window.location.search).get('agentcore')==='1'?'AgentCore 관리자 실험':'CAPI바라'}</strong><span>내게 맞는 공고와 교육, CAPI바라와 찾아보세요</span>{publicAccess && !adminChat && <small className="public-trial-note">체험 대화와 선택은 서비스 개선을 위해 기록됩니다. 연락처 등 개인정보는 입력하지 마세요.</small>}<button className="quiet new-conversation" type="button" disabled={busy || attachmentLoading} onClick={()=>{reset();setMobileScreen('chat');if(!adminChat)window.location.hash='#jobs';}}>＋ 새 대화</button></div>
         <main ref={conversation} className="conversation" aria-label="대화 내용" aria-live="polite">
-          {!messages.length && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
+          {(mobileActive ? !messages.some(m=>!m.backgroundList) : !messages.length) && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
           {result?.active_job && <aside className="source" aria-label="현재 상담 공고"><strong>현재 상담 공고</strong><p>{result.active_job.company_name} · {result.active_job.title}</p><small>확인한 버전 {result.active_job.source_version} · 다른 목록을 보아도 새 공고 선택 전까지 이 공고의 답변을 유지합니다.</small></aside>}
           {messages.map((message, index) => message.backgroundList ? null : <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}><div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} hideMore={true} active={!pending && (!messages.slice(index + 1).some(m => !m.backgroundList) || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => !m.backgroundList && m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={(searchId, target) => send(requestPayload('confirm_search', { search_id: searchId }, session), target === 'training' ? '이 검색 기준으로 교육을 보여줘.' : '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} compact={exploring} onExplain={explainTraining} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={assessmentControl} />}</div></article>)}
+          {mobileActive && !busy && mobileResults.items.length>0 && <button type="button" className="mobile-results-shortcut" onClick={()=>openMobileResults(catalogTarget)}>{catalogTarget==='training'?'찾은 교육':'찾은 공고'} {mobileResults.items.length}개 보기 <span aria-hidden="true">→</span></button>}
           {busy && busyAction!=='next_results' && !messages.some(m => m.partial) && <div className="thinking" role="status">✳ {busyAction === 'select' ? '선택한 공고의 조건을 불러오고 있어요' : ['answer', 'answer_batch'].includes(busyAction) ? '답변을 저장하고 있어요' : busyAction === 'remember' ? '말씀하신 내용을 반영하고 있어요' : '답변을 준비하고 있어요'}<span>…</span></div>}
           {error && <div className="error" role="alert"><p>{error}</p>{pending && <button disabled={busy} onClick={() => { if (Date.now() < pending.retryAt) { setError('잠시 기다린 뒤 다시 시도해 주세요.'); return; } send(pending.payload); }}>다시 확인하기</button>}{stepRecovery?<div className="choices"><button disabled={busy} onClick={()=>{const message=recoveryMessage(stepRecovery.message,'assessment');send(requestPayload('search',{message},session),'역량 확인부터 진행해줘.');}}>역량 확인부터</button><button disabled={busy} onClick={()=>{const message=recoveryMessage(stepRecovery.message,'training');send(requestPayload('search',{message},session),'교육 찾기부터 진행해줘.');}}>교육 찾기부터</button></div>:<button className="quiet" disabled={busy} onClick={reset}>새 대화</button>}</div>}
           <div ref={bottom} />
@@ -325,10 +366,11 @@ export function CareerApp({page='chat',adminChat=false}) {
       </div>
       <SplitHandle width={chatWidth} onResize={setChatWidth}/>
       {libraryError && <p role="alert">{libraryError}</p>}
-      {page==='my' && <div className="my-page-host"><MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/></div>}
-      <div hidden={page!=='jobs'}><ExplorationPreview target="jobs" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs'} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
-      <div hidden={page!=='training'}><ExplorationPreview target="training" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training'} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
+      {(page==='my' || isMobile) && <div className="my-page-host" inert={mobileActive && mobileScreen!=='my' ? true : undefined}><MyPage library={library} onChange={updateLibrary} isSaved={isSaved} onSave={item=>saveItem(item,item.target)} onRead={item=>readItem(item,item.target)} details={jobDetails} trainingDetails={trainingDetails} detailError={detailError} busy={busy || !!pending} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} onExplain={course=>{revealConsultation();explainTraining(course);}}/></div>}
+      <div className="catalog-panel catalog-panel-jobs" hidden={page!=='jobs'} inert={mobileActive && mobileScreen!=='results' ? true : undefined}><ExplorationPreview target="jobs" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('jobs')} loading={(busy && !pending) || (!session && !error && !pending)} details={jobDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'jobs')} onRead={item=>readItem(item,'jobs')} active={page==='jobs' && (!mobileActive || mobileScreen==='results')} busy={busy || !!pending} onNext={()=>send(requestPayload('next_results',{target:'jobs'},session))} onReset={()=>send(requestPayload('search',{search_plan:{keyword:'',region:'',skills:[],limit:20}},session),'검색 조건을 초기화하고 전체 공고를 볼게요.')} onChat={revealConsultation} onAssess={job=>{revealConsultation();select(job);}} results={latestSearchResults(messages,'jobs')}/></div>
+      <div className="catalog-panel catalog-panel-training" hidden={page!=='training'} inert={mobileActive && mobileScreen!=='results' ? true : undefined}><ExplorationPreview target="training" onSearch={next=>send(requestPayload(next.action,next.values,session))} loadError={catalogError || (busyAction==='next_results'?error:null)} onRetry={()=>retryList('training')} trainingDetails={trainingDetails} detailError={detailError} isSaved={isSaved} onSave={item=>saveItem(item,'training')} onRead={item=>readItem(item,'training')} loading={(busy && !pending) || (!initialTraining.current && !error)} active={page==='training' && (!mobileActive || mobileScreen==='results')} onNext={()=>send(requestPayload('next_results',{target:'training'},session))} onReset={()=>send(requestPayload('browse_training',{},session))} busy={busy || !!pending} onChat={revealConsultation} onExplain={course=>{revealConsultation();explainTraining(course);}} results={latestSearchResults(messages,'training')}/></div>
       </div>
+      {mobileActive && <MobileWorkspaceNavigation screen={mobileScreen} onChange={openMobileScreen}/>}
       </>}
     </div>
   </div>;

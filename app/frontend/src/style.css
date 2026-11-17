@@ -239,3 +239,85 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .browse-detail .tags span,.browse-detail .pill{background:#eff6ff;color:#285699}
 .browse-detail .browse-actions button:hover:not(:disabled){background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
 .browse-detail .browse-actions button:focus-visible{outline:2px solid #2563eb}
+
+/* Mobile-only workspace. Desktop split panes retain their original layout. */
+.mobile-workspace-nav,.mobile-results-heading,.mobile-results-shortcut{display:none}
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){
+ .app.unified-workspace.explorer-layout.mobile-workspace{position:fixed;inset:auto 0 auto 0;top:var(--mobile-top,0px);height:var(--mobile-height,100dvh);min-height:0;overflow:hidden;width:100%}
+ .mobile-workspace>.workspace{height:100%!important;min-height:0;overflow:hidden}
+ .mobile-workspace.explorer-layout .workspace>header{position:relative;flex:none;height:56px;min-height:56px;padding:8px 16px;flex-wrap:nowrap;z-index:10;border-bottom:1px solid #e5edf7}
+ .mobile-workspace .workspace-tabs{display:none}
+ .mobile-workspace .educare-brand>img{width:36px;height:36px}
+ .mobile-workspace .educare-brand strong{font-size:16px}
+ .mobile-workspace .educare-brand small,.mobile-workspace .educare-brand div>span{display:none}
+ .mobile-workspace.explorer-layout .workspace-body{display:flex;flex:1;flex-direction:column;height:auto;min-height:0;overflow:hidden;position:relative}
+ .mobile-workspace.explorer-layout .workspace-resizer,.mobile-workspace .copilot-toggle{display:none!important}
+ .mobile-workspace.explorer-layout .workspace-body>.chat-view{display:none!important;flex:1;min-height:0;height:100%;max-height:none;width:100%;overflow:hidden}
+ .mobile-workspace.mobile-screen-chat .workspace-body>.chat-view{display:flex!important;flex-direction:column}
+ .mobile-workspace .copilot-heading{flex:none;padding:11px 100px 10px 16px;border-bottom:1px solid #e5edf7;background:#fff}
+ .mobile-workspace .copilot-heading strong{font-size:16px;line-height:1.5}
+ .mobile-workspace .copilot-heading>span{display:none}
+ .mobile-workspace .public-trial-note{display:block;font-size:10px;line-height:1.55;margin-top:4px;color:#77869a}
+ .mobile-workspace .new-conversation{min-height:36px;top:9px;right:12px;font-size:11px}
+ .mobile-workspace .conversation{flex:1;min-height:0;max-width:none;overflow-y:auto;overscroll-behavior:contain;padding:16px 16px 20px;scroll-padding:16px;touch-action:pan-y}
+ .mobile-workspace .welcome{padding:26px 4px 16px;text-align:left}
+ .mobile-workspace .welcome h1{font-size:24px;line-height:1.45;margin:10px 0}
+ .mobile-workspace .welcome p{font-size:14px;line-height:1.8}
+ .mobile-workspace .message{margin:12px 0 22px;gap:0}
+ .mobile-workspace .message-content,.mobile-workspace .assistant-text,.mobile-workspace .markdown-answer{font-size:15px;line-height:1.8;overflow-wrap:anywhere}
+ .mobile-workspace .message-content table{display:block;max-width:100%;overflow-x:auto}
+ .mobile-workspace .user .message-content{max-width:92%}
+ .mobile-workspace .user-text{padding:11px 14px;border-radius:18px;font-size:15px}
+ .mobile-workspace .composer-area{position:relative;flex:none;width:100%;padding:7px 12px 9px;max-width:none;margin:0;background:#f8fbff;border-top:1px solid #e8eff7}
+ .mobile-workspace .memory-tools{margin-bottom:4px}
+ .mobile-workspace .memory-tools .quiet{min-height:30px;padding:2px 3px;font-size:11px}
+ .mobile-workspace .memory-tools>span{display:none}
+ .mobile-workspace .composer{padding:10px 12px 8px;border-radius:18px;background:white}
+ .mobile-workspace .composer textarea{min-height:42px;max-height:100px;font-size:16px;line-height:1.5;resize:none}
+ .mobile-workspace .chat-attachment{margin:0;min-height:32px}
+ .mobile-workspace .chat-attachment small{display:none}
+ .mobile-workspace .composer-bottom{min-height:0;position:absolute;right:22px;bottom:17px}
+ .mobile-workspace .composer textarea{padding-right:38px}
+ .mobile-workspace .composer-bottom>span,.mobile-workspace .disclaimer{display:none}
+ .mobile-workspace .composer .send{width:36px;height:36px;min-width:36px;min-height:36px}
+ .mobile-workspace .workspace-body>.catalog-panel,.mobile-workspace .workspace-body>.my-page-host{display:none!important}
+ .mobile-workspace.mobile-screen-results .workspace-body>.catalog-panel:not([hidden]){display:block!important;flex:1;min-height:0;height:auto;overflow-y:auto!important;overscroll-behavior:contain;touch-action:pan-y;width:100%}
+ .mobile-workspace.mobile-screen-my .workspace-body>.my-page-host{display:block!important;flex:1;min-height:0;height:auto;overflow-y:auto!important;overscroll-behavior:contain;width:100%}
+ .mobile-workspace .mobile-results-heading{display:none!important;flex:none;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5edf7;background:white}
+ .mobile-workspace.mobile-screen-results .mobile-results-heading{display:flex!important;height:auto!important;overflow:visible!important}
+ .mobile-results-heading strong{display:block;font-size:19px;line-height:1.4}
+ .mobile-results-heading>div[role=group]{display:flex;gap:3px;padding:3px;background:#f1f5fc;border-radius:12px}
+ .mobile-results-heading button{min-width:58px;min-height:38px;padding:7px 13px;background:transparent;border:0;font-size:13px;color:#708199;border-radius:9px}
+ .mobile-results-heading button[aria-pressed=true]{background:#fff;color:#2563eb;box-shadow:0 1px 5px #15336310}
+ .mobile-workspace-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex:none;gap:4px;padding:5px 10px calc(5px + env(safe-area-inset-bottom,0px));border-top:1px solid #e2eaf5;background:#fff;z-index:20}
+ .mobile-workspace-nav button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-height:52px;padding:5px 8px;border:0;border-radius:12px;background:transparent;color:#8190a6;font-size:11px;line-height:1.4}
+ .mobile-workspace-nav button[aria-current=page]{color:#2563eb;background:#eff5ff;font-weight:650}
+ .mobile-workspace-nav button:focus-visible{outline:2px solid #2563eb;outline-offset:-2px}
+ .mobile-workspace .mobile-results-shortcut{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;width:100%;padding:12px 15px;background:#edf4ff;border:1px solid #d5e4ff;border-radius:13px;color:#245fbe;font-size:14px;text-align:left}
+ .mobile-workspace .browse-page{padding:16px 14px 32px}
+ .mobile-workspace .browse-heading h1{font-size:22px}
+ .mobile-workspace .browse-card-grid{grid-template-columns:minmax(0,1fr)!important}
+ .mobile-workspace .my-page{padding:18px 14px}
+ .mobile-workspace .browse-detail{top:64px;bottom:calc(72px + env(safe-area-inset-bottom,0px));left:10px;right:10px;width:auto;max-height:none;z-index:40}
+ .mobile-workspace .detail-backdrop{z-index:35}
+}
+
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){
+ .mobile-workspace.mobile-compact-height .workspace>header{display:none}
+ .mobile-workspace.mobile-keyboard-open .mobile-workspace-nav{display:none}
+ .mobile-workspace dialog.assessment-modal-backdrop{top:var(--mobile-top,0px);bottom:auto;height:var(--mobile-height,100dvh);max-height:var(--mobile-height,100dvh);padding:10px}
+ .mobile-workspace .assessment-modal{max-height:calc(var(--mobile-height,100dvh) - 20px)}
+}
+
+/* In landscape or above a keyboard, keep an actual reading area instead of a tall empty composer. */
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){
+ .mobile-workspace.mobile-compact-height .composer:not(:has(.attachment-chip)){display:grid;grid-template-columns:36px minmax(0,1fr) 36px;gap:8px;align-items:center}
+ .mobile-workspace.mobile-compact-height .composer:not(:has(.attachment-chip)) textarea{grid-column:2;grid-row:1;height:48px;min-height:48px;padding-right:0}
+ .mobile-workspace.mobile-compact-height .composer:not(:has(.attachment-chip)) .chat-attachment{grid-column:1;grid-row:1}
+ .mobile-workspace.mobile-compact-height .composer:not(:has(.attachment-chip)) .composer-bottom{position:static;grid-column:3;grid-row:1}
+}
+
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){
+ .mobile-workspace.mobile-compact-height .welcome{padding-top:8px}
+ .mobile-workspace.mobile-compact-height .welcome .spark{display:none}
+}
