@@ -1,5 +1,4 @@
 """AWS HTTP entry and separate IAM-only database inspection entry."""
-import os
 
 from src.handlers.dialogue import lambda_handler as dialogue_handler, response
 from src.repositories.aws_secrets import configure_chat

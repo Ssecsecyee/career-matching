@@ -1,7 +1,6 @@
 """MySQL sessions, per-request leases, replay cache and evidence transactions."""
 import hashlib
 import json
-import os
 import time
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4, uuid5, NAMESPACE_URL

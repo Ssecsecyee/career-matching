@@ -9,7 +9,7 @@ from src.services.conversation_policy import preferences, respect_preferences
 from src.services.condition_display import display_condition
 from src.services.condition_structure import source_binding, source_notice
 from src.services.assessment_summary import build_summary
-from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory, consultation_context
+from src.services.memory import memory, record, context, apply_facts, condition_key, split_conditions, public_memory
 
 
 class FlowError(Exception):

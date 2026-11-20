@@ -1,7 +1,5 @@
 """Authenticated MySQL dialogue endpoint; separate from the original scaffold handler."""
 import base64
-import hashlib
-import hmac
 import json
 import os
 import re

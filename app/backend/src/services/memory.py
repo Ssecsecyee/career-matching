@@ -1,7 +1,6 @@
 """Session-scoped, source-backed memory. No inferred eligibility or cross-user cache."""
 import hashlib
 import json
-import re
 
 
 def memory(state):

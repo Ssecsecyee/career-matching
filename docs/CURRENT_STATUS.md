@@ -32,3 +32,8 @@
 - 프런트: app/frontend에서 npm test, npm run build. 백엔드: app/backend에서 python -m unittest discover -s tests -v. 로컬 boto3/pymysql이 없으면 별도 환경에 설치한다.
 - 실제 Bedrock 호출은 기본 테스트에서 켜지 않는다. 배포는 요청받았을 때만 실행하고 기존 운영 설정·DB·복구 자산을 보존한다.
 - docs/INDEX.md는 전체 문서 길잡이, docs/history는 당시 기록이다. sources/archive/workspace 연결 원본은 수정하지 않는다.
+
+## 이번 정리 이후 로컬 상태
+- 문서 정리와 미사용 코드 정리는 별도 커밋으로 구분했다. 이번 코드 정리는 운영 미배포다.
+- 미사용 import 6개, 항상 false인 noteOnly 분기, 선행 return으로 도달하지 못하는 스크롤 조건, 제거된 화면 요소의 CSS만 정리했다.
+- 기존 search_repair.py와 해당 테스트의 미커밋 수정, 표기 사전·실험 자료는 이번 정리 커밋에 포함하지 않았다. 다음 작업 시 git status로 확인한다.
