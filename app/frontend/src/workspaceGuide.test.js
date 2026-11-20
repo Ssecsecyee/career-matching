@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {guideSeen,rememberGuide,placeGuide,GUIDE_KEY} from './workspaceGuide.js';
+test('guide remembers completion and tolerates blocked storage',()=>{const values=new Map();const storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};assert.equal(guideSeen(storage),false);rememberGuide(storage);assert.equal(values.get(GUIDE_KEY),'done');assert.equal(guideSeen(storage),true);const blocked={getItem(){throw Error();},setItem(){throw Error();}};assert.equal(guideSeen(blocked),false);assert.doesNotThrow(()=>rememberGuide(blocked));});
+test('card stays inside desktop, phone and scrolled visual viewports',()=>{for(const v of [{left:0,top:0,width:1440,height:900},{left:0,top:70,width:360,height:500},{left:20,top:0,width:844,height:390}]){const w=Math.min(360,v.width-24),h=220;const p=placeGuide([{left:v.left,top:v.top,right:v.left+v.width,bottom:v.top+90}],w,h,v);assert.ok(p.x>=v.left+12);assert.ok(p.y>=v.top+12);assert.ok(p.x+w<=v.left+v.width-12);assert.ok(p.y+h<=v.top+v.height-12);}});
+test('card avoids highlighted controls when there is room',()=>{const r={left:10,top:10,right:300,bottom:150};const p=placeGuide([r],360,240,{left:0,top:0,width:1200,height:800});assert.ok(p.x>=r.right||p.y>=r.bottom||p.x+360<=r.left||p.y+240<=r.top);});

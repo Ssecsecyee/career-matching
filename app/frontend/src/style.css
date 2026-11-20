@@ -319,5 +319,28 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 
 @media(max-width:767px), (max-width:1000px) and (pointer:coarse){
  .mobile-workspace.mobile-compact-height .welcome{padding-top:8px}
- .mobile-workspace.mobile-compact-height .welcome .spark{display:none}
+ .mobile-workspace .welcome .spark{display:none}
 }
+
+/* First-visit guide: portal overlay keeps its focus independent of the inert workspace. */
+.workspace-guide-layer{position:fixed;inset:0;z-index:10000;isolation:isolate;touch-action:none}
+.workspace-guide-shade{position:absolute;inset:0;pointer-events:none}
+.workspace-guide-ring{position:absolute;box-sizing:border-box;border:2px solid #3385ff;border-radius:10px;box-shadow:0 0 0 3px #72bcff45;pointer-events:none}
+.workspace-guide-card{position:absolute;box-sizing:border-box;width:min(360px,calc(100vw - 24px));padding:22px;background:#fff;border:1px solid #dbe7f5;border-radius:14px;box-shadow:0 12px 45px #081b373d;color:#142a47;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.workspace-guide-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#4b6e9b;font-size:13px}
+.workspace-guide-meta button{border:0;background:transparent;padding:4px 0;color:#61758f;font-size:13px;min-height:36px}
+.workspace-guide-card h2{font-size:21px;line-height:1.5;margin:12px 0 10px;letter-spacing:-.5px}
+.workspace-guide-card p{font-size:15px;line-height:1.8;margin:0 0 20px;word-break:keep-all;overflow-wrap:anywhere;color:#435872}
+.workspace-guide-actions{display:flex;justify-content:space-between;gap:12px}
+.workspace-guide-actions button{min-height:44px;padding:8px 18px;font-size:14px;border-radius:9px}
+.workspace-guide-actions .guide-next{background:#2563eb;border-color:#2563eb;color:white;font-weight:600}
+.workspace-guide-actions .guide-next:hover{background:#1d4ed8}
+.workspace-guide-card button:focus-visible{outline:3px solid #3c99f8;outline-offset:3px}
+.guide-launch{white-space:nowrap;min-height:36px}
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){.workspace-guide-card{padding:18px}.workspace-guide-card h2{font-size:20px}.mobile-workspace .guide-launch{font-size:12px;padding:5px 8px;min-height:36px}}
+
+.guide-launch-compact{display:none}
+.workspace-guide-card{display:flex;flex-direction:column;overflow:hidden}
+.workspace-guide-meta,.workspace-guide-actions,.workspace-guide-card h2{flex-shrink:0}
+.workspace-guide-card p{min-height:28px;overflow-y:auto;overscroll-behavior:contain}
+@media(max-width:767px), (max-width:1000px) and (pointer:coarse){.mobile-compact-height .guide-launch-compact{display:block;font-size:11px;min-height:30px;padding:3px 6px}.mobile-compact-height .copilot-heading>.guide-launch-compact{position:absolute;right:12px;top:43px}.workspace-guide-card{padding:16px}.workspace-guide-card h2{font-size:19px;line-height:1.35;margin:8px 0}.workspace-guide-card p{margin:0 0 12px;font-size:14px;line-height:1.6}.workspace-guide-meta button{min-height:30px}.workspace-guide-actions button{min-height:40px}}

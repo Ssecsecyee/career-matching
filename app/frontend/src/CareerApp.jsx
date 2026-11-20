@@ -1,3 +1,5 @@
+import {WorkspaceGuide} from './WorkspaceGuide.jsx';
+import {guideSeen,rememberGuide} from './workspaceGuide.js';
 import {MobileWorkspaceNavigation,MobileResultTabs} from './MobileWorkspaceNavigation.jsx';
 import {ChatAttachment} from './ChatAttachment.jsx';
 import {attachmentSearchText} from './chatAttachment.js';
@@ -345,14 +347,40 @@ export function CareerApp({page='chat',adminChat=false}) {
   const mobileActive=isMobile && exploring;
   const catalogTarget=page==='training'?'training':page==='jobs'?'jobs':lastCatalogTarget.current;
   const mobileResults=latestSearchResults(messages,catalogTarget);
+  const [guideOpen,setGuideOpen]=useState(false),[guideStep,setGuideStep]=useState(0);
+  const guideOrigin=useRef(null),guideAutoChecked=useRef(false);
+  function startGuide(){
+    if(guideOpen)return;
+    const focused=document.activeElement;document.activeElement?.blur();
+    guideOrigin.current={focus:focused,hash:window.location.hash,screen:mobileScreen,copilot:copilotOpen,scrolls:[...document.querySelectorAll('.conversation,.catalog-panel,.my-page-host')].map(el=>[el,el.scrollTop]),windowY:window.scrollY};
+    setGuideStep(0);setGuideOpen(true);
+  }
+  function closeGuide(){
+    rememberGuide(window.localStorage);setGuideOpen(false);
+    const origin=guideOrigin.current;if(!origin)return;
+    window.location.hash=origin.hash;setMobileScreen(origin.screen);setCopilotOpen(origin.copilot);
+    window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{origin.scrolls.forEach(([el,top])=>{if(el.isConnected)el.scrollTop=top;});window.scrollTo({top:origin.windowY,behavior:'instant'});if(origin.focus?.isConnected)origin.focus.focus({preventScroll:true});}));
+  }
+  useEffect(()=>{
+    if(!unlocked || adminChat || apiEnabled!==true || busy || pending || guideAutoChecked.current)return;
+    guideAutoChecked.current=true;if(!guideSeen(window.localStorage))startGuide();
+  },[unlocked,adminChat,apiEnabled,busy,pending]);
+  useEffect(()=>{
+    if(!guideOpen)return;
+    setCopilotOpen(true);setMobileScreen(guideStep===0?'chat':'results');
+    const original=guideOrigin.current?.hash;window.location.hash=original==='#training'?'#training':'#jobs';
+    if(guideStep>0)window.requestAnimationFrame(()=>{document.querySelector('.catalog-panel:not([hidden])')?.scrollTo({top:0,behavior:'instant'});window.scrollTo({top:0,behavior:'instant'});});
+  },[guideOpen,guideStep,isMobile]);
+
   return <div className={`app unified-workspace${exploring?' explorer-layout':''}${copilotOpen?' copilot-open':''}${mobileActive?' mobile-workspace mobile-screen-'+mobileScreen+(mobileViewport.height<520?' mobile-compact-height':'')+(mobileViewport.keyboard?' mobile-keyboard-open':''):''}`} style={{'--chat-width':chatWidth+'px','--catalog-columns':catalogColumns(viewport,chatWidth),'--mobile-height':mobileViewport.height+'px','--mobile-top':mobileViewport.top+'px'}}>
     {savedOpen&&<SavedAnswersPanel data={savedData} busy={busy} error={savedError} onClose={()=>{if(!busy){setSavedOpen(false);setSavedData(null);}}} onRefresh={loadSavedAnswers} onRevise={reviseSaved} onRemember={rememberAll}/>}
 
-    <div className="workspace"><header><div className="educare-brand"><img src="/educare-logo-white.png" alt="해!듀케 EDU-CARE 로고" /><div><strong>해!듀케 <small>EDU-CARE</small></strong><span>당신의 진로와 학습을 안내하는 AI 가이드</span></div></div>{unlocked && !adminChat && <WorkspaceNavigation page={page}/>}{unlocked && (!publicAccess || adminChat) && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
+    {guideOpen && <WorkspaceGuide step={guideStep} mobile={isMobile} onStep={setGuideStep} onClose={closeGuide}/>}
+    <div className="workspace"><header><div className="educare-brand"><img src="/educare-logo-white.png" alt="해!듀케 EDU-CARE 로고" /><div><strong>해!듀케 <small>EDU-CARE</small></strong><span>당신의 진로와 학습을 안내하는 AI 가이드</span></div></div>{unlocked && !adminChat && <WorkspaceNavigation page={page}/>} {unlocked && !adminChat && <button type="button" className="quiet guide-launch" onClick={startGuide} disabled={busy || !!pending}>사용 방법</button>}{unlocked && (!publicAccess || adminChat) && <button className="quiet" disabled={busy} onClick={() => { reset(); setCode(''); setUnlocked(false); owner.current = clientToken(); }}>잠금</button>}</header>
       {apiEnabled !== true ? <main className="access"><h1>{apiEnabled === null ? '연결을 확인하고 있어요.' : '다음 기회를 준비하고 있어요.'}</h1><p className="muted">{apiEnabled === null ? '잠시만 기다려 주세요.' : '웹 호스팅이 준비되었습니다. 공고 검색과 대화 기능은 백엔드 연결 후 제공됩니다.'}</p></main> : !unlocked ? <main className="access"><h1>함께 다음 기회를 찾아봐요.</h1><p className="muted">{adminChat ? '관리자 전용 토큰을 입력하세요. 관리자 세션은 호출 횟수 제한 없이 사용량을 기록합니다.' : '공유받은 테스트 접속 코드를 입력해 주세요.'}</p><form onSubmit={event => { event.preventDefault(); setUnlocked(true); }}><label htmlFor="access-code">접속 코드</label><input id="access-code" type="password" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" minLength={32} required /><button className="primary">대화 시작하기 →</button></form></main> : <>
-        <div className="workspace-body">{mobileActive && <MobileResultTabs target={catalogTarget} onChange={openMobileResults}/>}<button className="copilot-toggle" type="button" aria-expanded={copilotOpen} onClick={()=>setCopilotOpen(!copilotOpen)}>{copilotOpen?'AI 패널 닫기':'AI에게 조건 말하기'}</button><div className="chat-view" inert={mobileActive && mobileScreen!=='chat' ? true : undefined}><div className="copilot-heading"><strong>{new URLSearchParams(window.location.search).get('agentcore')==='1'?'AgentCore 관리자 실험':'CAPI바라'}</strong><span>내게 맞는 공고와 교육, CAPI바라와 찾아보세요</span>{publicAccess && !adminChat && <small className="public-trial-note">체험 대화와 선택은 서비스 개선을 위해 기록됩니다. 연락처 등 개인정보는 입력하지 마세요.</small>}<button className="quiet new-conversation" type="button" disabled={busy || attachmentLoading} onClick={()=>{reset();setMobileScreen('chat');if(!adminChat)window.location.hash='#jobs';}}>＋ 새 대화</button></div>
+        <div className="workspace-body">{mobileActive && <MobileResultTabs target={catalogTarget} onChange={openMobileResults} onHelp={startGuide}/>}<button className="copilot-toggle" type="button" aria-expanded={copilotOpen} onClick={()=>setCopilotOpen(!copilotOpen)}>{copilotOpen?'AI 패널 닫기':'AI에게 조건 말하기'}</button><div className="chat-view" inert={mobileActive && mobileScreen!=='chat' ? true : undefined}><div className="copilot-heading"><strong>{new URLSearchParams(window.location.search).get('agentcore')==='1'?'AgentCore 관리자 실험':'CAPI바라'}</strong><span>내게 맞는 공고와 교육, CAPI바라와 찾아보세요</span>{publicAccess && !adminChat && <small className="public-trial-note">체험 대화와 선택은 서비스 개선을 위해 기록됩니다. 연락처 등 개인정보는 입력하지 마세요.</small>}<button className="quiet guide-launch-compact" type="button" onClick={startGuide} disabled={busy || !!pending}>사용 방법</button><button className="quiet new-conversation" type="button" disabled={busy || attachmentLoading} onClick={()=>{reset();setMobileScreen('chat');if(!adminChat)window.location.hash='#jobs';}}>＋ 새 대화</button></div>
         <main ref={conversation} className="conversation" aria-label="대화 내용" aria-live="polite">
-          {(mobileActive ? !messages.some(m=>!m.backgroundList) : !messages.length) && <section className="welcome"><div className="spark">✳</div><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
+          {(mobileActive ? !messages.some(m=>!m.backgroundList) : !messages.length) && <section className="welcome"><h1>어떤 일을 찾고 계신가요?</h1><p>희망하는 직무, 기술, 지역을 편하게 말씀해 주세요.<br />채용공고나 교육 과정을 찾고, 원할 때 지원 조건을 확인할 수 있어요.</p></section>}
           {result?.active_job && <aside className="source" aria-label="현재 상담 공고"><strong>현재 상담 공고</strong><p>{result.active_job.company_name} · {result.active_job.title}</p><small>확인한 버전 {result.active_job.source_version} · 다른 목록을 보아도 새 공고 선택 전까지 이 공고의 답변을 유지합니다.</small></aside>}
           {messages.map((message, index) => message.backgroundList ? null : <article key={message.id} className={`message ${message.role}`} aria-label={message.role === 'user' ? '내 메시지' : '도우미 응답'}><div className="message-content">{message.text ? <p className="user-text">{message.text}</p> : <Reply data={message.data} hideMore={true} active={!pending && (!messages.slice(index + 1).some(m => !m.backgroundList) || (result?.stage === 'conversation' && message.data?.stage === 'choose_job' && !messages.slice(index + 1).some(m => !m.backgroundList && m.data && m.data.stage !== 'conversation')))} busy={busy} onConfirm={(searchId, target) => send(requestPayload('confirm_search', { search_id: searchId }, session), target === 'training' ? '이 검색 기준으로 교육을 보여줘.' : '이 검색 기준으로 공고를 보여줘.')} onModify={() => { setDraft('검색 조건 수정: '); document.getElementById('message')?.focus(); }} onContinue={continueSummary} compact={exploring} onExplain={explainTraining} onSelect={select} onAnswer={answer} onBatch={answerBatch} onAssessment={assessmentControl} />}</div></article>)}
           {mobileActive && !busy && mobileResults.items.length>0 && <button type="button" className="mobile-results-shortcut" onClick={()=>openMobileResults(catalogTarget)}>{catalogTarget==='training'?'찾은 교육':'찾은 공고'} {mobileResults.items.length}개 보기 <span aria-hidden="true">→</span></button>}

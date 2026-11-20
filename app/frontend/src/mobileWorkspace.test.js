@@ -5,7 +5,7 @@ import {build} from 'esbuild';
 import {Window} from 'happy-dom';
 import React,{act} from 'react';
 test('mobile switching preserves draft, scroll and panels without extra requests',async()=>{
- const window=new Window({url:'http://localhost/#jobs'});
+ const window=new Window({url:'http://localhost/#jobs'});window.localStorage.setItem('educare:workspace-guide:v1','done');
  Object.defineProperty(window,'innerWidth',{value:390,writable:true});Object.defineProperty(window,'innerHeight',{value:844,writable:true});
  const coarse=new window.EventTarget();coarse.matches=true;const matchMedia=window.matchMedia.bind(window);window.matchMedia=query=>query==='(pointer: coarse)'?coarse:matchMedia(query);
  const visual=new window.EventTarget();visual.height=844;visual.offsetTop=0;Object.defineProperty(window,'visualViewport',{value:visual});

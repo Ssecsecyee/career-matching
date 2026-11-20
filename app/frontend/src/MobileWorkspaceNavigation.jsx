@@ -10,6 +10,6 @@ export function MobileWorkspaceNavigation({screen,onChange}) {
   </nav>;
 }
 
-export function MobileResultTabs({target,onChange}) {
-  return <div className="mobile-results-heading"><div><span className="fine">찾은 결과를 살펴보세요</span><strong>검색 결과</strong></div><div role="group" aria-label="모바일 검색 결과 종류"><button type="button" aria-pressed={target==='jobs'} onClick={()=>onChange('jobs')}>공고</button><button type="button" aria-pressed={target==='training'} onClick={()=>onChange('training')}>교육</button></div></div>;
+export function MobileResultTabs({target,onChange,onHelp}) {
+  return <div className="mobile-results-heading"><div><span className="fine">찾은 결과를 살펴보세요</span><strong>검색 결과</strong>{onHelp&&<button className="guide-launch-compact" type="button" onClick={onHelp}>사용 방법</button>}</div><div role="group" aria-label="모바일 검색 결과 종류"><button type="button" aria-pressed={target==='jobs'} onClick={()=>onChange('jobs')}>공고</button><button type="button" aria-pressed={target==='training'} onClick={()=>onChange('training')}>교육</button></div></div>;
 }
