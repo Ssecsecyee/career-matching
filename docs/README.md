@@ -1,61 +1,22 @@
-# 채용·교육 매칭 서비스 문서
+# 해!듀케 프로젝트 문서
 
-기준일: 2026-11-04
+기준일: 2026-11-20
 
-사용자 대화에서 채용·교육 탐색 의도를 파악하고, 저장 공고 검색과 조건 자기평가·근거 기반 상담을 연결한다. React/CloudFront → API Gateway/Lambda → SQS → EC2 작업자 구조이며 MySQL이 기준 저장소, Elasticsearch가 검색 사본이다. 현재 서버는 MySQL·ES·작업자를 함께 운영하는 t4g.medium이다. 고용24 교육의 초회 적재·검색 연결은 완료했고 매일 자동 수집·적재 예약은 후속 계획이다.
+처음 이어서 작업할 때는 [구현 현황과 다음 작업](CURRENT_STATUS.md)을 읽는다. [문서 전체 목록](INDEX.md)에서 설계·배포·검증 이력을 찾을 수 있다.
 
-## 기준 문서
+## 현재 기준
+- [구현 현황·다음 작업](CURRENT_STATUS.md): 배포된 기능, 확인 범위, 개선 우선순위, 테스트 방법.
+- [제품 요구](PRD.md), [아키텍처](ARCHITECTURE.md), [AWS 구성](AWS_INFRA.md), [데이터](DATA_MODEL.md), [API](API_SPEC.md), [운영](OPERATIONS.md), [검증](QA_CHECKLIST.md).
+- 위 기준 문서에는 이전 추가 기록이 남아 있다. 최신 구현은 코드와 해당 배포 기록을 대조하며, 미정 사항을 확정하지 않는다.
 
-[제품 요구](PRD.md), [현재 아키텍처](ARCHITECTURE.md), [현재 AWS 구성](AWS_INFRA.md), [데이터](DATA_MODEL.md), [API](API_SPEC.md), [운영](OPERATIONS.md), [검증](QA_CHECKLIST.md).
+## 최근 변경
+- [역량 기반 추천·우대조건 재개](reports/ASSESSMENT_FOLLOWUP_DEBUG_20261120.md)
+- [검색/채팅 분리·화면 정리](deployments/UI_FOLLOWUPS_20261120.md)
+- [사용 안내·아이콘 디자인](deployments/PRIVACY_GUIDE_ICONS_20261120.md)
+- [점핏 갱신](deployments/JUMPIT_UPDATE_20261119.md), [고용24 갱신](deployments/WORK24_NEW_TRAINING_20261119.md)
+- [모바일 화면](deployments/MOBILE_WORKSPACE_20261117.md), [TXT 유사 검색](deployments/TXT_SIMILARITY_20261114.md), [0건 벡터 대체](deployments/ZERO_RESULT_VECTOR_20261114.md)
 
-현재 아키텍처·AWS 본문은 누적 이력을 분리해 갱신했다. 나머지 기준 문서에는 과거 설계와 추가 기록이 남아 있으므로 현재 구현 확인 없이 확정 사실로 사용하지 않는다. 데이터·API 세부 계약은 실제 스키마·검증 코드와 대조한다. 전체 기준 문서 정합화는 남은 작업이다.
+## 문서 관리
+과거 자료는 삭제하거나 이름을 바꾸지 않고 이력으로 분류한다. plans는 제안, deployments는 당시 반영, reports는 조사·검증 기록이다. 수집 건수는 관측일을 함께 읽는다. 비밀키·설정·실사용 대화는 커밋하지 않는다.
 
-## 상세 문서
-
-- [교육 검색 AND·OR 관계 보존](plans/TRAINING_BOOLEAN_SEARCH.md)
-
-- [교육 전문 분야·학습 목표 분리 이력 — 동시 조건 제외 방식 정정](plans/TRAINING_TOPICS_AND_GOALS.md)
-
-- [답변 마크다운·상세 링크 표시](plans/ANSWER_MARKDOWN_PRESENTATION.md)
-
-- [교육 설명 버튼](plans/TRAINING_EXPLANATION_BUTTON.md)
-
-- [교육 설명 시 목록 재출력 제거](plans/TRAINING_REPLY_PRESENTATION.md)
-
-- [교육 회차 묶음과 다른 과정 탐색](plans/TRAINING_COHORT_GROUPING.md)
-
-- [Vue 검색 표기 누락 수정](plans/VUE_SEARCH_SPELLING_FIX.md)
-
-- [교육 일정·모집 상태 표시](plans/TRAINING_STATUS_DISPLAY.md)
-
-- [교육 탐색 문맥·검색 기준 확인](plans/TRAINING_CONTEXT_AND_SEARCH_REVIEW.md)
-
-- [고용24 교육 초회 적재·운영 검색 확인](deployments/WORK24_INITIAL_IMPORT.md)
-
-- [검색 동기화 운영](SEARCH_SYNC.md)
-- [저장 답변 조회·수정](SAVED_ANSWERS_REVIEW_PLAN.md)
-- [문맥 판단 단일화: AWS 배포 완료](UNIFIED_CONTEXT_ROUTING.md)
-- [선택한 공고의 SQL 조건 정리·공유 캐시](ON_DEMAND_CONDITION_REVIEW.md)
-- [AI 공고 조건 구조화·검색 반영](AI_CONDITION_CLASSIFICATION.md)
-- [AI 조건 분류 실행·운영 준비](AI_CONDITION_RUNBOOK.md)
-- [AI 질문 선정 평가 계획](AI_QUESTION_SELECTION_EVALUATION.md)
-- [정규식 유지·정리 판단](REGEX_REVIEW.md)
-- [보안·운영 후속 작업](SECURITY_OPERATIONS_ROADMAP.md)
-- [남은 과업](REMAINING_TASKS.md)
-
-## 검토 중인 전환·실험
-
-- [후속 우선순위와 전체 품질 평가](plans/NEXT_PRIORITIES_AND_EVALUATION.md): 일일 자동화·교육 보완·단계별 평가·사람인 승인 후 전환.
-
-- [고용24 수집·설정·일일 운영 절차](plans/WORK24_BULK_INCREMENTAL_PIPELINE.md): .env 분리, 계획 확인과 실제 실행 구분, 증분 및 운영 연결 경계.
-- [고용24 훈련·NCS 저장 구조](plans/WORK24_TRAINING_NCS_MODEL.md): 통합 교육과 분류 연결 설계, DB 마이그레이션 전.
-- [고용24 개인 권한 중심 범위](plans/WORK24_PERSONAL_SCOPE.md): 채용 API 전환 보류, 훈련·분류·직업/직무 정보 우선. 교육 초회 운영 적재·검색 연결 완료, 일일 자동 수집·적재 예약 전.
-
-- [AgentCore Harness 전환 계획](plans/AGENTCORE_HARNESS_ADOPTION.md): 제안 단계. 기존 검색·DB·검증을 도구로 재사용하고 문맥/도구 선택만 비교한다.
-- [Harness 비교 실험](plans/AGENTCORE_HARNESS_EXPERIMENT.md): 별도 smoke 5개 + 고정 50개 시나리오 설계. 평가셋/실행기·AWS 리소스·실측 결과는 아직 없다.
-
-## 관리 원칙
-
-현재 기준 본문에는 현재 구조를 한 번만 설명한다. 계획은 구현·배포와 구분하고 상세 이력은 별도 기록에 둔다. 민감 설정·토큰·실사용자 대화는 문서에 복사하지 않는다. sources·archive 및 기존 workspace 연결 자료를 수정하거나 삭제하지 않는다.
-
-이전 누적 README는 [보관본](history/20261102_before_current_design/README.md)에 보존한다.
+정리 전 README와 남은 과업은 [보관 폴더](history/20261120_before_document_cleanup/)에 보존했다. 기존 미커밋 자료와 sources/archive/workspace 원본은 별도 보존한다.
