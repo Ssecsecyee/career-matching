@@ -351,3 +351,16 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .unified-workspace .composer .chat-attachment{grid-column:1;grid-row:2;min-width:0;margin:0}
 .unified-workspace .composer .composer-bottom{grid-column:2;grid-row:2;position:static;display:flex;align-items:center;justify-content:flex-end;min-height:0}
 .unified-workspace .composer .attachment-notice{grid-column:1/-1;grid-row:3}
+
+.guide-privacy{flex-shrink:0;background:#f1f7ff;border:1px solid #d9e8ff;border-radius:12px;padding:14px 15px;margin:0 0 18px;font-size:13px;line-height:1.75;color:#536782}
+.guide-privacy>strong{display:flex;align-items:center;gap:8px;color:#235bb0;font-size:13px;font-weight:700;margin-bottom:7px}
+.guide-privacy b{color:#244e87;font-weight:600}
+.workspace-guide-card:has(.guide-privacy){overflow-y:auto}
+@media(max-height:520px){.guide-privacy{padding:9px 11px;margin-bottom:10px;font-size:12px}.guide-privacy>strong{margin-bottom:3px}.workspace-guide-card:has(.guide-privacy){max-height:calc(100dvh - 24px)!important}}
+
+/* Composer icons show a circular surface only on interaction. */
+.unified-workspace .composer .attach-button,.unified-workspace .composer .send{background:transparent;border-radius:50%;color:#2563eb}
+.unified-workspace .composer .send:disabled{background:transparent;color:#79a2e8}
+.unified-workspace .composer .attach-button:focus-visible,.unified-workspace .composer .send:focus-visible{background:#eff6ff;outline:2px solid #78a9fa;outline-offset:2px}
+@media(hover:hover){.unified-workspace .composer .attach-button:hover:not(:disabled),.unified-workspace .composer .send:hover:not(:disabled){background:#eaf2ff}}
+.unified-workspace .composer .attach-button:active:not(:disabled),.unified-workspace .composer .send:active:not(:disabled){background:#dbeafe}

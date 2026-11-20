@@ -32,7 +32,7 @@ export function WorkspaceGuide({step,mobile,onStep,onClose}){
   {layout?.rects.map((r,i)=><div className="workspace-guide-ring" key={i} style={{left:r.left,top:r.top,width:r.width,height:r.height}}/>)}
   <section className="workspace-guide-card" role="dialog" aria-modal="true" aria-labelledby={'guide-title-'+id} aria-describedby={'guide-description-'+id} ref={card} style={{left:layout?.position.x??12,top:layout?.position.y??12,width:Math.min(360,(layout?.v.width||window.innerWidth)-24),maxHeight:Math.max(150,Math.min((layout?.v.height||window.innerHeight)-24,mobile&&(layout?.v.height||window.innerHeight)<520?230:430))}}>
    <div className="workspace-guide-meta"><span aria-live="polite">사용 방법 · {step+1} / 3</span><button type="button" onClick={onClose}>건너뛰기</button></div>
-   <h2 id={'guide-title-'+id}>{steps[step].title}</h2><p id={'guide-description-'+id}>{steps[step].description}</p>
+   <h2 id={'guide-title-'+id}>{steps[step].title}</h2><p id={'guide-description-'+id}>{steps[step].description}</p>{step===0&&<aside className="guide-privacy" aria-label="이용 전 안내"><strong><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg>이용 전 확인해 주세요</strong><div>체험 대화와 선택은 서비스 개선을 위해 기록됩니다.<br/><b>연락처 등 개인정보는 입력하지 마세요.</b></div></aside>}
    <div className="workspace-guide-actions"><button type="button" disabled={step===0} onClick={()=>onStep(step-1)}>이전</button><button ref={next} type="button" className="guide-next" onClick={()=>step===2?onClose():onStep(step+1)}>{step===2?'시작하기':'확인·다음'}</button></div>
   </section>
  </div>,document.body);
