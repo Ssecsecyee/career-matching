@@ -40,7 +40,7 @@ export function ExplorationPreview({target,results,busy=false,loading=false,load
    {(keyword || region || extra) && <button type="button" className="quiet" onClick={()=>{setKeyword('');setRegion('');setExtra('');}}>필터 초기화</button>}
   </div>}
   <div className="browse-heading"><h1>{results.retrievalMode==='section_vector_fallback'?'검색 내용과 관련 있는':results.retrievalMode==='section_vector'?'첨부한 경험과 관련 있는':jobs?'검색 조건에 맞는':'탐색 가능한'} {jobs?'공고':'교육'} <em>{initialLoading?'불러오는 중':typeof results.total==='number'?results.total.toLocaleString()+(jobs?'건':'회차'):'전체 건수 미집계'}</em></h1>
-   <p>{initialLoading?'잠시만 기다려 주세요. 목록을 준비하고 있어요.':results.retrievalMode?.startsWith('section_vector')?'전체 조건 일치 건수가 아닌 최대 20개 관련 후보입니다. 자격 충족 여부는 공고별 역량 문답으로 확인해 주세요.':jobs?'현재 '+results.items.length+'개를 불러왔습니다. 전체 건수는 검색 조건을 통과한 후보 수이며, 아래로 내리면 나머지를 불러옵니다. 위 검색창이나 CAPI바라에게 조건을 말해 전체 검색 대상에서 좁혀보세요.':'전체 건수는 검색 대상 회차 수이며, 현재 '+results.items.length+'개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.'} 현재 모집 여부는 원문에서 확인해 주세요.</p>
+   {initialLoading?<p>잠시만 기다려 주세요. 목록을 준비하고 있어요.</p>:results.retrievalMode?.startsWith('section_vector')?<p>전체 조건 일치 건수가 아닌 최대 20개 관련 후보입니다. 자격 충족 여부는 공고별 역량 문답으로 확인해 주세요.</p>:!jobs?<p>전체 건수는 검색 대상 회차 수이며, 현재 {results.items.length}개 과정 카드를 불러왔습니다. 같은 과정의 여러 회차는 한 카드로 묶습니다.</p>:null}
   </div>
   </>}
   {jobs && results.summary && <section className="source" aria-label="현재 적용한 검색 조건"><strong>현재 적용한 조건</strong>{publicSearchFilters(results.summary).length?<ul>{publicSearchFilters(results.summary).map(t=><li key={t}>{t}</li>)}</ul>:<p>지역·직무·필수 기술 제한 없음</p>}</section>}

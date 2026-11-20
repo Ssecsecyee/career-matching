@@ -32,5 +32,5 @@ export function CatalogSearch({target,busy,onSearch,onReset,currentPlan,items=[]
  {open==='skills'&&<div className="category-custom-tag"><input aria-label="기술 태그 추가" value={tag} maxLength={80} placeholder="다른 기술 입력" onChange={e=>setTag(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();if(tag.trim()&&!value.skills.includes(tag.trim()))toggle('skills',tag.trim());setTag('');}}}/><button type="button" onClick={()=>{if(tag.trim()&&!value.skills.includes(tag.trim()))toggle('skills',tag.trim());setTag('');}}>추가</button></div>}
  <div className="category-panel-footer"><span>{open==='entry'?(value.entry?'신입 조건 선택':'전체 경력'):`${value[open].length}개 선택`}</span><button className="category-submit" type="button" disabled={busy} onClick={()=>submit()}>선택 적용</button></div></section>}
  {chips.length>0&&<div className="category-chips" aria-label="선택한 검색 조건">{chips.map(([key,item])=><button key={key+item} type="button" disabled={busy} onClick={()=>remove(key,item)} aria-label={item+' 조건 해제'}>{item}<span aria-hidden="true">×</span></button>)}</div>}
- <p className="category-footnote">검색어는 AI가 지역·직무·기술로 해석합니다. 카테고리만 변경할 때는 AI를 호출하지 않습니다.</p></form>;
+ </form>;
 }
