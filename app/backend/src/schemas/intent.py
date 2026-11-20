@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from src.schemas.search import SearchPlan, CareerPreference, Terms
 
-INTENT_VERSION = 'context-intent-v9'
+INTENT_VERSION = 'context-intent-v10'
 
 class SearchChanges(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True, frozen=True)
@@ -77,6 +77,15 @@ class IntentDecision(BaseModel):
     task: Literal['prepare','interview','learning_plan','explain_unknown','defer','general'] | None = None
     control: Literal['stop','resume','preferred'] | None = None
     question: Annotated[str, Field(min_length=1,max_length=500)] | None = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def selected_assessment_target(cls, value):
+        # A checklist action always refers to the selected job, not catalog search.
+        # Only this known domain alias is canonicalized; unknown controls/fields still fail.
+        if isinstance(value, dict) and value.get('action') == 'assessment_control' and value.get('target') == 'jobs':
+            return {**value, 'target': 'selected'}
+        return value
 
     @field_validator('topics','learning_goals',mode='before')
     @classmethod

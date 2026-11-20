@@ -344,3 +344,10 @@ dialog.assessment-modal-backdrop{margin:0;border:0;width:100vw;height:100dvh;max
 .workspace-guide-meta,.workspace-guide-actions,.workspace-guide-card h2{flex-shrink:0}
 .workspace-guide-card p{min-height:28px;overflow-y:auto;overscroll-behavior:contain}
 @media(max-width:767px), (max-width:1000px) and (pointer:coarse){.mobile-compact-height .guide-launch-compact{display:block;font-size:11px;min-height:30px;padding:3px 6px}.mobile-compact-height .copilot-heading>.guide-launch-compact{position:absolute;right:12px;top:43px}.workspace-guide-card{padding:16px}.workspace-guide-card h2{font-size:19px;line-height:1.35;margin:8px 0}.workspace-guide-card p{margin:0 0 12px;font-size:14px;line-height:1.6}.workspace-guide-meta button{min-height:30px}.workspace-guide-actions button{min-height:40px}}
+
+/* Keep attachment and send controls on a shared baseline. */
+.unified-workspace .composer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px}
+.unified-workspace .composer textarea{grid-column:1/-1;grid-row:1}
+.unified-workspace .composer .chat-attachment{grid-column:1;grid-row:2;min-width:0;margin:0}
+.unified-workspace .composer .composer-bottom{grid-column:2;grid-row:2;position:static;display:flex;align-items:center;justify-content:flex-end;min-height:0}
+.unified-workspace .composer .attachment-notice{grid-column:1/-1;grid-row:3}

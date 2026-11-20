@@ -111,7 +111,19 @@ class ContextRouter:
             # A schema-validated plan enters the existing search executor, never legacy classification.
             record(state,text,'search')
             from src.services.search_repair import execute_with_repair
-            result=execute_with_repair(self.flow,state,plan,raw_plan,payload,invoke,exclude_ids=excluded)
+            # Recommendation updates the catalog; the answered job remains resumable.
+            preserved_keys=('selected','checks','conditions','condition','question','answer_summary',
+                            'condition_review','original_conditions','reference_conditions',
+                            'preferred_approved','assessment_checkpoint_enabled','grouped','consultation_focus')
+            from copy import deepcopy
+            preserved={key:deepcopy(state[key]) for key in preserved_keys if key in state} if d.search_basis=='assessment' else None
+            try:
+                result=execute_with_repair(self.flow,state,plan,raw_plan,payload,invoke,exclude_ids=excluded)
+            finally:
+                if preserved is not None:
+                    for key in preserved_keys:
+                        if key in preserved:state[key]=preserved[key]
+                        else:state.pop(key,None)
             context=state.get('search_context')
             if context:
                 context['constraint_guard']=guard

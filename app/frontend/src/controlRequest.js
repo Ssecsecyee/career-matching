@@ -4,6 +4,7 @@ const controls = {
   assessment_resume: {action:'assessment_control', values:{control:'resume'}, label:'다시 역량 조건을 확인해줘'},
   assessment_preferred: {action:'assessment_control', values:{control:'preferred'}, label:'우대조건도 계속 확인해줘'},
   next_training: {action:'next_results', values:{target:'training'}, label:'다른 교육 추천해줘'},
+  recommend_jobs: {action:'search', values:{message:'지금까지 이 공고의 역량 문답에서 충족한다고 답한 경험을 바탕으로 다른 채용공고를 새로 찾아줘. 미충족·미확인 조건을 보유 역량으로 간주하지 말고, 현재 선택한 공고는 제외해줘.'}, label:'답변한 역량을 바탕으로 다른 공고 추천해줘'},
   next_jobs: {action:'next_results', values:{target:'jobs'}, label:'다른 공고 추천해줘'},
   consult_gaps: {action:'consult', values:{task:'learning_plan', message:'현재 답변으로 보완 방향을 정리해줘.'}, label:'현재 답변으로 보완 방향을 정리해줘.'},
 };

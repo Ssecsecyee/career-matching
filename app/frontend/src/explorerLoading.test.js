@@ -11,7 +11,7 @@ await writeFile(path,built.outputFiles[0].text);
 let ExplorationPreview;try{({ExplorationPreview}=await import(path.href));}finally{await unlink(path);}
 test('initial loading shows skeletons instead of empty result or zero total',()=>{
  const html=renderToStaticMarkup(React.createElement(ExplorationPreview,{target:'jobs',results:{items:[],total:0},loading:true}));
- assert.match(html,/목록 불러오는 중/);assert.match(html,/skeleton-card/);assert.doesNotMatch(html,/현재 조건에서 표시할 공고가 없습니다/);assert.doesNotMatch(html,/0건/);
+ assert.match(html,/목록 불러오는 중/);assert.equal((html.match(/공고를 불러오고 있어요/g)||[]).length,1);assert.doesNotMatch(html,/잠시만 기다려 주세요|공고 <em>불러오는 중/);assert.match(html,/skeleton-card/);assert.doesNotMatch(html,/현재 조건에서 표시할 공고가 없습니다/);assert.doesNotMatch(html,/0건/);
  const empty=renderToStaticMarkup(React.createElement(ExplorationPreview,{target:'jobs',results:{items:[],total:0},loading:false}));
  assert.match(empty,/현재 조건에서 표시할 공고가 없습니다/);assert.doesNotMatch(empty,/skeleton-card/);
 });

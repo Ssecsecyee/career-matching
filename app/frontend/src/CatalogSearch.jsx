@@ -17,7 +17,7 @@ export function CatalogSearch({target,busy,onSearch,onReset,currentPlan,items=[]
  const clear=()=>{const next=categoryValues(null);setValue(next);setOpen(null);onReset?.();};
  if(!jobs)return <form className="catalog-search education-query-only" aria-label="교육 직접 검색" onSubmit={e=>{e.preventDefault();submit();}}>
  <div className="catalog-query"><input type="search" aria-label="전체 데이터 검색어" value={value.keyword} onChange={e=>setValue(v=>({...v,keyword:e.target.value}))} maxLength={120} placeholder="배우고 싶은 분야·과정명·교육기관으로 검색"/><button type="submit" disabled={busy}>{busy?'조회 중…':'검색'}</button><button type="button" disabled={busy} onClick={clear}>초기화</button></div>
- <p className="fine">전체 교육 자료를 검색합니다. AI를 호출하지 않습니다.</p></form>;
+ </form>;
  const tags=[...new Set(items.flatMap(i=>i.tech_stacks || []))].sort((a,b)=>a.localeCompare(b)).slice(0,60);
  const groups=[['roles','직무',value.roles.length],['regions','지역',value.regions.length],['entry','신입 조건',value.entry?1:0],['skills','기술',value.skills.length]];
  const remove=(key,item)=>{const next={...value,[key]:key==='entry'?false:value[key].filter(x=>x!==item)};setValue(next);submit(next);};

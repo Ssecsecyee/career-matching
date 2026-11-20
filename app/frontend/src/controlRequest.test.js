@@ -12,3 +12,10 @@ test('stable button IDs dispatch direct actions independently of display text', 
   const value=controlRequest('next_jobs');value.values.target='training';
   assert.equal(controlRequest('next_jobs').values.target,'jobs');
 });
+
+test('assessment recommendation starts a new context-aware search instead of pagination',()=>{
+ const request=controlRequest('recommend_jobs');
+ assert.equal(request.action,'search');assert.match(request.values.message,/충족한다고 답한 경험/);
+ assert.equal(request.values.target,undefined);assert.equal(request.values.search_plan,undefined);
+ assert.equal(controlRequest('next_jobs').action,'next_results');
+});
