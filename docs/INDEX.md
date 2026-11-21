@@ -2,6 +2,10 @@
 
 현재 상태는 [CURRENT_STATUS](CURRENT_STATUS.md)을 먼저 읽는다. 아래 과거 문서의 완료/미완료·수치는 작성 당시 기준이다. 문서 이동 없이 기존 링크를 보존했다. 미커밋 문서는 목록에 포함하지 않았다.
 
+## 계정 이식
+
+- [AWS 계정 이식·전체 DB 복원](AWS_MIGRATION_HANDOFF.md) 및 [동료 MCP 실행 프롬프트](MCP_MIGRATION_PROMPT.md)
+
 ## 기준·상세 문서
 
 - [ADMIN_DASHBOARD](ADMIN_DASHBOARD.md)

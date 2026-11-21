@@ -1,0 +1,53 @@
+react, 리액트, 리엑트, react.js, reactjs
+postgresql, postgres, 포스트그레스큐엘
+python, 파이썬
+docker, 도커, 독커
+kubernetes, k8s, 쿠버네티스, 쿠버네테스, 큐버네티스
+django, 장고, 쟝고, 쟁고
+linux, 리눅스
+flask, 플라스크
+numpy, 넘파이, 넘피
+pandas, 판다스
+matplotlib, 맷플롯리브
+seaborn, 씨본, 시본
+networkx, 네트워크엑스
+pytorch, 파이토치
+tensorflow, 텐서플로우, 텐서플로
+keras, 케라스
+cuda, 쿠다
+github, 깃허브, 깃헙
+git, 깃
+javascript, 자바스크립트
+typescript, 타입스크립트
+java, 자바
+c++, 씨플러스플러스
+c#, 씨샵, 시샵
+mysql, 마이에스큐엘
+mongodb, 몽고디비, 몽고db
+redis, 레디스
+elasticsearch, 엘라스틱서치, 엘라스틱써치
+spring, 스프링
+spring boot, springboot, 스프링부트, 스프링 부트
+node.js, nodejs, 노드js, 노드제이에스
+next.js, nextjs, 넥스트js, 넥스트제이에스
+vue.js, vuejs, 뷰js, 뷰제이에스
+angular, 앵귤러
+react native, reactnative, 리액트네이티브, 리액트 네이티브
+aws, 아마존웹서비스, 아마존 웹 서비스
+azure, 애저, 에저
+terraform, 테라폼
+jenkins, 젠킨스
+ansible, 앤서블
+nginx, 엔진엑스
+kafka, 카프카
+airflow, 에어플로우, 아파치 에어플로우
+hadoop, 하둡
+spark, 아파치 스파크
+unity, 유니티
+unreal engine, 언리얼엔진, 언리얼 엔진
+figma, 피그마
+photoshop, 포토샵
+illustrator, 일러스트레이터
+gitlab, 깃랩
+bitbucket, 비트버킷
+jupyter, 주피터

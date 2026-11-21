@@ -68,3 +68,6 @@ Desktop.ini
 
 # Host-only privileged DB credentials
 admin-db.json
+
+# Private migration settings and runtime artifacts
+.migration/

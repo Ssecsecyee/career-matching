@@ -1,0 +1,116 @@
+[
+  {
+    "source_id": "pythonkr",
+    "url": "https://github.com/pythonkr/python-terms",
+    "license": "Apache-2.0",
+    "retrieved_utc": "2026-11-13T04:37:04.995932+00:00",
+    "raw_url": {
+      "url": "https://raw.githubusercontent.com/pythonkr/python-terms/master/README.md",
+      "sha256": "bc3a8eeecf768b15747d6a809c4135a872bb9968f9108486c3a780f537f3a2ce",
+      "file": "raw/pythonkr-raw_url-bc3a8eeecf76.txt",
+      "bytes": 17331
+    },
+    "license_url": {
+      "url": "https://raw.githubusercontent.com/pythonkr/python-terms/master/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "file": "raw/pythonkr-license_url-c71d239df917.txt",
+      "bytes": 11357
+    }
+  },
+  {
+    "source_id": "kubernetes",
+    "url": "https://kubernetes.io/ko/docs/reference/glossary/",
+    "license": "CC-BY-4.0",
+    "retrieved_utc": "2026-11-13T04:37:05.082262+00:00",
+    "raw_url": {
+      "url": "https://kubernetes.io/ko/docs/reference/glossary/",
+      "sha256": "fee9498e3251310e4a7b7d1379a7c24dfee446a8ae48018db96e895ff848d21c",
+      "file": "raw/kubernetes-raw_url-fee9498e3251.txt",
+      "bytes": 754086
+    },
+    "license_url": {
+      "url": "https://raw.githubusercontent.com/kubernetes/website/main/LICENSE",
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
+      "file": "raw/kubernetes-license_url-9ba9550ad484.txt",
+      "bytes": 18657
+    }
+  },
+  {
+    "source_id": "mdn",
+    "url": "https://developer.mozilla.org/ko/docs/Glossary",
+    "license": "CC-BY-SA-2.5 prose",
+    "retrieved_utc": "2026-11-13T04:37:05.476814+00:00",
+    "raw_url": {
+      "url": "https://raw.githubusercontent.com/mdn/translated-content/main/files/ko/glossary/index.md",
+      "sha256": "07d0b2bcbc8ebe382713da1615815d542ddf123393313a9eb396abde22e56647",
+      "file": "raw/mdn-raw_url-07d0b2bcbc8e.txt",
+      "bytes": 736
+    },
+    "license_url": {
+      "url": "https://raw.githubusercontent.com/mdn/translated-content/main/LICENSE.md",
+      "sha256": "57c0d7e200fadfdbadb04b9ab220297809ba7f2ac0adaa6707a07fba432b2ebe",
+      "file": "raw/mdn-license_url-57c0d7e200fa.txt",
+      "bytes": 23750
+    }
+  },
+  {
+    "source_id": "google_ml",
+    "url": "https://developers.google.com/machine-learning/glossary?hl=ko",
+    "license": "CC-BY-4.0 subject to page exceptions",
+    "retrieved_utc": "2026-11-13T04:37:05.576998+00:00",
+    "raw_url": {
+      "url": "https://developers.google.com/machine-learning/glossary?hl=ko",
+      "sha256": "aa480c382ebde3b97292421fb1ae7a7c2b81e828a7f249e519d442406bc65816",
+      "file": "raw/google_ml-raw_url-aa480c382ebd.txt",
+      "bytes": 857344
+    },
+    "license_url": {
+      "url": "https://developers.google.com/terms/site-policies",
+      "sha256": "1474c77f62b50ffcfb247eefc81e068dfb608011b7112479c952066c149e8e51",
+      "file": "raw/google_ml-license_url-1474c77f62b5.txt",
+      "bytes": 56623
+    }
+  },
+  {
+    "source_id": "github",
+    "url": "https://docs.github.com/ko/get-started/learning-about-github/github-glossary",
+    "license": "inspect downloaded LICENSE",
+    "retrieved_utc": "2026-11-13T04:37:08.105684+00:00",
+    "raw_url": {
+      "url": "https://docs.github.com/ko/get-started/learning-about-github/github-glossary",
+      "sha256": "fe3fa449a594cfaa158163ce0b6f5655ef0666f088fbb420aa6b6294b8b6d31a",
+      "file": "raw/github-raw_url-fe3fa449a594.txt",
+      "bytes": 451561
+    },
+    "license_url": {
+      "url": "https://raw.githubusercontent.com/github/docs/main/LICENSE",
+      "sha256": "12d3a82a7d1378e6f597ec23d63a081aeb6ec4bc8de2a76ee9dc96c34c6d7a1b",
+      "file": "raw/github-license_url-12d3a82a7d13.txt",
+      "bytes": 18620
+    }
+  },
+  {
+    "source_id": "microsoft",
+    "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology",
+    "license": "download terms require confirmation",
+    "retrieved_utc": "2026-11-13T04:37:08.268015+00:00"
+  },
+  {
+    "source_id": "daangn",
+    "url": "https://github.com/daangn/search-ko-dic",
+    "license": "MIT",
+    "retrieved_utc": "2026-11-13T04:37:08.268027+00:00",
+    "raw_url": {
+      "url": "https://raw.githubusercontent.com/daangn/search-ko-dic/master/synonym.txt",
+      "sha256": "4dbf3daac795a6c7f854941a13d1220e4dfeca3b5be0773eec14b90641f1c5dc",
+      "file": "raw/daangn-raw_url-4dbf3daac795.txt",
+      "bytes": 474
+    },
+    "license_url": {
+      "url": "https://raw.githubusercontent.com/daangn/search-ko-dic/master/LICENSE",
+      "sha256": "96e9931ae590f18a5e27bcac5e30af139cab25e3b906a0eb06b7c0e0d2e4335f",
+      "file": "raw/daangn-license_url-96e9931ae590.txt",
+      "bytes": 1071
+    }
+  }
+]

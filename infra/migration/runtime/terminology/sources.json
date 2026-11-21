@@ -1,0 +1,63 @@
+[
+  {
+    "id": "pythonkr",
+    "url": "https://github.com/pythonkr/python-terms",
+    "raw_url": "https://raw.githubusercontent.com/pythonkr/python-terms/master/README.md",
+    "license_url": "https://raw.githubusercontent.com/pythonkr/python-terms/master/LICENSE",
+    "license": "Apache-2.0",
+    "use": "selected technology spellings",
+    "parser": "markdown table: English term, Korean pronunciation; explanation excluded"
+  },
+  {
+    "id": "kubernetes",
+    "url": "https://kubernetes.io/ko/docs/reference/glossary/",
+    "raw_url": "https://kubernetes.io/ko/docs/reference/glossary/",
+    "license_url": "https://raw.githubusercontent.com/kubernetes/website/main/LICENSE",
+    "license": "CC-BY-4.0",
+    "use": "candidate terminology; product vs concept reviewed",
+    "parser": "HTML heading labels; definitions not synonym rules"
+  },
+  {
+    "id": "mdn",
+    "url": "https://developer.mozilla.org/ko/docs/Glossary",
+    "raw_url": "https://raw.githubusercontent.com/mdn/translated-content/main/files/ko/glossary/index.md",
+    "license_url": "https://raw.githubusercontent.com/mdn/translated-content/main/LICENSE.md",
+    "license": "CC-BY-SA-2.5 prose",
+    "use": "candidate web terminology; no automatic approval",
+    "parser": "index links/title only; fetch paired English/Korean entry before approving a translation"
+  },
+  {
+    "id": "google_ml",
+    "url": "https://developers.google.com/machine-learning/glossary?hl=ko",
+    "raw_url": "https://developers.google.com/machine-learning/glossary?hl=ko",
+    "license_url": "https://developers.google.com/terms/site-policies",
+    "license": "CC-BY-4.0 subject to page exceptions",
+    "use": "candidate AI concepts; not all translations are market spellings",
+    "parser": "HTML h2 headings with IDs; English ID is a hint, not an approved synonym"
+  },
+  {
+    "id": "github",
+    "url": "https://docs.github.com/ko/get-started/learning-about-github/github-glossary",
+    "raw_url": "https://docs.github.com/ko/get-started/learning-about-github/github-glossary",
+    "license_url": "https://raw.githubusercontent.com/github/docs/main/LICENSE",
+    "license": "CC-BY-4.0",
+    "use": "reference/candidate only",
+    "parser": "HTML heading labels; Git and GitHub remain separate"
+  },
+  {
+    "id": "microsoft",
+    "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology",
+    "license": "download terms require confirmation",
+    "use": "reference only; no bulk import",
+    "parser": "TBX termEntry, langSet, term after file and terms verification; disabled initially"
+  },
+  {
+    "id": "daangn",
+    "url": "https://github.com/daangn/search-ko-dic",
+    "raw_url": "https://raw.githubusercontent.com/daangn/search-ko-dic/master/synonym.txt",
+    "license_url": "https://raw.githubusercontent.com/daangn/search-ko-dic/master/LICENSE",
+    "license": "MIT",
+    "use": "reference only: product/search domain not IT recruitment",
+    "parser": "Solr rules, including directional =>; do not automatically turn into equivalence"
+  }
+]
