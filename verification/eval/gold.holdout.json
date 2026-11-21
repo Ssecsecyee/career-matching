@@ -1,0 +1,5899 @@
+{
+ "_comment": "V3-H 독립 시험 정답(블라인드). 규칙을 만들 때 한 번도 쓰지 않은 공고다. 사람이 원문만 보고 조건마다 범주·기술 이름·관계를 적는다. 원문은 넣지 않는다(위치만). 봉인 뒤에는 이 공고의 결과를 보고 규칙·패치를 고치지 않는다(고치면 개발용으로 바뀐다).",
+ "status": "sealed",
+ "labeled_by": "pending",
+ "guideline": "docs/eval/labeling-guide.md (V3·V4 시험 정답과 같은 기준)",
+ "parser": {
+  "file": "career-matching/app/backend/src/services/condition_structure.py",
+  "version": "condition-split-v3",
+  "sha256": "6d19a09ce991078d088c11b8651abba01a98a4da216db8696cddedecb2ad4471"
+ },
+ "snapshot": {
+  "at": "2026-11-08T12:59:38+00:00",
+  "sha256": "b60e966beaaab718"
+ },
+ "sample": {
+  "seed": 20261118,
+  "size": 20,
+  "pool": "jumpit backend after cleaning, one per company, no company of the first test set, none shown in discussion — the postings of data/real/jumpit/live_runs/fresh",
+  "model_answers_saved_before_labelling": true
+ },
+ "jobs": {
+  "jumpit-55136449": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55136449",
+   "conditions": [
+    {
+     "id": "55136449:1:required:5fed4cf6d3e9fff6:0",
+     "key": "627a2a260d32c25a59888f6f8906c7a39613d7898a1894a198f295a8b005141a",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       21,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:required:5fed4cf6d3e9fff6:1",
+     "key": "a1a0a1ba0570420516ffa8e91a54562634faa4e57df66647f3d2c8b4c7e92133",
+     "type": "required",
+     "spans": [
+      [
+       22,
+       55,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:required:5fed4cf6d3e9fff6:2",
+     "key": "f428af6600c9441f986a6f657cc6234f51e034b5e964e0410ef4e1ec68023c32",
+     "type": "required",
+     "spans": [
+      [
+       56,
+       94,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:required:5fed4cf6d3e9fff6:3",
+     "key": "547370feb8172c2f987834f0f6dee5f4a22ee0cf5689f6892e43721955acedf6",
+     "type": "required",
+     "spans": [
+      [
+       95,
+       133,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:required:5fed4cf6d3e9fff6:4",
+     "key": "f2d72ba43d5afb31b06abae2225803a187cf81edf7ae03a30a8e59778ee940cb",
+     "type": "required",
+     "spans": [
+      [
+       134,
+       155,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:preferred:9761f7ecac1b03f4:0",
+     "key": "8766d1b874b157d443762fa06276eb60e8f6dfe209092fdf2738792aee682825",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       46,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:preferred:9761f7ecac1b03f4:1",
+     "key": "71c24ad6d54b2da46ab00c3ec0a942b94c0979843defedf3891283bd9425bdb7",
+     "type": "preferred",
+     "spans": [
+      [
+       47,
+       71,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:preferred:9761f7ecac1b03f4:2",
+     "key": "834d9beb9caa0c511c28ab8de90410bd0865fececee3827ede4082f975790976",
+     "type": "preferred",
+     "spans": [
+      [
+       72,
+       96,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:preferred:9761f7ecac1b03f4:3",
+     "key": "ee090d49e01ecc79fdef65852034565aef7fa1af9a10da8556e47bdbaef9f389",
+     "type": "preferred",
+     "spans": [
+      [
+       97,
+       125,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55136449:1:preferred:9761f7ecac1b03f4:4",
+     "key": "df1e104ab5f08605e1af2195ded540eeeafc8f598183e402bc5d879806b17ac1",
+     "type": "preferred",
+     "spans": [
+      [
+       126,
+       153,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55150792": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55150792",
+   "conditions": [
+    {
+     "id": "55150792:1:required:6b2c69e65fecaae9:0",
+     "key": "468d99fc6159e2cda697d9de6ecbf4008976bdf164ab437b3686fb021fcfab0b",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       51,
+       "body"
+      ]
+     ],
+     "parse_notes": [
+      "unmarked_multiline"
+     ]
+    },
+    {
+     "id": "55150792:1:preferred:bb7da5d4006a0ead:0",
+     "key": "03cc891caf07775d7a64a4e2f310a41697d5147817dec35db4504594b6e1c192",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       133,
+       "body"
+      ]
+     ],
+     "parse_notes": [
+      "unmarked_multiline"
+     ]
+    }
+   ]
+  },
+  "jumpit-55160027": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55160027",
+   "conditions": [
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:0",
+     "key": "54c6dd4614f3008da8aad7d4126766284e27c1327275b59f269c8e1595e3a261",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       31,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:1",
+     "key": "83da63a0ee8e996d3fe7bba3a40e448e56422d7b5fd519cd2f896b2f01899b9c",
+     "type": "required",
+     "spans": [
+      [
+       32,
+       65,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:2",
+     "key": "20e67a09905973ebe964e46aec31c3d003b13052dc08acaaa2c575765d7e84ad",
+     "type": "required",
+     "spans": [
+      [
+       66,
+       96,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:3",
+     "key": "54554c2ba3a5f96445d1496bf7098b9b950a4ed70e437fad864e97193443958a",
+     "type": "required",
+     "spans": [
+      [
+       97,
+       123,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:4",
+     "key": "fb279c58a30f6a1459295a8fbe8c76a5188c9c816a8b0974a3b0ba6fa6cd1fb5",
+     "type": "required",
+     "spans": [
+      [
+       124,
+       157,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:5",
+     "key": "e03e635509d5038da9f48609e121f5bb05c283bbd9fd1b45189e23294bbd4f8b",
+     "type": "required",
+     "spans": [
+      [
+       158,
+       182,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:6",
+     "key": "b7b80b24f37060ec095aedec6c786bc0d9dca5241990b7b5560f38e7dc89a251",
+     "type": "required",
+     "spans": [
+      [
+       183,
+       218,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:required:12c0f00b8b987a84:7",
+     "key": "fb6e4dda56b6ea91744129e3716bffa829e3c81db8e9fa7977e1f46d1ef2eeee",
+     "type": "required",
+     "spans": [
+      [
+       219,
+       240,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:0",
+     "key": "d1508311f4aaf61707bc18c109c23f1a015996a4d50f83cd45c99dd41fd1a80e",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       62,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:1",
+     "key": "f130b649777b9f790ecc958c703c762ced59028c7625a30b11ca32d19fc71089",
+     "type": "preferred",
+     "spans": [
+      [
+       63,
+       94,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:2",
+     "key": "3f74c3eb61f156fa7bde03b45277e6b1448d9248ab8e67b02fa8f24ecadae3ad",
+     "type": "preferred",
+     "spans": [
+      [
+       95,
+       115,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:3",
+     "key": "713f386e6ba6713d6e68bc04de3164fac2ca3db1049e3ddfc28261d66d5a3b96",
+     "type": "preferred",
+     "spans": [
+      [
+       116,
+       155,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:4",
+     "key": "4a051c0ef1df999a0e368345e05659b470640b9e1934d42c35cc97825294fe61",
+     "type": "preferred",
+     "spans": [
+      [
+       156,
+       198,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:5",
+     "key": "d9b2f02dcd76ce09d272d535d523e898c3d3900bc20dbe1e14e8a84df2f29825",
+     "type": "preferred",
+     "spans": [
+      [
+       199,
+       246,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55160027:1:preferred:d6eb96054de935fd:6",
+     "key": "d6309bd1bec56737d85d0cfd5f77127345235b8ea2925248b8740373c0a72942",
+     "type": "preferred",
+     "spans": [
+      [
+       247,
+       282,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55162736": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55162736",
+   "conditions": [
+    {
+     "id": "55162736:1:required:18f4db50b2a3820f:0",
+     "key": "e4e64c4b241d15c91f32764c84312933951117e5842c8605c054cd0af598a13c",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       24,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55162736:1:preferred:0a76baaa4cfba737:0",
+     "key": "47eb32a12814f87f85ece6316eda21473471b0b148210de759d8fa8d6321941f",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       43,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55162736:1:preferred:0a76baaa4cfba737:1",
+     "key": "14ca4bbedf88c7d32957908801fef5d88b47f9c67799d7ca663f47b85cd45e35",
+     "type": "preferred",
+     "spans": [
+      [
+       44,
+       88,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55171249": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55171249",
+   "conditions": [
+    {
+     "id": "55171249:1:required:12f05ecdd098ecff:0",
+     "key": "fdf319af0300454dfa1944400049bf5721c5993a35485ede2c48222c523afe34",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       9,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:required:12f05ecdd098ecff:1",
+     "key": "c4629eb3a57fc0d209c53b1b51afca5b57ba3edddefc8269951f368e43d1a052",
+     "type": "required",
+     "spans": [
+      [
+       10,
+       19,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:required:12f05ecdd098ecff:2",
+     "key": "44ac06f8737fe749444d54e2ab8be804cc73b42789224ec667a397b8ec6e50f0",
+     "type": "required",
+     "spans": [
+      [
+       20,
+       32,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:required:12f05ecdd098ecff:3",
+     "key": "d7116b7b5761292709fe49a10058e95cdc305e0b1fbabdb7d9858c3b7e2b7796",
+     "type": "required",
+     "spans": [
+      [
+       33,
+       137,
+       "body"
+      ]
+     ],
+     "parse_notes": [
+      "nested_items"
+     ]
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:0",
+     "key": "6b3292544d7171298297d67b88fe87162254759c5e2bcf4ffdd7fa4b64124a41",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       21,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:1",
+     "key": "fc001bb9cf54a9461443314f1980dc7429440d3e56cb420983024c6c2f66240d",
+     "type": "preferred",
+     "spans": [
+      [
+       22,
+       37,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:2",
+     "key": "40aaa93bfb69ac55d224ec06f4d54749c6809ad39760427cd1bfbcf3cf91bc61",
+     "type": "preferred",
+     "spans": [
+      [
+       38,
+       65,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:3",
+     "key": "376b7c96b2d89a16dad566f3e1280305430c8d886a33e971b761d56bc75e829c",
+     "type": "preferred",
+     "spans": [
+      [
+       66,
+       114,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:4",
+     "key": "34057508b77e972d38d550358bfd928bfb813d13bf4bebf4f87a170ab45c9adb",
+     "type": "preferred",
+     "spans": [
+      [
+       115,
+       145,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:5",
+     "key": "df674304e780d41485d08db79493e5bca3f973c5a2a710a2c86bd267cc065873",
+     "type": "preferred",
+     "spans": [
+      [
+       146,
+       168,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:6",
+     "key": "9e0aeb14beaa09860f254eab4bb0017029e99f15c7e215bc575c5c8b249eeb2f",
+     "type": "preferred",
+     "spans": [
+      [
+       169,
+       180,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:7",
+     "key": "6e44049a2e5697d8906f301df34e420409201dc623009bbcd08ed15deb2e256b",
+     "type": "preferred",
+     "spans": [
+      [
+       181,
+       196,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:8",
+     "key": "f5215bdc20e98b00ccae2451424b90e7c37973493f618199ff33bf02ce33d0e0",
+     "type": "preferred",
+     "spans": [
+      [
+       197,
+       213,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55171249:1:preferred:caaf198355eed98f:9",
+     "key": "26ddf42c11ec3efc9473b0fd88fc50071aa10fbc0230629e518ad514bef32b88",
+     "type": "preferred",
+     "spans": [
+      [
+       214,
+       251,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55176690": {
+   "source_version": 1,
+   "url": "https://jumpit.saramin.co.kr/position/55176690",
+   "conditions": [
+    {
+     "id": "55176690:1:required:69218492ca0236ba:0",
+     "key": "8e9d875c45fb746985d2eab83a3ba1e7ec2fa3a2977b912a91550868f54fbf71",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       46,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55176690:1:required:69218492ca0236ba:1",
+     "key": "005de91e0fdf76423f2d0d7ca39d461d9d14b1fafedf56e2a303ec1e5b82e1d1",
+     "type": "required",
+     "spans": [
+      [
+       47,
+       265,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55176690:1:preferred:a8b7f3187e06ce7d:0",
+     "key": "7575495e5cbf0fcfb780604d4aec68f5a41b0b6cec8c29d26fee45eed039d1b4",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       25,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55176690:1:preferred:a8b7f3187e06ce7d:1",
+     "key": "f576dc68b7fb9d0bf909a5b0d3cf2bb0595bd291c2670e69a332e50736ba4d66",
+     "type": "preferred",
+     "spans": [
+      [
+       26,
+       56,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55176690:1:preferred:a8b7f3187e06ce7d:2",
+     "key": "cff819b3bd4d87e39a36763d71f14d7f8226c5bf2d4f8a1fce68ab8e123ec418",
+     "type": "preferred",
+     "spans": [
+      [
+       57,
+       87,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55176690:1:preferred:a8b7f3187e06ce7d:3",
+     "key": "b9e5e478cdf989f8d53ca0453384a48863c89237cd8aa147dda8673ae05efc43",
+     "type": "preferred",
+     "spans": [
+      [
+       88,
+       117,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55236275": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55236275",
+   "conditions": [
+    {
+     "id": "55236275:2:required:32cbd1030bf3c8da:0",
+     "key": "474c2350cb24fbd8dd891b67459b8f6a185f2338dcf77efb41f69769fb8694d6",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       133,
+       "body"
+      ]
+     ],
+     "parse_notes": [
+      "unmarked_multiline"
+     ]
+    },
+    {
+     "id": "55236275:2:preferred:bd4e7034af1d0dc1:0",
+     "key": "b2b16f95c2c2e38a51f6de7b08d5a1d4e7c87dfc8ec8a5644bd9da2d35c74756",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       89,
+       "body"
+      ]
+     ],
+     "parse_notes": [
+      "unmarked_multiline"
+     ]
+    }
+   ]
+  },
+  "jumpit-55242293": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55242293",
+   "conditions": [
+    {
+     "id": "55242293:2:required:10d93df08665b9f5:0",
+     "key": "dee25353c3252b3a33e2016b48fd87357e5ab19496f3bda3eae6ecedd9279bc2",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       26,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:required:10d93df08665b9f5:1",
+     "key": "ec68e50e5a93a2966378cfaf01c290fbc6707a2de31259e9e5cd5ab1f3883c87",
+     "type": "required",
+     "spans": [
+      [
+       27,
+       75,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:required:10d93df08665b9f5:2",
+     "key": "53df7d57660372ae8af51c2d17f01d55e49211d5db219b4dd654b0aa8e9803d0",
+     "type": "required",
+     "spans": [
+      [
+       76,
+       111,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:0",
+     "key": "f5e7cde9d47f8dc0a4825fe8753db35ba9ea1dceb173f41a226d04bd73bf1a46",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       30,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:1",
+     "key": "9508078bafdda7d2f932eddeeafd1f4f4ffbe9f4b7149e2c9df9fde03a321e3b",
+     "type": "preferred",
+     "spans": [
+      [
+       31,
+       80,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:2",
+     "key": "e764080606feab6770b00f737a7b8373905cd0d6fce6b1b537082493a29e8533",
+     "type": "preferred",
+     "spans": [
+      [
+       81,
+       109,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:3",
+     "key": "092334f00194a6c324296b04d04339bd5e8df38b4d069a3eb84a443c0a0bc0dd",
+     "type": "preferred",
+     "spans": [
+      [
+       110,
+       150,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:4",
+     "key": "94c659f6d992ee19185bd05c840ccb133e9c45547f9a35cd803efe638856ae22",
+     "type": "preferred",
+     "spans": [
+      [
+       151,
+       187,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55242293:2:preferred:cf9da9640334f5fe:5",
+     "key": "6acfba1039661d80f118cff7498ba6d6bd4886c7eb75e7475a77b46bcf095cfd",
+     "type": "preferred",
+     "spans": [
+      [
+       188,
+       217,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55299141": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55299141",
+   "conditions": [
+    {
+     "id": "55299141:2:required:3d62534aa751174a:0",
+     "key": "206bf7b77af3e24053dee3115c9578754536df062e38ced42de9c222e1f6d1f0",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       30,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:required:3d62534aa751174a:1",
+     "key": "6d85c5ff63bdf2be6f8403585cc6b5931897586646c313065d211605fc13aa08",
+     "type": "required",
+     "spans": [
+      [
+       31,
+       93,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:required:3d62534aa751174a:2",
+     "key": "74a54ef3cfea91c8da57a774d3cf52eb96b0d7f12da82c4f6a73db8c56a7ab5f",
+     "type": "required",
+     "spans": [
+      [
+       94,
+       121,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:required:3d62534aa751174a:3",
+     "key": "cc66f32fffa153851b7462d340ef85df35f400aaf8792c98ab490756f20fd055",
+     "type": "required",
+     "spans": [
+      [
+       122,
+       166,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:required:3d62534aa751174a:4",
+     "key": "ccaa715232c35756dff944e8307dc098c9b5ae8ee9b388b4ad5485193a0d2f8b",
+     "type": "required",
+     "spans": [
+      [
+       167,
+       209,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:required:3d62534aa751174a:5",
+     "key": "4dcbb8da205418704eddf4ecc33cb855f24fea2bfaf1fb55c0bbf4e39eae39b7",
+     "type": "required",
+     "spans": [
+      [
+       210,
+       255,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:preferred:31d9c994cfb2a1c3:0",
+     "key": "31d26d0894d3eacddf3a11c87e3e14b0239975956f63203321bb4126623e3023",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       41,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:preferred:31d9c994cfb2a1c3:1",
+     "key": "bfe915753574522ac4534446148b41524b9cc16732b64cdc85eb967c1001ea24",
+     "type": "preferred",
+     "spans": [
+      [
+       42,
+       156,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:preferred:31d9c994cfb2a1c3:2",
+     "key": "150f70d666abdb243bb68dffd8360f67698d67c22d80b3ef363cccb5b6de97aa",
+     "type": "preferred",
+     "spans": [
+      [
+       157,
+       219,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:preferred:31d9c994cfb2a1c3:3",
+     "key": "1471f2689e618a702180bf4b7bbcb475501ced869e6ce9ff5d26dd2c8c581423",
+     "type": "preferred",
+     "spans": [
+      [
+       220,
+       271,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55299141:2:preferred:31d9c994cfb2a1c3:4",
+     "key": "2276985b040c92211d24af45fc305da02c61b01d65ee27ffb287c212d40e9416",
+     "type": "preferred",
+     "spans": [
+      [
+       272,
+       316,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55309648": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55309648",
+   "conditions": [
+    {
+     "id": "55309648:2:required:2a315b161f3f0dba:0",
+     "key": "a099630e4ba61db05d0a8d103c26c656d056bebf79f69084446aa858d5f269ef",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       12,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:required:2a315b161f3f0dba:1",
+     "key": "1b30c2c53fdd0ec61672b7379962c0209da19a78bba62b2f9f9db5ca45653acc",
+     "type": "required",
+     "spans": [
+      [
+       13,
+       31,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:required:2a315b161f3f0dba:2",
+     "key": "fda7613b80269f97a6125f31a962b90c3019075098130b7eedd2123e9a615ea5",
+     "type": "required",
+     "spans": [
+      [
+       32,
+       46,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:required:2a315b161f3f0dba:3",
+     "key": "df7aec381aa004b24dd67e8696fdb169c867c7abde0008fc7ce2ca7049e4cc6c",
+     "type": "required",
+     "spans": [
+      [
+       47,
+       65,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:required:2a315b161f3f0dba:4",
+     "key": "3dd9c20372c479093843dcdf04c9021d2ae62c27702788e42cb21ddb8fcf8286",
+     "type": "required",
+     "spans": [
+      [
+       66,
+       78,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:preferred:3072399170b6f009:0",
+     "key": "b96e84b1cd518e1e0ac2731657ca3068ff48effbcb7b9bc5b9c627fc77f96c02",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       20,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:preferred:3072399170b6f009:1",
+     "key": "b796848b960ba8fcbfb2bb63a823073a3c6df553f72fc158420d5d3c931e6fa4",
+     "type": "preferred",
+     "spans": [
+      [
+       21,
+       35,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55309648:2:preferred:3072399170b6f009:2",
+     "key": "2d65c0339ae8e70b1dc218b705f2d63d763f6a01d30055f18e771ea0a65bdc36",
+     "type": "preferred",
+     "spans": [
+      [
+       36,
+       48,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55325121": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55325121",
+   "conditions": [
+    {
+     "id": "55325121:2:required:402b9017c6cb258d:0",
+     "key": "ef9fd07c1d338da627b93b33b1877ee9813a7e9c229066be9bffb5241e88f3e3",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       19,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:required:402b9017c6cb258d:1",
+     "key": "28c9cfe7d902dcdf6890422e2f124951e886991e7a14ee253e7baa034d579d04",
+     "type": "required",
+     "spans": [
+      [
+       21,
+       34,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:required:402b9017c6cb258d:2",
+     "key": "87dd86b467f9f2edd2b175629512cccca42f600390edf348c41c3254bd9c50bf",
+     "type": "required",
+     "spans": [
+      [
+       36,
+       45,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:required:402b9017c6cb258d:3",
+     "key": "a2ef6ffef7bd3e3a4b5553ed8f84453ef508ec696ad0a4c91ce767efb78d6e34",
+     "type": "required",
+     "spans": [
+      [
+       47,
+       63,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:required:402b9017c6cb258d:4",
+     "key": "45a7b05e3cc2e56f38cded4e72b07c0094ac2720fae99b469003d4822496a38d",
+     "type": "required",
+     "spans": [
+      [
+       65,
+       75,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:preferred:2f9da212f811e078:0",
+     "key": "27d267ec1214e012fe624958a4a3e016525342968ca0f0568bb10474e45ff710",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       22,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:preferred:2f9da212f811e078:1",
+     "key": "4d93c068cfa769a9bc21667e2af2d4185321a830f833f5ed47ff1f88a5f507c0",
+     "type": "preferred",
+     "spans": [
+      [
+       24,
+       42,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:preferred:2f9da212f811e078:2",
+     "key": "75ee7fe29bd0956945fb58c1f7f3e8a0062c2fa02ed5b88e5fc7e30a000243ae",
+     "type": "preferred",
+     "spans": [
+      [
+       44,
+       56,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55325121:2:preferred:2f9da212f811e078:3",
+     "key": "e871e0922a883b84f4b53bc11f6c5631860427710ef4433de989f084c1d01994",
+     "type": "preferred",
+     "spans": [
+      [
+       58,
+       75,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55338216": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55338216",
+   "conditions": [
+    {
+     "id": "55338216:2:required:ac868d4015a5b5f6:0",
+     "key": "7588a2d84df5a716fd61fe4ec8b3e1fb8fd1c1265212dc2328d4e783c8e94961",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       19,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:required:ac868d4015a5b5f6:1",
+     "key": "ed211817f089d836c9d915c39efed52dadcfb692401a41555747d361ae0ce791",
+     "type": "required",
+     "spans": [
+      [
+       20,
+       40,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:required:ac868d4015a5b5f6:2",
+     "key": "f590d148cfbfcba6c59097122bcf4ededd7e5a9917f14fee7d8fe11885750b66",
+     "type": "required",
+     "spans": [
+      [
+       41,
+       78,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:required:ac868d4015a5b5f6:3",
+     "key": "662c4b98f1dff3f468ebd4aa720b9a0787d634098698c0d2d12cbc137b62b3ef",
+     "type": "required",
+     "spans": [
+      [
+       79,
+       111,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:required:ac868d4015a5b5f6:4",
+     "key": "efb0c0db3eab3c38e685d9c00107ca1fe3730ae238b44c81029cfa9ba570b130",
+     "type": "required",
+     "spans": [
+      [
+       112,
+       137,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:preferred:da336503f45ba860:0",
+     "key": "ed1a0eb5fa4be8b9f68b7c9af874498e7293fd68fc375774d9a77ded91cd572c",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       37,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:preferred:da336503f45ba860:1",
+     "key": "ecd23e2cfadb854ed84e75e42b93fcd1d1cda955c3015b4b0ef1e32acbc971aa",
+     "type": "preferred",
+     "spans": [
+      [
+       38,
+       60,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:preferred:da336503f45ba860:2",
+     "key": "2d338f415af41aa050b4d78df798c41f86b504925a7b6dc6a22fb17e3c1a5f2a",
+     "type": "preferred",
+     "spans": [
+      [
+       61,
+       91,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55338216:2:preferred:da336503f45ba860:3",
+     "key": "916f8c89585758fdb327ac19e3d865dcd23d028eba5892e6f0890683ff1c3de2",
+     "type": "preferred",
+     "spans": [
+      [
+       92,
+       117,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55352065": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55352065",
+   "conditions": [
+    {
+     "id": "55352065:2:required:8f86dcfbf5e91a00:0",
+     "key": "59ef4e8eaa0cb1da593695c864941800e15edb45be06234b97f83676d60bd390",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       10,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:required:8f86dcfbf5e91a00:1",
+     "key": "2b04d505c937679de12cd5f3c71572decbe2125d8351c9aa076dc1cacbbd4806",
+     "type": "required",
+     "spans": [
+      [
+       11,
+       103,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:required:8f86dcfbf5e91a00:2",
+     "key": "c7ac69de38570ed73001d7982b48c6901e361282ce38ffdb7078063d5eb70250",
+     "type": "required",
+     "spans": [
+      [
+       104,
+       167,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:required:8f86dcfbf5e91a00:3",
+     "key": "45755acc48b65130c9756499265b2b99cfbe3eb7b2b44029972c4653c877202f",
+     "type": "required",
+     "spans": [
+      [
+       168,
+       205,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:required:8f86dcfbf5e91a00:4",
+     "key": "f26b9630158871e6746d2c38d25afc451f1b0d2ddf117af0ea5d548d1b63fb83",
+     "type": "required",
+     "spans": [
+      [
+       206,
+       228,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:0",
+     "key": "e5ba304ff58a8985589221891ae8be5917bf665aac157e1c55b635dfe016c8a5",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       7,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:1",
+     "key": "344183251e09c7a304b3eb1782170a36c6a5775197844fac58dfc22a4d37c05e",
+     "type": "preferred",
+     "spans": [
+      [
+       8,
+       31,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:2",
+     "key": "1746885ec035994aae76ae5be1754e2d1116bd7298304c9ab1ab487570aaa5d9",
+     "type": "preferred",
+     "spans": [
+      [
+       32,
+       74,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:3",
+     "key": "d7c058985e8fd1840d4d04c26b5f15557d9fc4aaf84be0f4ca47865c12fb8ac8",
+     "type": "preferred",
+     "spans": [
+      [
+       75,
+       93,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:4",
+     "key": "2812a53819491899473fd80ae25b20d3ac10474054ff03e1e000df15c1d4c67b",
+     "type": "preferred",
+     "spans": [
+      [
+       94,
+       129,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:5",
+     "key": "2488098bd5615ea547e9a1e23ab238e2281563b0e9991e3cec04a1eb10326683",
+     "type": "preferred",
+     "spans": [
+      [
+       130,
+       160,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:6",
+     "key": "d85dfb3f7b23825ae8a173721bdf86634a9fbbc6e3f197b19b852a2c61ed69d3",
+     "type": "preferred",
+     "spans": [
+      [
+       161,
+       201,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55352065:2:preferred:d2396374b94106dc:7",
+     "key": "afd440a485107ec070b553fe3a6e862bed05b582000f72d1a420b11e7829794d",
+     "type": "preferred",
+     "spans": [
+      [
+       202,
+       221,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55361937": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55361937",
+   "conditions": [
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:0",
+     "key": "dfd1b8ae781c2dc949fed9a77db5059ebbb7c2fffd876a0eb72bde92b0f5b738",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       29,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:1",
+     "key": "c944ed6435cd6c697a0b8f3dd183e8186c00c5ecbb488ac55ddef1e822d7fa35",
+     "type": "required",
+     "spans": [
+      [
+       30,
+       51,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:2",
+     "key": "6daa47b4facfe3f7b1a7d73b81cbb4297bd3555e6e32a1f14116ff6a13348f9d",
+     "type": "required",
+     "spans": [
+      [
+       52,
+       112,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:3",
+     "key": "1a49e9cb4810993a8e483e2adaf17fbbef081e1cd5c1be49c38b626c62eba8fb",
+     "type": "required",
+     "spans": [
+      [
+       113,
+       141,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:4",
+     "key": "e81c59cbe24521aabaa6a0a820ad085c342183e2484159d9c620343991f727c1",
+     "type": "required",
+     "spans": [
+      [
+       142,
+       164,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:required:336f60b1730d2ea5:5",
+     "key": "92c007f8ecc006c182ada1098957d7a14702d37a7f90654f03aca2a736da5818",
+     "type": "required",
+     "spans": [
+      [
+       165,
+       186,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:0",
+     "key": "aac1764f012e2fd40f25cc9b2f7ffa5ecc689d9b1b75d3d759dd7eabbd55af7a",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       16,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:1",
+     "key": "0c7be200dbe59c57ca69a280e27e7f6cd4539e00faa39c00aa543d99c1178985",
+     "type": "preferred",
+     "spans": [
+      [
+       17,
+       41,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:2",
+     "key": "a05d3944b5295bcab16624303fa5e28fb4973fb62c8f116223d50e2c3fdd24d3",
+     "type": "preferred",
+     "spans": [
+      [
+       42,
+       89,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:3",
+     "key": "4b0890bb314df5edf76b96148f08218fcc6073e3e68359993dc7f800e06187c4",
+     "type": "preferred",
+     "spans": [
+      [
+       90,
+       126,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:4",
+     "key": "5e700ad87fd73a242a6014395749f4ee0bc1c180dd57389692f201d4102de9bd",
+     "type": "preferred",
+     "spans": [
+      [
+       127,
+       162,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:5",
+     "key": "d2feabb37773861751bc6b014ef84d58c9fc22e6509062e34b623b3915e0d0eb",
+     "type": "preferred",
+     "spans": [
+      [
+       163,
+       207,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55361937:2:preferred:21c1798d6714ef80:6",
+     "key": "c3ee57bc2a8582a6448e11e3feb9273555ed26c6625a836bc6fe6e0c970bb13b",
+     "type": "preferred",
+     "spans": [
+      [
+       208,
+       295,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55362018": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55362018",
+   "conditions": [
+    {
+     "id": "55362018:2:required:fe4e17a0d10812e2:0",
+     "key": "78e83c2869ac4b6834790cc1e7aa7685c7fabff8d20ba8f848f6f50d0de58e47",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       19,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:required:fe4e17a0d10812e2:1",
+     "key": "6381196ffc998e520e4cd14b7187b156103a753c6055d710c83ccfd494026a4b",
+     "type": "required",
+     "spans": [
+      [
+       20,
+       109,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:required:fe4e17a0d10812e2:2",
+     "key": "fe3dde88b1df9016d3ab9b3acf0af9b7503bea86277520756b0445351d1d3f04",
+     "type": "required",
+     "spans": [
+      [
+       110,
+       139,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:required:fe4e17a0d10812e2:3",
+     "key": "28d28a517544f5c903e82fbbf4a07afb972b375db7b89388e709eb025dd0c63b",
+     "type": "required",
+     "spans": [
+      [
+       140,
+       168,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:required:fe4e17a0d10812e2:4",
+     "key": "864b074bee0f4a580d776caaedfcafc4730aa0ff4ffeb59a82e8adab1060f992",
+     "type": "required",
+     "spans": [
+      [
+       169,
+       210,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:preferred:a3a21590ec698d8b:0",
+     "key": "a2e0f726568370b3eb6d74936c255981506d33d0c2f476009491a3f600d7682f",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       22,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:preferred:a3a21590ec698d8b:1",
+     "key": "a362505b47ec21e56ce626f23aba94a1684f4c53bdb5a8fc61cf56870911102e",
+     "type": "preferred",
+     "spans": [
+      [
+       23,
+       44,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:preferred:a3a21590ec698d8b:2",
+     "key": "514f4febbd2816eeabd629854c235fcb2cf5770c9546a2a9b9e8958a1ee9bb74",
+     "type": "preferred",
+     "spans": [
+      [
+       45,
+       82,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:preferred:a3a21590ec698d8b:3",
+     "key": "999924c4c87c3af8caa7ddaaf62699b2d16c48245a21e2935ae44295355a001c",
+     "type": "preferred",
+     "spans": [
+      [
+       83,
+       99,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55362018:2:preferred:a3a21590ec698d8b:4",
+     "key": "49b150381b6623085e22514082f1b2337d5a6d7b5b0d2283f6cf41271c5d18d4",
+     "type": "preferred",
+     "spans": [
+      [
+       100,
+       117,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55377873": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55377873",
+   "conditions": [
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:0",
+     "key": "0c2029d18ba1b0aece16b307690428947924172aa506b8825751bd97b75f27a5",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       10,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:1",
+     "key": "c0a3651cc1d9f0708fd1c67a34f24e781771fb0d9d73edfd6a65795832681762",
+     "type": "required",
+     "spans": [
+      [
+       11,
+       24,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:2",
+     "key": "30ce548051cd5b9ebe353221aa92997e678f0467980c14267fc329b74a1f1158",
+     "type": "required",
+     "spans": [
+      [
+       25,
+       46,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:3",
+     "key": "83f4084f104bf4dd865a3c40abbcca036d7cc2e5fc9b060fb724e537816ced23",
+     "type": "required",
+     "spans": [
+      [
+       47,
+       72,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:4",
+     "key": "b3932f05ba1b5487742d96b5dc53cf91d3db3c9fa0f59f3f5f66a5a4fb0169af",
+     "type": "required",
+     "spans": [
+      [
+       73,
+       99,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:5",
+     "key": "63d62dae9c0a8159f675568e219a0439423b10444d65c4d6c55b97f8e5f970d0",
+     "type": "required",
+     "spans": [
+      [
+       100,
+       134,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:required:ef42c8e30f222cbe:6",
+     "key": "ec09bc6d14d1d63360f3ca57e7284b01df39adaf701129528694db4adeeac281",
+     "type": "required",
+     "spans": [
+      [
+       135,
+       161,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:0",
+     "key": "06a6037aaac7597a9fc3c878fcd08a0ea5730b34200c631dd63b8a02919e9e34",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       28,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:1",
+     "key": "d0648912b7e989de891dcf8ebf8fd6c53b59199757cf9922c2a41866673bfde8",
+     "type": "preferred",
+     "spans": [
+      [
+       29,
+       59,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:2",
+     "key": "5092077cd4ea9918345bd651688e6ee95847a881f4b006ff44f7bda68b8f3653",
+     "type": "preferred",
+     "spans": [
+      [
+       60,
+       96,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:3",
+     "key": "ccf47a8f7a5e7e149f6916d9e4f1f2e554568f8a314e1bc7ff340ee3c0b99f53",
+     "type": "preferred",
+     "spans": [
+      [
+       97,
+       130,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:4",
+     "key": "0a58933a80b47aef3b630961633266fd5ad2e19681f9f021e097b2d3a8f31538",
+     "type": "preferred",
+     "spans": [
+      [
+       131,
+       169,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:5",
+     "key": "8e4ac6ed4415a6e5ffc9ba9da4770edf5813e2947e8bfc359e07e76c0c0db2af",
+     "type": "preferred",
+     "spans": [
+      [
+       170,
+       200,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55377873:2:preferred:7e8bba782e00dec0:6",
+     "key": "ae96cacaeb0817d2766471b2165f31a37b1dfbd746c2b24b005ff16a1f865a45",
+     "type": "preferred",
+     "spans": [
+      [
+       201,
+       226,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55379247": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55379247",
+   "conditions": [
+    {
+     "id": "55379247:2:required:de27604a0697cb91:0",
+     "key": "11fa2291f66564233050c9ea536b72107615282191f8555d2796618eecab8281",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       21,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:1",
+     "key": "fc381b829055d59f6d267541497d81c17ee92777c8867a495d0db4381908e597",
+     "type": "required",
+     "spans": [
+      [
+       22,
+       41,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:2",
+     "key": "3cf03c85e0b0e08edf73b9cbb8a541ce25eadad657ab150508bed79a364d6184",
+     "type": "required",
+     "spans": [
+      [
+       42,
+       64,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:3",
+     "key": "9796ba904cf3d9e7d8fe28e5e636547a90a5d86bb12060f8cebf04ab8a8df760",
+     "type": "required",
+     "spans": [
+      [
+       65,
+       89,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:4",
+     "key": "4716523553f73f6f0049b3b344f518230a02ebc98c03d046c761e6cbfe4e0a7c",
+     "type": "required",
+     "spans": [
+      [
+       90,
+       122,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:5",
+     "key": "f6908fe99c3beb1f2612acfa528a5bdfc6fe17aa0ebeffaf1f04cf0db2ae3f62",
+     "type": "required",
+     "spans": [
+      [
+       123,
+       163,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:6",
+     "key": "7f8ba1795b1f2b81ce7ea62bdcc2dcd74fc541e8395f36339887a9a7387c4758",
+     "type": "required",
+     "spans": [
+      [
+       164,
+       189,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:required:de27604a0697cb91:7",
+     "key": "d980ed29769bb59b0e66fd2d09aaf6a7f77ae51a9a4373e75fe2e897cd0ef0a0",
+     "type": "required",
+     "spans": [
+      [
+       190,
+       214,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:0",
+     "key": "78726931184aea28ad63a1a360c93d202548f3a1d8fc25fd0afa62953d97c059",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       21,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:1",
+     "key": "f5b5a0f914b4ed9a3514fc0b6163ad94f2d337dedeb33e9e0d361f49e9dbbc8b",
+     "type": "preferred",
+     "spans": [
+      [
+       22,
+       50,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:2",
+     "key": "9876cea7bae64f7988de8b6dc7dcc37f9f6d051a4634fae7801bd186ade4e437",
+     "type": "preferred",
+     "spans": [
+      [
+       51,
+       72,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:3",
+     "key": "4e5e6658cf7be0dcdd44b2608ec745fe315f7060af9ee1e10596ab270050db1e",
+     "type": "preferred",
+     "spans": [
+      [
+       73,
+       93,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:4",
+     "key": "c20fa7a4ff503de9c4b1eab8e20df40510be55cc84bbdd3744c9cac3d8d9e2d0",
+     "type": "preferred",
+     "spans": [
+      [
+       94,
+       119,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:5",
+     "key": "eb053962554d275c945a26bee5c871f4cda6902afe2c7e4a1cb8cf16cf1f66eb",
+     "type": "preferred",
+     "spans": [
+      [
+       120,
+       146,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55379247:2:preferred:7aa1fc51ba18f08b:6",
+     "key": "01f9a2f2756f0c59f1561c30a18b64acddb88155c9df0602a8eb4a3b97f7b9c8",
+     "type": "preferred",
+     "spans": [
+      [
+       147,
+       171,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55394660": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55394660",
+   "conditions": [
+    {
+     "id": "55394660:2:required:cdd4459ea28df267:0",
+     "key": "2e365c8d62eea9e49a502f3bc9e2568cab2d882654f646d34466f8e93bcb4d95",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       45,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:required:cdd4459ea28df267:1",
+     "key": "77bcacbab2a30c90711ce89d4786a0c3c180812d6c5698d48cdf7dd5f9180be2",
+     "type": "required",
+     "spans": [
+      [
+       46,
+       73,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:required:cdd4459ea28df267:2",
+     "key": "f42ef2f0b2f96552c9564dd1a3a173d91f197b88f4fd348c6e8ac11539484da3",
+     "type": "required",
+     "spans": [
+      [
+       74,
+       91,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:preferred:8e23a4b9b845144e:0",
+     "key": "37b03850ff0c93d030bad5222ec35744a95d9eba5a4d3720d3846d17741bab2b",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       29,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:preferred:8e23a4b9b845144e:1",
+     "key": "92d5e48310feb2f56107ecdac660166d3cf8131c316d36764ad8879c371699bf",
+     "type": "preferred",
+     "spans": [
+      [
+       30,
+       64,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:preferred:8e23a4b9b845144e:2",
+     "key": "825f6cddba9f6b94cd90f3bf7348547c22b25cb3afc544f332b3aace6839e26f",
+     "type": "preferred",
+     "spans": [
+      [
+       65,
+       80,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55394660:2:preferred:8e23a4b9b845144e:3",
+     "key": "eef25525bf4ac645cad6d056fa6762c2917c055012bb21cbbee54718f7a6c64d",
+     "type": "preferred",
+     "spans": [
+      [
+       81,
+       97,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55396303": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55396303",
+   "conditions": [
+    {
+     "id": "55396303:2:required:7465e7423f71ee26:0",
+     "key": "b544e328c3d77bf4ac37248fcbacbf4f289302abf323070c53e9173855204c62",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       98,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:required:7465e7423f71ee26:1",
+     "key": "ce99af0dec135d3e0559749843b1dc9f28e7b913b1c4f882ffb89baddd6d754c",
+     "type": "required",
+     "spans": [
+      [
+       99,
+       148,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:required:7465e7423f71ee26:2",
+     "key": "d12947f2279853864b69f7fa32b1cb41b7c89b08b3a6c5c9184addf5bef98011",
+     "type": "required",
+     "spans": [
+      [
+       149,
+       202,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:required:7465e7423f71ee26:3",
+     "key": "216f3bd7dc8bc0fa3a67359ea5b201ee0228a636c4e97c1a86a08a162bfc97db",
+     "type": "required",
+     "spans": [
+      [
+       203,
+       263,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:required:7465e7423f71ee26:4",
+     "key": "44b2e67bdb8209e93d4e4f67437838110bd0235b934156b11c32ef5aab26a40f",
+     "type": "required",
+     "spans": [
+      [
+       264,
+       293,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:0",
+     "key": "12d213c98f5c187db8f695ac573e615d2cb5aca8469f595126a55b82438f87aa",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       42,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:1",
+     "key": "b623f9aae1ba9b9a6fc4e5f01c8bc3ae5bd488d26c2b180ec66e74758eeac729",
+     "type": "preferred",
+     "spans": [
+      [
+       43,
+       87,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:2",
+     "key": "ce207b2b1d7b3e8e87e1512be2ceb1f365c130ad14bc69e8bb7700aeb8063fa3",
+     "type": "preferred",
+     "spans": [
+      [
+       88,
+       128,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:3",
+     "key": "76363024727788be2980c6dd69eaf2a764c60a86c5d486a7a9a0db9010706c43",
+     "type": "preferred",
+     "spans": [
+      [
+       129,
+       184,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:4",
+     "key": "e21926350c8e8dbaa749fb243c8d87656699ac25a12aec54ef8c980906eea86c",
+     "type": "preferred",
+     "spans": [
+      [
+       185,
+       233,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55396303:2:preferred:bfbb59d2cf607b7c:5",
+     "key": "402a0225f8eef31dd933a997e8e32895d4af6102cad4ce2366de111c6417e908",
+     "type": "preferred",
+     "spans": [
+      [
+       234,
+       267,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  },
+  "jumpit-55406282": {
+   "source_version": 2,
+   "url": "https://jumpit.saramin.co.kr/position/55406282",
+   "conditions": [
+    {
+     "id": "55406282:2:required:ce25523765f827c9:0",
+     "key": "bf6afdc315c8a27c846b27366cf5e14fa1720135235637bbc9ea0bcf999dd7f0",
+     "type": "required",
+     "spans": [
+      [
+       0,
+       45,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55406282:2:preferred:8d4ce06e750c0d07:0",
+     "key": "a9ee967cb9b87cb271ff1319ea21460a958b94f831affcba46408976c3f84a58",
+     "type": "preferred",
+     "spans": [
+      [
+       0,
+       23,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55406282:2:preferred:8d4ce06e750c0d07:1",
+     "key": "5cf8369a929541f79e98bfb60c19a4d2ba84ad2817d9616a472ef6a6734a834f",
+     "type": "preferred",
+     "spans": [
+      [
+       24,
+       40,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    },
+    {
+     "id": "55406282:2:preferred:8d4ce06e750c0d07:2",
+     "key": "562040fb0ba2102165dd19abe23c9548b21cbc51f9e567e350f59f354191ec3d",
+     "type": "preferred",
+     "spans": [
+      [
+       41,
+       64,
+       "body"
+      ]
+     ],
+     "parse_notes": []
+    }
+   ]
+  }
+ },
+ "labels": {
+  "627a2a260d32c25a59888f6f8906c7a39613d7898a1894a198f295a8b005141a": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "a1a0a1ba0570420516ffa8e91a54562634faa4e57df66647f3d2c8b4c7e92133": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Linux",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Windows, Linux",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "f428af6600c9441f986a6f657cc6234f51e034b5e964e0410ef4e1ec68023c32": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "네트워크, 보안, 가상화, 서버, 스토리지",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "서버/스토리지는 서로 다른 인프라 영역의 병기이고, 전체는 관련 지식의 나열로 해석함. 각 영역의 필수 충족 범위는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "네트워크, 보안, 가상화, 서버, 스토리지",
+    "relation": "all",
+    "unknown": false,
+    "note": "서버/스토리지는 서로 다른 인프라 영역의 병기이고, 전체는 관련 지식의 나열로 해석함. 각 영역의 필수 충족 범위는 명시되지 않음."
+   }
+  },
+  "547370feb8172c2f987834f0f6dee5f4a22ee0cf5689f6892e43721955acedf6": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "Troubleshooting은 장애 대응 및 원인 분석이라는 일반 능력의 영문 표현임.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "Troubleshooting은 장애 대응 및 원인 분석이라는 일반 능력의 영문 표현임."
+   }
+  },
+  "f2d72ba43d5afb31b06abae2225803a187cf81edf7ae03a30a8e59778ee940cb": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "8766d1b874b157d443762fa06276eb60e8f6dfe209092fdf2738792aee682825": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "UTM, NAC, DLP, DRM",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "보안솔루션은 상위 범주이며 UTM, NAC, DLP, DRM 중 최소 2개가 필요함. any 또는 all만으로 표현할 수 없는 수량 조건임.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "보안솔루션, UTM, NAC, DLP, DRM",
+    "relation": "unknown",
+    "unknown": true,
+    "note": "보안솔루션은 상위 범주이며 UTM, NAC, DLP, DRM 중 최소 2개가 필요함. any 또는 all만으로 표현할 수 없는 수량 조건임."
+   }
+  },
+  "71c24ad6d54b2da46ab00c3ec0a942b94c0979843defedf3891283bd9425bdb7": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "보안감사와 서버 취약점 진단이라는 업무 수행 경험을 요구하며 특정 기술이나 도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "보안감사와 서버 취약점 진단이라는 업무 수행 경험을 요구하며 특정 기술이나 도구명은 없음."
+   }
+  },
+  "834d9beb9caa0c511c28ab8de90410bd0865fececee3827ede4082f975790976": {
+   "category": "certificate",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "관련자격증이 필요하다고 했지, 구체적으로 뭔지는 베드락이 인터넷 검색해서 알아봐야하는 부분임",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "certificate",
+    "not_condition": false,
+    "terms": "서버, 네트워크, 보안",
+    "relation": "unknown",
+    "unknown": true,
+    "note": "자격증의 관련 기술 분야를 나열했으나 모든 분야의 자격증이 필요한지 명시되지 않음. 구체적 자격증명 없음."
+   }
+  },
+  "ee090d49e01ecc79fdef65852034565aef7fa1af9a10da8556e47bdbaef9f389": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "전공명과 전공 분야를 나열한 조건으로 개별 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "전공명과 전공 분야를 나열한 조건으로 개별 기술명은 없음."
+   }
+  },
+  "df1e104ab5f08605e1af2195ded540eeeafc8f598183e402bc5d879806b17ac1": {
+   "category": "certificate",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "PMP와 정보관리기술사는 자격증명이며 기술명이 아님. 자격증 간에는 대체 관계가 있음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "certificate",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "PMP와 정보관리기술사는 자격증명이며 기술명이 아님. 자격증 간에는 대체 관계가 있음."
+   }
+  },
+  "468d99fc6159e2cda697d9de6ecbf4008976bdf164ab437b3686fb021fcfab0b": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "한 ID에 관련 학위, 소프트웨어 개발 경력 3년 이상, java 조건이 함께 있음. 기술명 명시 기준으로 skill을 선택했으며 나머지 조건도 별도로 존재함. 근데 이건 그냥 추출부터 잘못한거임 java는 따로 뽑아야지 java는 기술이긴하나 메인은 경력으로 해서 경력 픽함",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "java",
+    "relation": null,
+    "unknown": false,
+    "note": "한 ID에 관련 학위, 소프트웨어 개발 경력 3년 이상, java 조건이 함께 있음. 기술명 명시 기준으로 skill을 선택했으며 나머지 조건도 별도로 존재함."
+   }
+  },
+  "03cc891caf07775d7a64a4e2f310a41697d5147817dec35db4504594b6e1c192": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "WebSocket, HTML5, Unity3D, vue, DB, MySQL, MSSQL, Oracle, TCP/IP, Linux, ROS, Python",
+   "relation": "all",
+   "unknown": false,
+   "note": "DB는 상위 범주이고 MySQL/MSSQL/Oracle은 대체 예시(any). Linux 및 ROS는 all. 나머지 독립 경험과 어학 조건은 병렬 나열됨. HTML5/Unity3D/vue는 역할이 다른 예시로 대체 가능 여부가 불명확함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "WebSocket, HTML5, Unity3D, vue, DB, MySQL, MSSQL, Oracle, TCP/IP, Linux, ROS, Python, 영어회화",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "DB는 상위 범주이고 MySQL/MSSQL/Oracle은 대체 예시(any). Linux 및 ROS는 all. 나머지 독립 경험과 어학 조건은 병렬 나열됨. HTML5/Unity3D/vue는 역할이 다른 예시로 대체 가능 여부가 불명확함."
+   }
+  },
+  "54c6dd4614f3008da8aad7d4126766284e27c1327275b59f269c8e1595e3a261": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Rest API",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "83da63a0ee8e996d3fe7bba3a40e448e56422d7b5fd519cd2f896b2f01899b9c": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Springboot",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Springboot",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "20e67a09905973ebe964e46aec31c3d003b13052dc08acaaa2c575765d7e84ad": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "SQL, NoSQL DB",
+   "relation": "any",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "SQL, NoSQL DB",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "54554c2ba3a5f96445d1496bf7098b9b950a4ed70e437fad864e97193443958a": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Git",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Git",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "fb279c58a30f6a1459295a8fbe8c76a5188c9c816a8b0974a3b0ba6fa6cd1fb5": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "시스템 운영 또는 IT 인프라에 대한 관심을 묻고 있으며 특정 기술 숙련도를 요구하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "시스템 운영 또는 IT 인프라에 대한 관심을 묻고 있으며 특정 기술 숙련도를 요구하지 않음."
+   }
+  },
+  "e03e635509d5038da9f48609e121f5bb05c283bbd9fd1b45189e23294bbd4f8b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "리눅스",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "리눅스",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "b7b80b24f37060ec095aedec6c786bc0d9dca5241990b7b5560f38e7dc89a251": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "네트워크는 상위 범주이고 IP, 서브넷, 포트, 방화벽은 서로 대체되지 않는 기초 개념의 예시임. 각 개념의 필수 충족 여부는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "네트워크, IP, 서브넷, 포트, 방화벽",
+    "relation": "all",
+    "unknown": false,
+    "note": "네트워크는 상위 범주이고 IP, 서브넷, 포트, 방화벽은 서로 대체되지 않는 기초 개념의 예시임. 각 개념의 필수 충족 여부는 명시되지 않음."
+   }
+  },
+  "fb6e4dda56b6ea91744129e3716bffa829e3c81db8e9fa7977e1f46d1ef2eeee": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "운전 가능 여부이며 운전면허 자격증 보유를 직접 명시하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "운전 가능 여부이며 운전면허 자격증 보유를 직접 명시하지 않음."
+   }
+  },
+  "d1508311f4aaf61707bc18c109c23f1a015996a4d50f83cd45c99dd41fd1a80e": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "React, Angular, Vue",
+   "relation": "any",
+   "unknown": false,
+   "note": "FrontEnd Framework는 상위 범주이고 나머지는 프레임워크 예시임.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "FrontEnd Framework, React, Angular, Vue",
+    "relation": "any",
+    "unknown": false,
+    "note": "FrontEnd Framework는 상위 범주이고 나머지는 프레임워크 예시임."
+   }
+  },
+  "f130b649777b9f790ecc958c703c762ced59028c7625a30b11ca32d19fc71089": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AWS, EC2, EB",
+   "relation": "all",
+   "unknown": false,
+   "note": "AWS는 상위 플랫폼이고 EC2와 EB는 서로 다른 역할의 서비스로 병기됨. 두 서비스 경험이 반드시 모두 필요한지는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AWS, EC2, EB",
+    "relation": "all",
+    "unknown": false,
+    "note": "AWS는 상위 플랫폼이고 EC2와 EB는 서로 다른 역할의 서비스로 병기됨. 두 서비스 경험이 반드시 모두 필요한지는 명시되지 않음."
+   }
+  },
+  "3f74c3eb61f156fa7bde03b45277e6b1448d9248ab8e67b02fa8f24ecadae3ad": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "특정 배포 자동화 도구나 방법론의 이름이 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "특정 배포 자동화 도구나 방법론의 이름이 없음."
+   }
+  },
+  "713f386e6ba6713d6e68bc04de3164fac2ca3db1049e3ddfc28261d66d5a3b96": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "On-Premise 환경(all)에서 가상화(VM) 또는 컨테이너 운용(any). VM은 가상화에 대한 괄호 설명임.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "On-Premise, 가상화, VM, 컨테이너",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "On-Premise 환경(all)에서 가상화(VM) 또는 컨테이너 운용(any). VM은 가상화에 대한 괄호 설명임."
+   }
+  },
+  "4a051c0ef1df999a0e368345e05659b470640b9e1934d42c35cc97825294fe61": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AWS, NCP, Azure",
+   "relation": "any",
+   "unknown": false,
+   "note": "클라우드 인프라는 상위 범주이며 AWS, NCP, Azure는 대체 가능한 플랫폼 예시임.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AWS, NCP, Azure, 클라우드 인프라",
+    "relation": "any",
+    "unknown": false,
+    "note": "클라우드 인프라는 상위 범주이며 AWS, NCP, Azure는 대체 가능한 플랫폼 예시임."
+   }
+  },
+  "d9b2f02dcd76ce09d272d535d523e898c3d3900bc20dbe1e14e8a84df2f29825": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Prometheus, Grafana, Telegraf",
+   "relation": "all",
+   "unknown": false,
+   "note": "지표 수집·모니터링·시각화 등 역할이 다른 도구의 나열로 all을 선택함. 실제로 세 도구 모두를 요구하는지는 명시되지 않음. 일단 이거는 희귀한, 기술명들임. 맥락파악하는데만 쓰자",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Prometheus, Grafana, Telegraf",
+    "relation": "all",
+    "unknown": false,
+    "note": "지표 수집·모니터링·시각화 등 역할이 다른 도구의 나열로 all을 선택함. 실제로 세 도구 모두를 요구하는지는 명시되지 않음."
+   }
+  },
+  "d6309bd1bec56737d85d0cfd5f77127345235b8ea2925248b8740373c0a72942": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "네트워크 장비는 기술 범주이며 운영 업무 자동화는 이름 없는 일반 업무 능력임. 두 업무 경험은 원문에서 또는으로 연결됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "네트워크 장비",
+    "relation": null,
+    "unknown": false,
+    "note": "네트워크 장비는 기술 범주이며 운영 업무 자동화는 이름 없는 일반 업무 능력임. 두 업무 경험은 원문에서 또는으로 연결됨."
+   }
+  },
+  "e4e64c4b241d15c91f32764c84312933951117e5842c8605c054cd0af598a13c": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "서버 시스템 운영 경력 6년 이상이 핵심이며 구체적 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "서버 시스템 운영 경력 6년 이상이 핵심이며 구체적 기술명은 없음."
+   }
+  },
+  "47eb32a12814f87f85ece6316eda21473471b0b148210de759d8fa8d6321941f": {
+   "category": "certificate",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "전공·자격증 우대와 클라우드 경험이 한 ID에 혼재함. 오라클은 제공사, 클라우드 서비스는 해당 범주로 독립된 두 요구사항은 아님. 정확한 서비스명은 원문에 없음. 자격증은 우대조건, 오라클, 클라우드는 필수",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "오라클, 클라우드 서비스",
+    "relation": "all",
+    "unknown": false,
+    "note": "전공·자격증 우대와 클라우드 경험이 한 ID에 혼재함. 오라클은 제공사, 클라우드 서비스는 해당 범주로 독립된 두 요구사항은 아님. 정확한 서비스명은 원문에 없음."
+   }
+  },
+  "14ca4bbedf88c7d32957908801fef5d88b47f9c67799d7ca663f47b85cd45e35": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PHP, Python, Shell Script",
+   "relation": "all",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "PHP, Python, Shell Script",
+    "relation": "all",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "fdf319af0300454dfa1944400049bf5721c5993a35485ede2c48222c523afe34": {
+   "category": "other",
+   "not_condition": true,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "학력 제한이 없음을 명시하므로 실제 요구 조건이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "학력 제한이 없음을 명시하므로 실제 요구 조건이 아님."
+   }
+  },
+  "c4629eb3a57fc0d209c53b1b51afca5b57ba3edddefc8269951f368e43d1a052": {
+   "category": "other",
+   "not_condition": true,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "전공 제한이 없음을 명시하므로 실제 요구 조건이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "전공 제한이 없음을 명시하므로 실제 요구 조건이 아님."
+   }
+  },
+  "44ac06f8737fe749444d54e2ab8be804cc73b42789224ec667a397b8ec6e50f0": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "d7116b7b5761292709fe49a10058e95cdc305e0b1fbabdb7d9858c3b7e2b7796": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Modern C++, Go, Linux",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "Modern C++ 또는 Go(any) 기반 개발 경력 3년 이상과 해당 언어를 이용한 Linux용 보안 통신 및 시스템/보안 프로그래밍 경험(all). 연봉 기재 안내도 함께 포함됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Modern C++, Go, Linux",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "Modern C++ 또는 Go(any) 기반 개발 경력 3년 이상과 해당 언어를 이용한 Linux용 보안 통신 및 시스템/보안 프로그래밍 경험(all). 연봉 기재 안내도 함께 포함됨."
+   }
+  },
+  "6b3292544d7171298297d67b88fe87162254759c5e2bcf4ffdd7fa4b64124a41": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Rust, Python",
+   "relation": "all",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Rust, Python",
+    "relation": "all",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "fc001bb9cf54a9461443314f1980dc7429440d3e56cb420983024c6c2f66240d": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "오픈소스 기여 경험이며 특정 오픈소스 기술이나 프로젝트명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "오픈소스 기여 경험이며 특정 오픈소스 기술이나 프로젝트명은 없음."
+   }
+  },
+  "40aaa93bfb69ac55d224ec06f4d54749c6809ad39760427cd1bfbcf3cf91bc61": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Hashicorp Vault, KMS",
+   "relation": "all",
+   "unknown": false,
+   "note": "슬래시로 연결된 대체 예시로 해석함. KMS의 구체적인 제공 플랫폼은 명시되지 않음. 슬래시라고해서 무조건 대체는 아님 맥락 파악 필요 여기서는 and임. 다른 곳에선 or 일수도 있음",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Hashicorp Vault, KMS",
+    "relation": "any",
+    "unknown": false,
+    "note": "슬래시로 연결된 대체 예시로 해석함. KMS의 구체적인 제공 플랫폼은 명시되지 않음."
+   }
+  },
+  "376b7c96b2d89a16dad566f3e1280305430c8d886a33e971b761d56bc75e829c": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AD, Radius, OTP, FIDO, LDAP",
+   "relation": "any",
+   "unknown": false,
+   "note": "인증 방법의 예시 열거로 해석함. 다양한 인증 방법이라는 표현은 복수 경험을 시사하지만 최소 개수와 조합은 명시되지 않음. 기술이기엔 애매하긴함. 그리고 흔한 기술이 아니라 분류도 굳이하긴 더 애매한듯",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "LDAP, AD, Radius, OTP, FIDO",
+    "relation": "any",
+    "unknown": false,
+    "note": "인증 방법의 예시 열거로 해석함. 다양한 인증 방법이라는 표현은 복수 경험을 시사하지만 최소 개수와 조합은 명시되지 않음."
+   }
+  },
+  "34057508b77e972d38d550358bfd928bfb813d13bf4bebf4f87a170ab45c9adb": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Kubernetes, CASB",
+   "relation": "any",
+   "unknown": false,
+   "note": "Cloud와 Kubernetes는 상위 환경과 구체적 기술의 관계이며 CASB는 별도 보안 기술임. 슬래시와 쉼표만으로 대체·동시 충족 관계를 확정하기 어려움.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Cloud, Kubernetes, CASB",
+    "relation": "unknown",
+    "unknown": true,
+    "note": "Cloud와 Kubernetes는 상위 환경과 구체적 기술의 관계이며 CASB는 별도 보안 기술임. 슬래시와 쉼표만으로 대체·동시 충족 관계를 확정하기 어려움."
+   }
+  },
+  "df674304e780d41485d08db79493e5bca3f973c5a2a710a2c86bd267cc065873": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "9e0aeb14beaa09860f254eab4bb0017029e99f15c7e215bc575c5c8b249eeb2f": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "API 설계는 지침에 제시된 이름 없는 일반 능력에 해당함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "API 설계는 지침에 제시된 이름 없는 일반 능력에 해당함."
+   }
+  },
+  "6e44049a2e5697d8906f301df34e420409201dc623009bbcd08ed15deb2e256b": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "Bug bounty는 보안 취약점 제보·보상 활동이며 특정 기술명이나 도구명이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "Bug bounty는 보안 취약점 제보·보상 활동이며 특정 기술명이나 도구명이 아님."
+   }
+  },
+  "f5215bdc20e98b00ccae2451424b90e7c37973493f618199ff33bf02ce33d0e0": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "서버리스",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "26ddf42c11ec3efc9473b0fd88fc50071aa10fbc0230629e518ad514bef32b88": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "eBPF, XDP, Rust, Python",
+   "relation": "all",
+   "unknown": false,
+   "note": "eBPF와 XDP는 서로 관련된 별도 기술이고 Rust, Python은 단순 나열임. 원문에서 두 글머리표가 한 ID에 합쳐져 있음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "eBPF, XDP, Rust, Python",
+    "relation": "all",
+    "unknown": false,
+    "note": "eBPF와 XDP는 서로 관련된 별도 기술이고 Rust, Python은 단순 나열임. 원문에서 두 글머리표가 한 ID에 합쳐져 있음."
+   }
+  },
+  "8e9d875c45fb746985d2eab83a3ba1e7ec2fa3a2977b912a91550868f54fbf71": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "관련 분야 중 경력 2년 이상이 핵심. IT기획·업무혁신도 경력 분야 예시이며 PI·PM의 상세 의미는 원문에 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "AX, DX, PI, PM",
+    "relation": "any",
+    "unknown": false,
+    "note": "관련 분야 중 경력 2년 이상이 핵심. IT기획·업무혁신도 경력 분야 예시이며 PI·PM의 상세 의미는 원문에 없음."
+   }
+  },
+  "005de91e0fdf76423f2d0d7ca39d461d9d14b1fafedf56e2a303ec1e5b82e1d1": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "학사 이상, 전공 무관. 뒤의 부서 소개는 별도 요구조건이 아니므로 소개에만 등장하는 용어는 제외.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "학사 이상, 전공 무관. 뒤의 부서 소개는 별도 요구조건이 아니므로 소개에만 등장하는 용어는 제외."
+   }
+  },
+  "7575495e5cbf0fcfb780604d4aec68f5a41b0b6cec8c29d26fee45eed039d1b4": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "프로젝트 기획·관리 역량과 협업 역량이 함께 제시됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "프로젝트 기획·관리 역량과 협업 역량이 함께 제시됨."
+   }
+  },
+  "f576dc68b7fb9d0bf909a5b0d3cf2bb0595bd291c2670e69a332e50736ba4d66": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "디지털 기술은 구체적인 기술명이 명시되지 않은 포괄적 표현.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI",
+    "relation": null,
+    "unknown": false,
+    "note": "디지털 기술은 구체적인 기술명이 명시되지 않은 포괄적 표현."
+   }
+  },
+  "cff819b3bd4d87e39a36763d71f14d7f8226c5bf2d4f8a1fce68ab8e123ec418": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "AI/AX/DX 또는 업무자동화 프로젝트 경험. 업무자동화는 구체적인 도구명이 없는 대안.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI, AX, DX",
+    "relation": "any",
+    "unknown": false,
+    "note": "AI/AX/DX 또는 업무자동화 프로젝트 경험. 업무자동화는 구체적인 도구명이 없는 대안."
+   }
+  },
+  "b9e5e478cdf989f8d53ca0453384a48863c89237cd8aa147dda8673ae05efc43": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "생성형 AI와 RPA는 역할이 다른 기술. 데이터 분석은 구체적 기술명이 없는 일반 역량이며, 원문은 모든 예시의 필수 여부를 명시하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "생성형 AI, RPA",
+    "relation": "all",
+    "unknown": false,
+    "note": "생성형 AI와 RPA는 역할이 다른 기술. 데이터 분석은 구체적 기술명이 없는 일반 역량이며, 원문은 모든 예시의 필수 여부를 명시하지 않음."
+   }
+  },
+  "474c2350cb24fbd8dd891b67459b8f6a185f2338dcf77efb41f69769fb8694d6": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "Python",
+   "relation": null,
+   "unknown": false,
+   "note": "경력 5년 이상을 대표 범주로 선택. Python 개발 경험, 설계·개선 역량, 책임감 및 소통 조건도 같은 ID에 포함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "Python",
+    "relation": null,
+    "unknown": false,
+    "note": "경력 5년 이상을 대표 범주로 선택. Python 개발 경험, 설계·개선 역량, 책임감 및 소통 조건도 같은 ID에 포함."
+   }
+  },
+  "b2b16f95c2c2e38a51f6de7b08d5a1d4e7c87dfc8ec8a5644bd9da2d35c74756": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "정산 업무 도메인과 대용량 트래픽 운영·코드 리팩토링·설계 역량이 묶여 있음. 특정 도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "플랫폼 정산",
+    "relation": null,
+    "unknown": false,
+    "note": "정산 업무 도메인과 대용량 트래픽 운영·코드 리팩토링·설계 역량이 묶여 있음. 특정 도구명은 없음."
+   }
+  },
+  "dee25353c3252b3a33e2016b48fd87357e5ab19496f3bda3eae6ecedd9279bc2": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "필수로 구분된 ID이나 원문은 3년 이상 경험을 우대한다고 표현.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "필수로 구분된 ID이나 원문은 3년 이상 경험을 우대한다고 표현."
+   }
+  },
+  "ec68e50e5a93a2966378cfaf01c290fbc6707a2de31259e9e5cd5ab1f3883c87": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PHP, JavaScript, HTML, CSS, Node.js",
+   "relation": "all",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "PHP, JavaScript, HTML, CSS, Node.js",
+    "relation": "all",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "53df7d57660372ae8af51c2d17f01d55e49211d5db219b4dd654b0aa8e9803d0": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Java, Python",
+   "relation": "all",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Java, Python",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "f5e7cde9d47f8dc0a4825fe8753db35ba9ea1dceb173f41a226d04bd73bf1a46": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "접속어 없는 단순 나열이므로 지침상 all. 실제 세 도메인 모두의 경험이 필요한지는 원문상 불명확.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "메디컬, 뷰티, 쇼핑몰",
+    "relation": "all",
+    "unknown": false,
+    "note": "접속어 없는 단순 나열이므로 지침상 all. 실제 세 도메인 모두의 경험이 필요한지는 원문상 불명확."
+   }
+  },
+  "9508078bafdda7d2f932eddeeafd1f4f4ffbe9f4b7149e2c9df9fde03a321e3b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "React, Vue.js, Flutter",
+   "relation": "any",
+   "unknown": false,
+   "note": "프레임워크의 예시 나열.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "React, Vue.js, Flutter",
+    "relation": "any",
+    "unknown": false,
+    "note": "프레임워크의 예시 나열."
+   }
+  },
+  "e764080606feab6770b00f737a7b8373905cd0d6fce6b1b537082493a29e8533": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "특정 DB 또는 DB 유형 없이 설계·관리 역량을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "특정 DB 또는 DB 유형 없이 설계·관리 역량을 요구."
+   }
+  },
+  "092334f00194a6c324296b04d04339bd5e8df38b4d069a3eb84a443c0a0bc0dd": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AWS, Azure",
+   "relation": "any",
+   "unknown": false,
+   "note": "클라우드는 상위 범주, AWS와 Azure는 그 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "클라우드, AWS, Azure",
+    "relation": "any",
+    "unknown": false,
+    "note": "클라우드는 상위 범주, AWS와 Azure는 그 예시."
+   }
+  },
+  "94c659f6d992ee19185bd05c840ccb133e9c45547f9a35cd803efe638856ae22": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "6acfba1039661d80f118cff7498ba6d6bd4886c7eb75e7475a77b46bcf095cfd": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "문제 해결 능력과 창의적 사고 역량.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "문제 해결 능력과 창의적 사고 역량."
+   }
+  },
+  "206bf7b77af3e24053dee3115c9578754536df062e38ced42de9c222e1f6d1f0": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "학력·관련 전공과 3~5년 경력이 함께 제시되어 첫 조건인 학력을 대표 범주로 선택.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "학력·관련 전공과 3~5년 경력이 함께 제시되어 첫 조건인 학력을 대표 범주로 선택."
+   }
+  },
+  "6d85c5ff63bdf2be6f8403585cc6b5931897586646c313065d211605fc13aa08": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Node.js, JavaScript, TypeScript",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "Node.js AND (JavaScript OR TypeScript).",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Node.js, JavaScript, TypeScript",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "Node.js AND (JavaScript OR TypeScript)."
+   }
+  },
+  "74a54ef3cfea91c8da57a774d3cf52eb96b0d7f12da82c4f6a73db8c56a7ab5f": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "RDBMS, SQL",
+   "relation": "all",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "RDBMS, SQL",
+    "relation": "all",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "cc66f32fffa153851b7462d340ef85df35f400aaf8792c98ab490756f20fd055": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "자료구조·알고리즘·운영체제·네트워크는 CS 기초 지식의 일반 분야이며 특정 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "자료구조·알고리즘·운영체제·네트워크는 CS 기초 지식의 일반 분야이며 특정 기술명은 없음."
+   }
+  },
+  "ccaa715232c35756dff944e8307dc098c9b5ae8ee9b388b4ad5485193a0d2f8b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Git, JIRA",
+   "relation": "all",
+   "unknown": false,
+   "note": "형상 관리와 협업 도구라는 서로 다른 역할. JIRA는 협업 도구의 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Git, JIRA",
+    "relation": "all",
+    "unknown": false,
+    "note": "형상 관리와 협업 도구라는 서로 다른 역할. JIRA는 협업 도구의 예시."
+   }
+  },
+  "4dcbb8da205418704eddf4ecc33cb855f24fea2bfaf1fb55c0bbf4e39eae39b7": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "31d26d0894d3eacddf3a11c87e3e14b0239975956f63203321bb4126623e3023": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "Unit Test는 단위 테스트와 동일한 원문 병기이므로 중복 추출하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "단위 테스트, 통합 테스트",
+    "relation": "all",
+    "unknown": false,
+    "note": "Unit Test는 단위 테스트와 동일한 원문 병기이므로 중복 추출하지 않음."
+   }
+  },
+  "bfe915753574522ac4534446148b41524b9cc16732b64cdc85eb967c1001ea24": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PostgreSQL, ClickHouse, Cassandra",
+   "relation": "all",
+   "unknown": false,
+   "note": "서로 다른 DB를 조합하는 방법론과 역할이 다른 DB 예시. DB는 상위 범주이며, 원문이 나열된 세 제품 모두를 필수로 지정한 것은 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Polyglot Persistence, PostgreSQL, ClickHouse, Cassandra, DB",
+    "relation": "all",
+    "unknown": false,
+    "note": "서로 다른 DB를 조합하는 방법론과 역할이 다른 DB 예시. DB는 상위 범주이며, 원문이 나열된 세 제품 모두를 필수로 지정한 것은 아님."
+   }
+  },
+  "150f70d666abdb243bb68dffd8360f67698d67c22d80b3ef363cccb5b6de97aa": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "DR, Failover",
+   "relation": "all",
+   "unknown": false,
+   "note": "Disaster Recovery는 DR의 원문 병기이므로 중복 추출하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "DR, Failover",
+    "relation": "all",
+    "unknown": false,
+    "note": "Disaster Recovery는 DR의 원문 병기이므로 중복 추출하지 않음."
+   }
+  },
+  "1471f2689e618a702180bf4b7bbcb475501ced869e6ce9ff5d26dd2c8c581423": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Docker, Kubernetes",
+   "relation": "all",
+   "unknown": false,
+   "note": "Docker와 Kubernetes는 지침에 명시된 선후·보완 관계. 컨테이너는 상위 범주.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Docker, Kubernetes, 컨테이너",
+    "relation": "all",
+    "unknown": false,
+    "note": "Docker와 Kubernetes는 지침에 명시된 선후·보완 관계. 컨테이너는 상위 범주."
+   }
+  },
+  "2276985b040c92211d24af45fc305da02c61b01d65ee27ffb287c212d40e9416": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "시스템 도메인 예시. 개발 또는 데이터 마이그레이션 경험을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "EMR, CRM",
+    "relation": "any",
+    "unknown": false,
+    "note": "시스템 도메인 예시. 개발 또는 데이터 마이그레이션 경험을 요구."
+   }
+  },
+  "a099630e4ba61db05d0a8d103c26c656d056bebf79f69084446aa858d5f269ef": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "1b30c2c53fdd0ec61672b7379962c0209da19a78bba62b2f9f9db5ca45653acc": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "Backend 개발 직무 경험을 요구하며 구체적인 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "Backend 개발 직무 경험을 요구하며 구체적인 기술명은 없음."
+   }
+  },
+  "fda7613b80269f97a6125f31a962b90c3019075098130b7eedd2123e9a615ea5": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Composer",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "df7aec381aa004b24dd67e8696fdb169c867c7abde0008fc7ce2ca7049e4cc6c": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "특정 도구명 없이 버전 관리 시스템 활용 능력을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "특정 도구명 없이 버전 관리 시스템 활용 능력을 요구."
+   }
+  },
+  "3dd9c20372c479093843dcdf04c9021d2ae62c27702788e42cb21ddb8fcf8286": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PHP",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "PHP",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "b96e84b1cd518e1e0ac2731657ca3068ff48effbcb7b9bc5b9c627fc77f96c02": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "프론트엔드 개발 언어에 대한 일반 이해도를 요구하며 구체적 언어명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "프론트엔드 개발 언어에 대한 일반 이해도를 요구하며 구체적 언어명은 없음."
+   }
+  },
+  "b796848b960ba8fcbfb2bb63a823073a3c6df553f72fc158420d5d3c931e6fa4": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "개발에 사용하는 CMS 플랫폼.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "워드프레스",
+    "relation": null,
+    "unknown": false,
+    "note": "개발에 사용하는 CMS 플랫폼."
+   }
+  },
+  "2d65c0339ae8e70b1dc218b705f2d63d763f6a01d30055f18e771ea0a65bdc36": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "SEO",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "SEO",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "ef9fd07c1d338da627b93b33b1877ee9813a7e9c229066be9bffb5241e88f3e3": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "28c9cfe7d902dcdf6890422e2f124951e886991e7a14ee253e7baa034d579d04": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "87dd86b467f9f2edd2b175629512cccca42f600390edf348c41c3254bd9c50bf": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "C, C++",
+   "relation": "all",
+   "unknown": false,
+   "note": "슬래시로 병기되어 있으며 둘 모두 필수라는 명시는 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "C, C++",
+    "relation": "any",
+    "unknown": false,
+    "note": "슬래시로 병기되어 있으며 둘 모두 필수라는 명시는 없음."
+   }
+  },
+  "a2ef6ffef7bd3e3a4b5553ed8f84453ef508ec696ad0a4c91ce767efb78d6e34": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "컴퓨터·전자는 전공명으로 사용됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "컴퓨터·전자는 전공명으로 사용됨."
+   }
+  },
+  "45a7b05e3cc2e56f38cded4e72b07c0094ac2720fae99b469003d4822496a38d": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "구체 기술명 없이 시스템 프로그래밍 업무 능력을 요구함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "구체 기술명 없이 시스템 프로그래밍 업무 능력을 요구함."
+   }
+  },
+  "27d267ec1214e012fe624958a4a3e016525342968ca0f0568bb10474e45ff710": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "MCU",
+   "relation": null,
+   "unknown": false,
+   "note": "MCU 기반 임베디드 시스템 개발 경험을 의미하며 독립적인 두 조건은 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "임베디드 시스템, MCU",
+    "relation": "all",
+    "unknown": false,
+    "note": "MCU 기반 임베디드 시스템 개발 경험을 의미하며 독립적인 두 조건은 아님."
+   }
+  },
+  "4d93c068cfa769a9bc21667e2af2d4185321a830f833f5ed47ff1f88a5f507c0": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "QEMU",
+   "relation": null,
+   "unknown": false,
+   "note": "가상환경의 도구 예시로 QEMU를 제시함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "가상환경, QEMU",
+    "relation": "any",
+    "unknown": false,
+    "note": "가상환경의 도구 예시로 QEMU를 제시함."
+   }
+  },
+  "75ee7fe29bd0956945fb58c1f7f3e8a0062c2fa02ed5b88e5fc7e30a000243ae": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "BSP",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "BSP",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "e871e0922a883b84f4b53bc11f6c5631860427710ef4433de989f084c1d01994": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "기술문서 이해 수준의 어학 조건.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "영어",
+    "relation": null,
+    "unknown": false,
+    "note": "기술문서 이해 수준의 어학 조건."
+   }
+  },
+  "7588a2d84df5a716fd61fe4ec8b3e1fb8fd1c1265212dc2328d4e783c8e94961": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "ed211817f089d836c9d915c39efed52dadcfb692401a41555747d361ae0ce791": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "C, C++",
+   "relation": "any",
+   "unknown": false,
+   "note": "C/C++ 개발 경험 7년 이상. 두 언어 모두 필요하다는 명시는 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "C, C++",
+    "relation": "any",
+    "unknown": false,
+    "note": "C/C++ 개발 경험 7년 이상. 두 언어 모두 필요하다는 명시는 없음."
+   }
+  },
+  "f590d148cfbfcba6c59097122bcf4ededd7e5a9917f14fee7d8fe11885750b66": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "VoIP는 인터넷 전화 기술 범주이며 SIP는 관련 신호 프로토콜로, 단순 대체 관계가 아님. 범주어 포함; 각 기술의 개별 필수 여부는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "VoIP, SIP, 인터넷 전화 프로토콜",
+    "relation": "all",
+    "unknown": false,
+    "note": "VoIP는 인터넷 전화 기술 범주이며 SIP는 관련 신호 프로토콜로, 단순 대체 관계가 아님. 범주어 포함; 각 기술의 개별 필수 여부는 명시되지 않음."
+   }
+  },
+  "662c4b98f1dff3f468ebd4aa720b9a0787d634098698c0d2d12cbc137b62b3ef": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "efb0c0db3eab3c38e685d9c00107ca1fe3730ae238b44c81029cfa9ba570b130": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "CTI 업무 이해와 아웃바운드 경험을 함께 요구함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "CTI, 아웃바운드",
+    "relation": "all",
+    "unknown": false,
+    "note": "CTI 업무 이해와 아웃바운드 경험을 함께 요구함."
+   }
+  },
+  "ed1a0eb5fa4be8b9f68b7c9af874498e7293fd68fc375774d9a77ded91cd572c": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "(금융 OR 통신 OR 이커머스 등) 분야의 대규모 콜센터 시스템 구축 또는 운영 경험.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "금융, 통신, 이커머스, 콜센터",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "(금융 OR 통신 OR 이커머스 등) 분야의 대규모 콜센터 시스템 구축 또는 운영 경험."
+   }
+  },
+  "ecd23e2cfadb854ed84e75e42b93fcd1d1cda955c3015b4b0ef1e32acbc971aa": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "CTI 미들웨어라는 하나의 기술 대상이며 개발 또는 연동 경험을 요구함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "CTI, 미들웨어",
+    "relation": "all",
+    "unknown": false,
+    "note": "CTI 미들웨어라는 하나의 기술 대상이며 개발 또는 연동 경험을 요구함."
+   }
+  },
+  "2d338f415af41aa050b4d78df798c41f86b504925a7b6dc6a22fb17e3c1a5f2a": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "SQL",
+   "relation": null,
+   "unknown": false,
+   "note": "SQL을 활용하는 데이터베이스 및 쿼리 작성 능력으로, 두 용어는 대체 관계가 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "데이터베이스, SQL",
+    "relation": "all",
+    "unknown": false,
+    "note": "SQL을 활용하는 데이터베이스 및 쿼리 작성 능력으로, 두 용어는 대체 관계가 아님."
+   }
+  },
+  "916f8c89585758fdb327ac19e3d865dcd23d028eba5892e6f0890683ff1c3de2": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "컨택센터 업무 도메인 이해를 요구함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "컨택센터",
+    "relation": null,
+    "unknown": false,
+    "note": "컨택센터 업무 도메인 이해를 요구함."
+   }
+  },
+  "59ef4e8eaa0cb1da593695c864941800e15edb45be06234b97f83676d60bd390": {
+   "category": "other",
+   "not_condition": true,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "소제목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "소제목."
+   }
+  },
+  "2b04d505c937679de12cd5f3c71572decbe2125d8351c9aa076dc1cacbbd4806": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Java",
+   "relation": null,
+   "unknown": false,
+   "note": "Multi-Thread와 Thread Safety는 상호 관련된 개념이며 대체 관계가 아님. 나머지는 기술보단 개념인 느낌",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Java, Multi-Thread, Thread Safety, Lambda Expression, Stream",
+    "relation": "all",
+    "unknown": false,
+    "note": "Multi-Thread와 Thread Safety는 상호 관련된 개념이며 대체 관계가 아님."
+   }
+  },
+  "c7ac69de38570ed73001d7982b48c6901e361282ce38ffdb7078063d5eb70250": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "뒤의 시스템 레벨 이해는 소제목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Design Pattern",
+    "relation": null,
+    "unknown": false,
+    "note": "뒤의 시스템 레벨 이해는 소제목."
+   }
+  },
+  "45755acc48b65130c9756499265b2b99cfbe3eb7b2b44029972c4653c877202f": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "POSIX 환경의 Socket 구현체라는 결합 조건.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "POSIX, Socket",
+    "relation": "all",
+    "unknown": false,
+    "note": "POSIX 환경의 Socket 구현체라는 결합 조건."
+   }
+  },
+  "f26b9630158871e6746d2c38d25afc451f1b0d2ddf117af0ea5d548d1b63fb83": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Linux OS",
+   "relation": null,
+   "unknown": false,
+   "note": "Linux = Linux OS 같은거임",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Linux OS",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "e5ba304ff58a8985589221891ae8be5917bf665aac157e1c55b635dfe016c8a5": {
+   "category": "other",
+   "not_condition": true,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "소제목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "소제목."
+   }
+  },
+  "344183251e09c7a304b3eb1782170a36c6a5775197844fac58dfc22a4d37c05e": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "EAI/FEP 등 유사한 제품군 개발 경험을 예시로 제시함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "EAI, FEP",
+    "relation": "any",
+    "unknown": false,
+    "note": "EAI/FEP 등 유사한 제품군 개발 경험을 예시로 제시함."
+   }
+  },
+  "1746885ec035994aae76ae5be1754e2d1116bd7298304c9ab1ab487570aaa5d9": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "구체 기술명 없는 연계 명세 구현 경험. 뒤의 개발 리더십은 소제목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "구체 기술명 없는 연계 명세 구현 경험. 뒤의 개발 리더십은 소제목."
+   }
+  },
+  "d7c058985e8fd1840d4d04c26b5f15557d9fc4aaf84be0f4ca47865c12fb8ac8": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "팀 또는 기술 리딩 역량.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "팀 또는 기술 리딩 역량."
+   }
+  },
+  "2812a53819491899473fd80ae25b20d3ac10474054ff03e1e000df15c1d4c67b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "CI/CD",
+   "relation": null,
+   "unknown": false,
+   "note": "코드 품질 관리 도구도 요구하나 구체적인 도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "CI/CD, 자동화 테스트",
+    "relation": "all",
+    "unknown": false,
+    "note": "코드 품질 관리 도구도 요구하나 구체적인 도구명은 없음."
+   }
+  },
+  "2488098bd5615ea547e9a1e23ab238e2281563b0e9991e3cec04a1eb10326683": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "d85dfb3f7b23825ae8a173721bdf86634a9fbbc6e3f197b19b852a2c61ed69d3": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "특정 오픈소스 기술명이 없으며 뒤의 문제 해결 능력은 소제목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "특정 오픈소스 기술명이 없으며 뒤의 문제 해결 능력은 소제목."
+   }
+  },
+  "afd440a485107ec070b553fe3a6e862bed05b582000f72d1a420b11e7829794d": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "dfd1b8ae781c2dc949fed9a77db5059ebbb7c2fffd876a0eb72bde92b0f5b738": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "c944ed6435cd6c697a0b8f3dd183e8186c00c5ecbb488ac55ddef1e822d7fa35": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "6daa47b4facfe3f7b1a7d73b81cbb4297bd3555e6e32a1f14116ff6a13348f9d": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Java, Spring Boot, Python, Node.js",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "(Java AND Spring Boot) OR Python OR Node.js 등 하나 이상의 백엔드 기술 스택. Java/Spring Boot는 결합 스택으로 해석함. 하나 이상있어야함",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Java, Spring Boot, Python, Node.js",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "(Java AND Spring Boot) OR Python OR Node.js 등 하나 이상의 백엔드 기술 스택. Java/Spring Boot는 결합 스택으로 해석함."
+   }
+  },
+  "1a49e9cb4810993a8e483e2adaf17fbbef081e1cd5c1be49c38b626c62eba8fb": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "RESTAPI는 개념같은거니까",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "REST API",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "e81c59cbe24521aabaa6a0a820ad085c342183e2484159d9c620343991f727c1": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "RDBMS",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "RDBMS",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "92c007f8ecc006c182ada1098957d7a14702d37a7f90654f03aca2a736da5818": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Git",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Git",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "aac1764f012e2fd40f25cc9b2f7ffa5ecc689d9b1b75d3d759dd7eabbd55af7a": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "GIS",
+   "relation": null,
+   "unknown": false,
+   "note": "분야를 표시하는 소제목이며 기술 요구 관계가 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "GIS, Spatial",
+    "relation": "unknown",
+    "unknown": true,
+    "note": "분야를 표시하는 소제목이며 기술 요구 관계가 아님."
+   }
+  },
+  "0c7be200dbe59c57ca69a280e27e7f6cd4539e00faa39c00aa543d99c1178985": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "GIS",
+   "relation": null,
+   "unknown": false,
+   "note": "GIS 또는 지도 기반 서비스 개발 경험. 지도 기반 서비스는 구체 기술명이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "GIS",
+    "relation": null,
+    "unknown": false,
+    "note": "GIS 또는 지도 기반 서비스 개발 경험. 지도 기반 서비스는 구체 기술명이 아님."
+   }
+  },
+  "a05d3944b5295bcab16624303fa5e28fb4973fb62c8f116223d50e2c3fdd24d3": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PostgreSQL, PostGIS",
+   "relation": "all",
+   "unknown": false,
+   "note": "Spatial Database 범주의 예시이며 PostgreSQL과 PostGIS는 일반적으로 결합되는 DB와 확장 기능. 각각을 모두 요구한다는 명시는 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "PostgreSQL, PostGIS, Spatial Database",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "Spatial Database 범주의 예시이며 PostgreSQL과 PostGIS는 일반적으로 결합되는 DB와 확장 기능. 각각을 모두 요구한다는 명시는 없음."
+   }
+  },
+  "4b0890bb314df5edf76b96148f08218fcc6073e3e68359993dc7f800e06187c4": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AWS, GCP",
+   "relation": "any",
+   "unknown": false,
+   "note": "Cloud 환경의 플랫폼 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AWS, GCP, Cloud",
+    "relation": "any",
+    "unknown": false,
+    "note": "Cloud 환경의 플랫폼 예시."
+   }
+  },
+  "5e700ad87fd73a242a6014395749f4ee0bc1c180dd57389692f201d4102de9bd": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Digital Twin, 3D GIS",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "d2feabb37773861751bc6b014ef84d58c9fc22e6509062e34b623b3915e0d0eb": {
+   "category": "other",
+   "not_condition": true,
+   "terms": "GIS",
+   "relation": null,
+   "unknown": false,
+   "note": "해당 경험은 필수사항이 아니라는 안내로, any는 문장 내 병렬 대안 관계만 표시하며 필수 요구를 의미하지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": true,
+    "terms": "GIS, Digital Twin, AI",
+    "relation": "any",
+    "unknown": false,
+    "note": "해당 경험은 필수사항이 아니라는 안내로, any는 문장 내 병렬 대안 관계만 표시하며 필수 요구를 의미하지 않음."
+   }
+  },
+  "c3ee57bc2a8582a6448e11e3feb9273555ed26c6625a836bc6fe6e0c970bb13b": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "실제 조건은 일반 Backend 개발 역량과 경험이며 Spatial Data와 GeoAI는 입사 후 경험할 분야로만 언급됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "Spatial Data, GeoAI",
+    "relation": "unknown",
+    "unknown": true,
+    "note": "실제 조건은 일반 Backend 개발 역량과 경험이며 Spatial Data와 GeoAI는 입사 후 경험할 분야로만 언급됨."
+   }
+  },
+  "78e83c2869ac4b6834790cc1e7aa7685c7fabff8d20ba8f848f6f50d0de58e47": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "6381196ffc998e520e4cd14b7187b156103a753c6055d710c83ccfd494026a4b": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "경력직 3~10년 또는 병역특례 보충역 산업기능요원 대상 신입 수준의 복합 자격. 학력 무관.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "경력직 3~10년 또는 병역특례 보충역 산업기능요원 대상 신입 수준의 복합 자격. 학력 무관."
+   }
+  },
+  "fe3dde88b1df9016d3ab9b3acf0af9b7503bea86277520756b0445351d1d3f04": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "상기 기술 스택을 참조하지만 이 ID 내에는 구체 기술명이 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "상기 기술 스택을 참조하지만 이 ID 내에는 구체 기술명이 없음."
+   }
+  },
+  "28d28a517544f5c903e82fbbf4a07afb972b375db7b89388e709eb025dd0c63b": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "864b074bee0f4a580d776caaedfcafc4730aa0ff4ffeb59a82e8adab1060f992": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "개인/Toy 프로젝트는 프로젝트 유형으로 기술명이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI",
+    "relation": null,
+    "unknown": false,
+    "note": "개인/Toy 프로젝트는 프로젝트 유형으로 기술명이 아님."
+   }
+  },
+  "a2e0f726568370b3eb6d74936c255981506d33d0c2f476009491a3f600d7682f": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "a362505b47ec21e56ce626f23aba94a1684f4c53bdb5a8fc61cf56870911102e": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Unix, Linux",
+   "relation": "any",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Unix, Linux",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "514f4febbd2816eeabd629854c235fcb2cf5770c9546a2a9b9e8958a1ee9bb74": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Python, Typescript",
+   "relation": "all",
+   "unknown": false,
+   "note": "개발 언어의 예시이며 다양한 언어 경험을 선호하므로 하나만 있으면 충분하다는 뜻은 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Python, Typescript",
+    "relation": "any",
+    "unknown": false,
+    "note": "개발 언어의 예시이며 다양한 언어 경험을 선호하므로 하나만 있으면 충분하다는 뜻은 아님."
+   }
+  },
+  "999924c4c87c3af8caa7ddaaf62699b2d16c48245a21e2935ae44295355a001c": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "업무 도메인 경험.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "요식업",
+    "relation": null,
+    "unknown": false,
+    "note": "업무 도메인 경험."
+   }
+  },
+  "49b150381b6623085e22514082f1b2337d5a6d7b5b0d2283f6cf41271c5d18d4": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "에이전틱 코딩",
+   "relation": null,
+   "unknown": false,
+   "note": "기술 활용 숙련도가 아니라 해당 개발 방식에 대한 개방적 태도를 요구함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "에이전틱 코딩",
+    "relation": null,
+    "unknown": false,
+    "note": "기술 활용 숙련도가 아니라 해당 개발 방식에 대한 개방적 태도를 요구함."
+   }
+  },
+  "0c2029d18ba1b0aece16b307690428947924172aa506b8825751bd97b75f27a5": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "c0a3651cc1d9f0708fd1c67a34f24e781771fb0d9d73edfd6a65795832681762": {
+   "category": "education",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "education",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "30ce548051cd5b9ebe353221aa92997e678f0467980c14267fc329b74a1f1158": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "83f4084f104bf4dd865a3c40abbcca036d7cc2e5fc9b060fb724e537816ced23": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "풀스택 개발 범위를 요구하며 구체적인 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "풀스택 개발 범위를 요구하며 구체적인 기술명은 없음."
+   }
+  },
+  "b3932f05ba1b5487742d96b5dc53cf91d3db3c9fa0f59f3f5f66a5a4fb0169af": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "설계부터 운영까지의 일반 역량이며 구체 기술명이 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "설계부터 운영까지의 일반 역량이며 구체 기술명이 없음."
+   }
+  },
+  "63d62dae9c0a8159f675568e219a0439423b10444d65c4d6c55b97f8e5f970d0": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "AWS, GCP",
+   "relation": "any",
+   "unknown": false,
+   "note": "클라우드는 상위 범주, AWS와 GCP는 플랫폼 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "클라우드, AWS, GCP",
+    "relation": "any",
+    "unknown": false,
+    "note": "클라우드는 상위 범주, AWS와 GCP는 플랫폼 예시."
+   }
+  },
+  "ec09bc6d14d1d63360f3ca57e7284b01df39adaf701129528694db4adeeac281": {
+   "category": "attitude",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "attitude",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "06a6037aaac7597a9fc3c878fcd08a0ea5730b34200c631dd63b8a02919e9e34": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "팀 리딩 또는 멘토링 역할 경험을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "팀 리딩 또는 멘토링 역할 경험을 요구."
+   }
+  },
+  "d0648912b7e989de891dcf8ebf8fd6c53b59199757cf9922c2a41866673bfde8": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "광고 대행사 근무 경험도 대안으로 제시됨.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "디지털 마케팅, 애드테크",
+    "relation": "any",
+    "unknown": false,
+    "note": "광고 대행사 근무 경험도 대안으로 제시됨."
+   }
+  },
+  "5092077cd4ea9918345bd651688e6ee95847a881f4b006ff44f7bda68b8f3653": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "광고 API 연동 대상 플랫폼의 예시이며 구체 API 제품명은 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Meta, Google, 네이버",
+    "relation": "any",
+    "unknown": false,
+    "note": "광고 API 연동 대상 플랫폼의 예시이며 구체 API 제품명은 명시되지 않음."
+   }
+  },
+  "ccf47a8f7a5e7e149f6916d9e4f1f2e554568f8a314e1bc7ff340ee3c0b99f53": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "트래킹/분석 도구의 예시. 두 도구 모두 사용해야 한다는 명시는 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "GA, AppsFlyer",
+    "relation": "any",
+    "unknown": false,
+    "note": "트래킹/분석 도구의 예시. 두 도구 모두 사용해야 한다는 명시는 없음."
+   }
+  },
+  "0a58933a80b47aef3b630961633266fd5ad2e19681f9f021e097b2d3a8f31538": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "AI 도구 활용 사례의 예시. MCP는 Claude·ChatGPT와 달리 프로토콜이므로 기술적으로 동일한 유형의 대체재는 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI, Claude, ChatGPT, MCP",
+    "relation": "any",
+    "unknown": false,
+    "note": "AI 도구 활용 사례의 예시. MCP는 Claude·ChatGPT와 달리 프로토콜이므로 기술적으로 동일한 유형의 대체재는 아님."
+   }
+  },
+  "8e4ac6ed4415a6e5ffc9ba9da4770edf5813e2947e8bfc359e07e76c0c0db2af": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "CI/CD, DevOps",
+   "relation": "all",
+   "unknown": false,
+   "note": "DevOps는 상위 방법론이고 CI/CD는 세부 역량. 모니터링·자동화는 이름 없는 일반 업무로 분류.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "DevOps, CI/CD",
+    "relation": "all",
+    "unknown": false,
+    "note": "DevOps는 상위 방법론이고 CI/CD는 세부 역량. 모니터링·자동화는 이름 없는 일반 업무로 분류."
+   }
+  },
+  "ae96cacaeb0817d2766471b2165f31a37b1dfbd746c2b24b005ff16a1f865a45": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "구체 도구명 없이 데이터 파이프라인 또는 대시보드 개발 경험을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "구체 도구명 없이 데이터 파이프라인 또는 대시보드 개발 경험을 요구."
+   }
+  },
+  "11fa2291f66564233050c9ea536b72107615282191f8555d2796618eecab8281": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "fc381b829055d59f6d267541497d81c17ee92777c8867a495d0db4381908e597": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Java",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Java",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "3cf03c85e0b0e08edf73b9cbb8a541ce25eadad657ab150508bed79a364d6184": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Spring, Spring Boot",
+   "relation": "any",
+   "unknown": false,
+   "note": "슬래시 병기이며 둘 모두의 경험을 요구하는지는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Spring, Spring Boot",
+    "relation": "any",
+    "unknown": false,
+    "note": "슬래시 병기이며 둘 모두의 경험을 요구하는지는 명시되지 않음."
+   }
+  },
+  "9796ba904cf3d9e7d8fe28e5e636547a90a5d86bb12060f8cebf04ab8a8df760": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "React",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "React",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "4716523553f73f6f0049b3b344f518230a02ebc98c03d046c761e6cbfe4e0a7c": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "HTML, CSS, JavaScript, ES6+",
+   "relation": "all",
+   "unknown": false,
+   "note": "ES6+는 JavaScript의 버전 조건이며 독립적인 추가 언어는 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "HTML, CSS, JavaScript, ES6+",
+    "relation": "all",
+    "unknown": false,
+    "note": "ES6+는 JavaScript의 버전 조건이며 독립적인 추가 언어는 아님."
+   }
+  },
+  "f6908fe99c3beb1f2612acfa528a5bdfc6fe17aa0ebeffaf1f04cf0db2ae3f62": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "RDBMS, Oracle, MySQL, MariaDB",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "RDBMS는 상위 범주, 나머지는 제품 예시. 하나이상",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "RDBMS, Oracle, MySQL, MariaDB",
+    "relation": "any",
+    "unknown": false,
+    "note": "RDBMS는 상위 범주, 나머지는 제품 예시."
+   }
+  },
+  "7f8ba1795b1f2b81ce7ea62bdcc2dcd74fc541e8395f36339887a9a7387c4758": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Git, SVN",
+   "relation": "any",
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Git, SVN",
+    "relation": "any",
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "d980ed29769bb59b0e66fd2d09aaf6a7f77ae51a9a4373e75fe2e897cd0ef0a0": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "SI 프로젝트 경험 또는 이해를 요구하며 구체 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "SI 프로젝트 경험 또는 이해를 요구하며 구체 기술명은 없음."
+   }
+  },
+  "78726931184aea28ad63a1a360c93d202548f3a1d8fc25fd0afa62953d97c059": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Node.js",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Node.js",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "f5b5a0f914b4ed9a3514fc0b6163ad94f2d337dedeb33e9e0d361f49e9dbbc8b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Java, Node.js",
+   "relation": "all",
+   "unknown": false,
+   "note": "혼합 환경으로 두 기술을 함께 명시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Java, Node.js",
+    "relation": "all",
+    "unknown": false,
+    "note": "혼합 환경으로 두 기술을 함께 명시."
+   }
+  },
+  "9876cea7bae64f7988de8b6dc7dcc37f9f6d051a4634fae7801bd186ade4e437": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "REST API",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "4e5e6658cf7be0dcdd44b2608ec745fe315f7060af9ee1e10596ab270050db1e": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "JPA, MyBatis",
+   "relation": "all",
+   "unknown": false,
+   "note": "단순 나열이므로 지침상 all. 두 기술을 모두 요구하는지는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "JPA, MyBatis",
+    "relation": "all",
+    "unknown": false,
+    "note": "단순 나열이므로 지침상 all. 두 기술을 모두 요구하는지는 명시되지 않음."
+   }
+  },
+  "c20fa7a4ff503de9c4b1eab8e20df40510be55cc84bbdd3744c9cac3d8d9e2d0": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Linux",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Linux",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "eb053962554d275c945a26bee5c871f4cda6902afe2c7e4a1cb8cf16cf1f66eb": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "공공·금융 도메인 또는 대기업 SI 프로젝트 경험. 대기업은 조직 유형, SI는 프로젝트 유형으로 해석.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "공공, 금융",
+    "relation": "any",
+    "unknown": false,
+    "note": "공공·금융 도메인 또는 대기업 SI 프로젝트 경험. 대기업은 조직 유형, SI는 프로젝트 유형으로 해석."
+   }
+  },
+  "01f9a2f2756f0c59f1561c30a18b64acddb88155c9df0602a8eb4a3b97f7b9c8": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "자체 서비스 또는 장기 운영 서비스 경험이며 구체 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "자체 서비스 또는 장기 운영 서비스 경험이며 구체 기술명은 없음."
+   }
+  },
+  "2e365c8d62eea9e49a502f3bc9e2568cab2d882654f646d34466f8e93bcb4d95": {
+   "category": "experience",
+   "not_condition": false,
+   "terms": "SAP",
+   "relation": null,
+   "unknown": false,
+   "note": "SAP 상위 플랫폼에서 (SD OR MM) 모듈 운영 AND ABAP 개발. 경력 7~15년 조건도 포함.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "SAP, SD, MM, ABAP",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "SAP 상위 플랫폼에서 (SD OR MM) 모듈 운영 AND ABAP 개발. 경력 7~15년 조건도 포함."
+   }
+  },
+  "77bcacbab2a30c90711ce89d4786a0c3c180812d6c5698d48cdf7dd5f9180be2": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": true,
+   "note": "Configuration은 일반 설정 작업, IMG는 구체 명칭으로 추출.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "IMG",
+    "relation": null,
+    "unknown": false,
+    "note": "Configuration은 일반 설정 작업, IMG는 구체 명칭으로 추출."
+   }
+  },
+  "f42ef2f0b2f96552c9564dd1a3a173d91f197b88f4fd348c6e8ac11539484da3": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "37b03850ff0c93d030bad5222ec35744a95d9eba5a4d3720d3846d17741bab2b": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "SAP",
+   "relation": null,
+   "unknown": false,
+   "note": "SAP 환경의 프로젝트 관리 또는 코디네이션 경험.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "SAP",
+    "relation": null,
+    "unknown": false,
+    "note": "SAP 환경의 프로젝트 관리 또는 코디네이션 경험."
+   }
+  },
+  "92d5e48310feb2f56107ecdac660166d3cf8131c316d36764ad8879c371699bf": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "SAP",
+   "relation": null,
+   "unknown": false,
+   "note": "SAP는 상위 플랫폼, S/4HANA는 제품명으로 하나의 제품을 가리킴.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "SAP, S/4HANA",
+    "relation": "all",
+    "unknown": false,
+    "note": "SAP는 상위 플랫폼, S/4HANA는 제품명으로 하나의 제품을 가리킴."
+   }
+  },
+  "825f6cddba9f6b94cd90f3bf7348547c22b25cb3afc544f332b3aace6839e26f": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "영어",
+    "relation": null,
+    "unknown": false,
+    "note": ""
+   }
+  },
+  "eef25525bf4ac645cad6d056fa6762c2917c055012bb21cbbee54718f7a6c64d": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "AI 도구 범주만 명시되며 구체 도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI Tool",
+    "relation": null,
+    "unknown": false,
+    "note": "AI 도구 범주만 명시되며 구체 도구명은 없음."
+   }
+  },
+  "b544e328c3d77bf4ac37248fcbacbf4f289302abf323070c53e9173855204c62": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "NestJS, TypeScript, FastAPI, Django, Python, Java, Spring",
+   "relation": "mixed",
+   "unknown": false,
+   "note": "(NestJS AND TypeScript) OR ((FastAPI OR Django) AND Python) OR (Java AND Spring) 중 하나 이상의 스택으로 해석.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "NestJS, TypeScript, FastAPI, Django, Python, Java, Spring",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "(NestJS AND TypeScript) OR ((FastAPI OR Django) AND Python) OR (Java AND Spring) 중 하나 이상의 스택으로 해석."
+   }
+  },
+  "ce99af0dec135d3e0559749843b1dc9f28e7b913b1c4f882ffb89baddd6d754c": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "PostgreSQL",
+   "relation": null,
+   "unknown": false,
+   "note": "PostgreSQL은 RDBMS의 제품 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "PostgreSQL, RDBMS",
+    "relation": "any",
+    "unknown": false,
+    "note": "PostgreSQL은 RDBMS의 제품 예시."
+   }
+  },
+  "d12947f2279853864b69f7fa32b1cb41b7c89b08b3a6c5c9184addf5bef98011": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "외부 API 연동 및 장애 대응 역량이며 구체 프로토콜·도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "외부 API 연동 및 장애 대응 역량이며 구체 프로토콜·도구명은 없음."
+   }
+  },
+  "216f3bd7dc8bc0fa3a67359ea5b201ee0228a636c4e97c1a86a08a162bfc97db": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "상품·주문·재고·결제·정산은 도메인 내부 업무 항목.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "이커머스",
+    "relation": null,
+    "unknown": false,
+    "note": "상품·주문·재고·결제·정산은 도메인 내부 업무 항목."
+   }
+  },
+  "44b2e67bdb8209e93d4e4f67437838110bd0235b934156b11c32ef5aab26a40f": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "구체 제품명 없이 AI 도구 활용을 요구.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "AI 도구",
+    "relation": null,
+    "unknown": false,
+    "note": "구체 제품명 없이 AI 도구 활용을 요구."
+   }
+  },
+  "12d213c98f5c187db8f695ac573e615d2cb5aca8469f595126a55b82438f87aa": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "대규모 트래픽 및 데이터 처리 역량이며 구체 기술명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "대규모 트래픽 및 데이터 처리 역량이며 구체 기술명은 없음."
+   }
+  },
+  "b623f9aae1ba9b9a6fc4e5f01c8bc3ae5bd488d26c2b180ec66e74758eeac729": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "릴리스 오너 경험을 요구하며 GA는 정식 오픈(General Availability)을 뜻하는 문맥으로 기술 도구명이 아님.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "experience",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "릴리스 오너 경험을 요구하며 GA는 정식 오픈(General Availability)을 뜻하는 문맥으로 기술 도구명이 아님."
+   }
+  },
+  "ce207b2b1d7b3e8e87e1512be2ceb1f365c130ad14bc69e8bb7700aeb8063fa3": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "아키텍처 및 서비스 방식의 범주.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "멀티테넌트 SaaS",
+    "relation": null,
+    "unknown": false,
+    "note": "아키텍처 및 서비스 방식의 범주."
+   }
+  },
+  "76363024727788be2980c6dd69eaf2a764c60a86c5d486a7a9a0db9010706c43": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "Kubernetes, Terraform",
+   "relation": "all",
+   "unknown": false,
+   "note": "Kubernetes 운영 AND Terraform 기반 멀티클라우드 경험. 중국 리전은 환경 조건.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "Kubernetes, Terraform, 멀티클라우드",
+    "relation": "all",
+    "unknown": false,
+    "note": "Kubernetes 운영 AND Terraform 기반 멀티클라우드 경험. 중국 리전은 환경 조건."
+   }
+  },
+  "e21926350c8e8dbaa749fb243c8d87656699ac25a12aec54ef8c980906eea86c": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "중국 커머스 도메인 및 플랫폼 연동 경험. 위챗 미니프로그램·티몰글로벌·샤오홍슈는 연동 대상 서비스명으로 기술명과 구분.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "커머스",
+    "relation": null,
+    "unknown": false,
+    "note": "중국 커머스 도메인 및 플랫폼 연동 경험. 위챗 미니프로그램·티몰글로벌·샤오홍슈는 연동 대상 서비스명으로 기술명과 구분."
+   }
+  },
+  "402a0225f8eef31dd933a997e8e32895d4af6102cad4ce2366de111c6417e908": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "React, Next.js",
+   "relation": "all",
+   "unknown": false,
+   "note": "서로 결합되는 프론트엔드 기술이며 대체 조건은 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "React, Next.js",
+    "relation": "all",
+    "unknown": false,
+    "note": "서로 결합되는 프론트엔드 기술이며 대체 조건은 명시되지 않음."
+   }
+  },
+  "bf6afdc315c8a27c846b27366cf5e14fa1720135235637bbc9ea0bcf999dd7f0": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "C, C++",
+   "relation": "any",
+   "unknown": false,
+   "note": "C/C++ 실무 경력 1년 이상 또는 해당 언어 활용 가능한 신입. 두 언어 모두 필요한지는 명시되지 않음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "C, C++",
+    "relation": "any",
+    "unknown": false,
+    "note": "C/C++ 실무 경력 1년 이상 또는 해당 언어 활용 가능한 신입. 두 언어 모두 필요한지는 명시되지 않음."
+   }
+  },
+  "a9ee967cb9b87cb271ff1319ea21460a958b94f831affcba46408976c3f84a58": {
+   "category": "skill",
+   "not_condition": false,
+   "terms": "RTOS, C, C++",
+   "relation": "all",
+   "unknown": false,
+   "note": "RTOS 환경 AND C/C++ 개발. C와 C++는 언어 대안으로 해석했으나 단순 병기이므로 둘 모두 필요한지는 불명확.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "RTOS, C, C++",
+    "relation": "mixed",
+    "unknown": false,
+    "note": "RTOS 환경 AND C/C++ 개발. C와 C++는 언어 대안으로 해석했으나 단순 병기이므로 둘 모두 필요한지는 불명확."
+   }
+  },
+  "5cf8369a929541f79e98bfb60c19a4d2ba84ad2817d9616a472ef6a6734a834f": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "패킷 분석 경험이지만 구체 프로토콜 또는 분석 도구명은 없음.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "other",
+    "not_condition": false,
+    "terms": "",
+    "relation": null,
+    "unknown": false,
+    "note": "패킷 분석 경험이지만 구체 프로토콜 또는 분석 도구명은 없음."
+   }
+  },
+  "562040fb0ba2102165dd19abe23c9548b21cbc51f9e567e350f59f354191ec3d": {
+   "category": "other",
+   "not_condition": false,
+   "terms": "",
+   "relation": null,
+   "unknown": false,
+   "note": "구간암호화 제품의 기술 범주 예시.",
+   "source": "gpt",
+   "reviewed": true,
+   "gpt_draft": {
+    "category": "skill",
+    "not_condition": false,
+    "terms": "VPN",
+    "relation": null,
+    "unknown": false,
+    "note": "구간암호화 제품의 기술 범주 예시."
+   }
+  }
+ },
+ "sealed": {
+  "at": "2026-11-19T18:37:28",
+  "labels_sha256": "dd8106adceef84640766ecd931a2cb1197d3964b3fc31f54d4e31fb14dfc5395",
+  "answered_by": {
+   "person": 0,
+   "gpt_reviewed_by_person": 185,
+   "gpt_not_reviewed": 0
+  }
+ }
+}

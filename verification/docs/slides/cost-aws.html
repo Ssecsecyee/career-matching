@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>AI 호출 비용</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--line:#D5DBDB;--sub:#545B64;--soft:#F2F3F3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .top p{margin-top:18px;font-size:30px;color:var(--sub)}
+  .row{display:flex;gap:60px;padding:40px 60px 0}
+  .chart{width:820px}
+  .side{flex:1;display:flex;flex-direction:column;gap:26px;padding-top:30px}
+  .box{border:3px solid var(--ink);border-radius:16px;overflow:hidden}
+  .box .hd{background:var(--ink);color:#fff;font-size:24px;font-weight:700;padding:12px 24px}
+  .box .bd{padding:20px 24px;font-size:25px;font-weight:700;line-height:1.6;color:var(--ink2)}
+  .box .bd b{color:var(--orange2)}
+  .box.warn{border-color:var(--orange)}
+  .box.warn .hd{background:var(--orange);color:var(--ink2)}
+  .note{font-size:18px;color:var(--sub)}
+  text{font-family:"Noto Sans KR",sans-serif}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>AI 매핑 방식의 비용 문제<span class="dot"></span></h1>
+    <p>공고마다 모델을 호출해 직무역량 키워드를 매핑할 때</p>
+  </div>
+  <div class="row">
+    <svg class="chart" viewBox="0 0 820 600" width="820" height="600">
+      <!-- grid: 0..120, plot y 40..520 (480px), 1$ = 4px -->
+      <g stroke="#E3E6E6" stroke-width="1.5">
+        <line x1="90" y1="520" x2="800" y2="520" stroke="#879596" stroke-width="2.5"/>
+        <line x1="90" y1="400" x2="800" y2="400"/>
+        <line x1="90" y1="280" x2="800" y2="280"/>
+        <line x1="90" y1="160" x2="800" y2="160"/>
+        <line x1="90" y1="40" x2="800" y2="40"/>
+      </g>
+      <g font-size="20" fill="#545B64" text-anchor="end">
+        <text x="76" y="527">$0</text>
+        <text x="76" y="407">$30</text>
+        <text x="76" y="287">$60</text>
+        <text x="76" y="167">$90</text>
+        <text x="76" y="47">$120</text>
+      </g>
+      <!-- bar 1: $30 -> h 120 -->
+      <path d="M170 520 V404 a4 4 0 0 1 4 -4 H386 a4 4 0 0 1 4 4 V520 Z" fill="#232F3E"/>
+      <text x="280" y="382" text-anchor="middle" font-size="46" font-weight="900" fill="#131A22">약 $30</text>
+      <!-- bar 2: $110 -> h 440 -->
+      <path d="M500 520 V84 a4 4 0 0 1 4 -4 H716 a4 4 0 0 1 4 4 V520 Z" fill="#FF9900"/>
+      <text x="610" y="62" text-anchor="middle" font-size="46" font-weight="900" fill="#131A22">약 $110</text>
+      <!-- 배수 -->
+      <path d="M396 400 C440 400 450 120 494 100" fill="none" stroke="#EC7211" stroke-width="4" stroke-dasharray="10 8"/>
+      <path d="M484 92 l12 8 -12 10" fill="none" stroke="#EC7211" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="376" y="196" width="132" height="44" rx="22" fill="#EC7211"/>
+      <text x="442" y="226" text-anchor="middle" font-size="24" font-weight="900" fill="#fff">매달 반복</text>
+      <!-- x labels -->
+      <text x="280" y="560" text-anchor="middle" font-size="26" font-weight="700" fill="#131A22">초기 1회 매핑</text>
+      <text x="280" y="590" text-anchor="middle" font-size="20" fill="#545B64">공고 1,381건 × 1회 호출</text>
+      <text x="610" y="560" text-anchor="middle" font-size="26" font-weight="700" fill="#131A22">운영 시 월 추가 비용</text>
+      <text x="610" y="590" text-anchor="middle" font-size="20" fill="#545B64">신규·수정·마감마다 재호출</text>
+    </svg>
+
+    <div class="side">
+      <div class="box">
+        <div class="hd">초기 테스트</div>
+        <div class="bd">필수역량 섹션에서 NCS 직무코드 같은<br>직무역량 키워드를 추출해 매핑<br><b>공고 1건당 약 $0.02</b></div>
+      </div>
+      <div class="box warn">
+        <div class="hd">운영 시 부담</div>
+        <div class="bd">공고는 신규·수정·마감이 계속 생겨<br>매번 AI를 다시 호출해야 함<br><b>한 달 약 $110 추가 지출</b></div>
+      </div>
+      <div class="note">* 월 비용: 사용자 호출·서버 유지 고정비를 뺀 추가분, AWS 요금 기준 추정</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

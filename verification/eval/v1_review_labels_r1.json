@@ -1,0 +1,121 @@
+{
+  "_comment": "V1 중복 공고 사람 확인 (docs/eval/v1-reposts.md). 공고 id와 판단만 저장.",
+  "labels": {
+    "pair:jumpit-55136419:jumpit-55413601": {
+      "label": "same",
+      "note": ""
+    },
+    "pair:jumpit-55136449:jumpit-55413642": {
+      "label": "same",
+      "note": "경력만 5-8 --> 9-11 로 바뀜 5~8꺼는 마감된거임"
+    },
+    "pair:jumpit-55136505:jumpit-55413690": {
+      "label": "same",
+      "note": "이것도 같은 맥락 5~8년은 이미 마감된 공고이긴함"
+    },
+    "pair:jumpit-55136544:jumpit-55413716": {
+      "label": "same",
+      "note": "5~8은 마감된거임"
+    },
+    "pair:jumpit-55136574:jumpit-55413741": {
+      "label": "same",
+      "note": "5~8은 마감됨"
+    },
+    "pair:jumpit-55136600:jumpit-55413811": {
+      "label": "same",
+      "note": "5~8은 마감된것"
+    },
+    "pair:jumpit-55425722:jumpit-55425736": {
+      "label": "different",
+      "note": "이번건 신기하네 1년에는 제목이 풀스택개발자 전문연구원이고, 5년꺼는 \"전문연구원\"이라는 말이 빠져있음. 다른거라고 생각하긴 해야할듯..?"
+    },
+    "pair:jumpit-55506459:jumpit-55506534": {
+      "label": "same",
+      "note": "너가 찾은 다른점 빼곤 다 똑같네."
+    },
+    "pair:jumpit-55451368:jumpit-55469599": {
+      "label": "same",
+      "note": "첫 공고는 성남이고 판교도 출근가능해야한다고 명시되어있음 근데 다른거는 다 같음. 우리 입장에선 같은 공고라고 해도 무방함."
+    },
+    "group:jumpit-55270411:jumpit-55270431": {
+      "label": "same",
+      "note": "같은 공고인데 그냥 제목만 바꿈. 직무 이름만 바꿈. 일단 둘다 마감된 공고임"
+    },
+    "group:jumpit-55283975:jumpit-55401554": {
+      "label": "career",
+      "note": "같은 공고지만 경력이 더 높게 측정된거임 6~8년 옛날껀 마감됨"
+    },
+    "group:jumpit-55163896:jumpit-55163958": {
+      "label": "career",
+      "note": "둘 다 마감됨. 경력/신입 뽑냐 그 차이 나머지는 다 같음"
+    },
+    "group:jumpit-55190954:jumpit-55190977:jumpit-55191021:jumpit-55470380:jumpit-55470399:jumpit-55470428": {
+      "label": "career",
+      "note": "각각 경력별로 재게시한거 같고, 같은 조건에 경력만 서로다른 공고들임"
+    },
+    "group:jumpit-55314425:jumpit-55314443:jumpit-55314462": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55309411:jumpit-55309422:jumpit-55309436": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55356863:jumpit-55356874": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55224938:jumpit-55224945": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55361971:jumpit-55361982": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55377914:jumpit-55377945:jumpit-55378062": {
+      "label": "career",
+      "note": "고급개발자랑 풀스택 개발팀장은 아예 같고 직무이름만 다르네. 근데 중급은 필요 기술스택테그도 다르고 직무이름도 다른점이 있음"
+    },
+    "group:jumpit-55353978:jumpit-55353988": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55306979:jumpit-55307018": {
+      "label": "career",
+      "note": "같은 공고인데 신입뽑냐 경력뽑냐 그 차이임"
+    },
+    "group:jumpit-55357018:jumpit-55357049": {
+      "label": "career",
+      "note": "PL은 조금 더 높은 직급으로써 더 많은 경력을 요구함. 그런데 요구하는 기술스택은  더 줄어듦."
+    },
+    "group:jumpit-55327226:jumpit-55327300": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55253857:jumpit-55253877:jumpit-55253896": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55366832:jumpit-55366840": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55339346:jumpit-55339367": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55412908:jumpit-55413103": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55162183:jumpit-55365009:jumpit-55436258:jumpit-55436278": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55159056:jumpit-55159063:jumpit-55159138:jumpit-55425609:jumpit-55425616:jumpit-55425620": {
+      "label": "career",
+      "note": ""
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+ "_comment": "V3-T 사람 판정. 판정표(원문만, 순서 섞음, 어느 쪽 답인지 가림)를 보고 사용자가 줄마다 물어야 하는지 골랐다. id와 답만 담는다.",
+ "judged_by": "user (blind)",
+ "at": "2026-11-19T12:10:42",
+ "criterion": "팀원 프롬프트 정책: 구체적 요건은 묻기, 성향·요건 아닌 설명은 참고, 판단 어려우면 모름",
+ "sheet": {
+  "seed": 20261118,
+  "drawn_from": {
+   "a": "B",
+   "b": "C2S",
+   "runs": "C:\\All_Project\\AWS_code\\황승현\\data\\real\\jumpit\\live_runs\\adaptive"
+  }
+ },
+ "labels": {
+  "329b274b7f79ca945c97bce57e14cab8d379755dc79dd65ee97175ff45a3244e": "ask",
+  "ca8c5e4249896d6ed5bb9b61b927d1f90ec1f07688fb1218be85190943c42842": "ask",
+  "dbb67d31f311abc93d9b7d3efcde38e590473f587cb705781d86bfb3776b3130": "reference",
+  "7ce5a9dbbf9b06601e9750027e4ba59e2982e5bee4a10f094855f272e0d3295a": "reference",
+  "d4491fa5153b1ed786169057dd5a053006967ef94e0c617c513984ec679792ff": "reference",
+  "cf5608ea0e01b018deff88ebc8c6d8e5abace0352d0d6c190e5105dbb04ff5f3": "ask",
+  "cc463f4773f7f68ba7180f6b15458a81b3f70d730615caad46d82fb69a69a838": "ask",
+  "177f35d02e5a3ecc6288c388785b9a3672555b882f8f358bf7c27baccdfb69cc": "ask",
+  "05e4708e2c2527291904d427fdfaebc9112dd98a4e6467a0a2b37d5fb9d0cce7": "reference",
+  "b4743a0f669d755bce23cc77f6c72cbde0c2e5cde5b6ad393afc1e90d545cc7b": "reference",
+  "98fae218fb6cafb828198f805742e167b1beaeb9f0d0295164261319a847cdc0": "reference",
+  "2ed5a23ae4a3d15a53dfb9255c1942c10bde566f1e9b044ec49be8e8c2ef1810": "reference",
+  "9aca4f5b50d8db58979e447aeb1930ed5f9fa0ae037f6dfe166e3721cd35e7ec": "reference",
+  "8680e9cd99b6fb0eaa2ebce014abc254e7e6b1fdcbaa6ccc7a0a511def2dfdaf": "reference",
+  "00efe4a9846da672ad1a6a1050e7eb92c345d0b691ca01a168478836dcb483b8": "reference",
+  "e9cd25f90d2e5f88d0d10769c4c818fe6a612966320643d8d2e5ebe7d1898408": "ask"
+ },
+ "by_sheet_number": {
+  "1": {
+   "condition_id": "329b274b7f79ca945c97bce57e14cab8d379755dc79dd65ee97175ff45a3244e",
+   "type": "required",
+   "call": "ask"
+  },
+  "2": {
+   "condition_id": "ca8c5e4249896d6ed5bb9b61b927d1f90ec1f07688fb1218be85190943c42842",
+   "type": "required",
+   "call": "ask"
+  },
+  "3": {
+   "condition_id": "dbb67d31f311abc93d9b7d3efcde38e590473f587cb705781d86bfb3776b3130",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "4": {
+   "condition_id": "7ce5a9dbbf9b06601e9750027e4ba59e2982e5bee4a10f094855f272e0d3295a",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "5": {
+   "condition_id": "d4491fa5153b1ed786169057dd5a053006967ef94e0c617c513984ec679792ff",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "6": {
+   "condition_id": "cf5608ea0e01b018deff88ebc8c6d8e5abace0352d0d6c190e5105dbb04ff5f3",
+   "type": "required",
+   "call": "ask"
+  },
+  "7": {
+   "condition_id": "cc463f4773f7f68ba7180f6b15458a81b3f70d730615caad46d82fb69a69a838",
+   "type": "required",
+   "call": "ask"
+  },
+  "8": {
+   "condition_id": "177f35d02e5a3ecc6288c388785b9a3672555b882f8f358bf7c27baccdfb69cc",
+   "type": "required",
+   "call": "ask"
+  },
+  "9": {
+   "condition_id": "05e4708e2c2527291904d427fdfaebc9112dd98a4e6467a0a2b37d5fb9d0cce7",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "10": {
+   "condition_id": "b4743a0f669d755bce23cc77f6c72cbde0c2e5cde5b6ad393afc1e90d545cc7b",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "11": {
+   "condition_id": "98fae218fb6cafb828198f805742e167b1beaeb9f0d0295164261319a847cdc0",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "12": {
+   "condition_id": "2ed5a23ae4a3d15a53dfb9255c1942c10bde566f1e9b044ec49be8e8c2ef1810",
+   "type": "required",
+   "call": "reference",
+   "changed": {
+    "was": "ask",
+    "at": "2026-11-19",
+    "why": "팀원·사용자 정책 결정(11/19): 자격요건 칸의 소통·설명 능력 줄은 묻지 않는다. 주목표는 필요한 기술 스택을 뽑아 교육과정에 연계하는 것"
+   }
+  },
+  "13": {
+   "condition_id": "9aca4f5b50d8db58979e447aeb1930ed5f9fa0ae037f6dfe166e3721cd35e7ec",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "14": {
+   "condition_id": "8680e9cd99b6fb0eaa2ebce014abc254e7e6b1fdcbaa6ccc7a0a511def2dfdaf",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "15": {
+   "condition_id": "00efe4a9846da672ad1a6a1050e7eb92c345d0b691ca01a168478836dcb483b8",
+   "type": "preferred",
+   "call": "reference"
+  },
+  "16": {
+   "condition_id": "e9cd25f90d2e5f88d0d10769c4c818fe6a612966320643d8d2e5ebe7d1898408",
+   "type": "required",
+   "call": "ask"
+  }
+ },
+ "policy_updates": [
+  {
+   "at": "2026-11-19",
+   "by": "teammate + user",
+   "rule": "자격요건 칸의 소통·설명 능력(성향) 줄은 참고로 둔다. 팀원 프롬프트의 기존 정책과 같다",
+   "changed_lines": [
+    12
+   ]
+  }
+ ]
+}

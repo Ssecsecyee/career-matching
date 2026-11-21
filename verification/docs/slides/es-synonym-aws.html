@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ES 동의어 사전</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--blue:#146EB4;--teal:#00A1C9;--gray:#F2F3F3;--line:#D5DBDB;--text:#16191F;--sub:#545B64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:var(--text)}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{height:150px;background:#fff;display:flex;align-items:center;padding:20px 40px 0;position:relative}
+  .top h1{color:#000;font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 b{font-weight:700}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .smile{position:absolute;left:90px;bottom:22px}
+  .bar{height:8px;background:var(--orange)}
+  .flow{display:flex;align-items:flex-start;justify-content:space-between;padding:60px 60px 0}
+  .step{width:440px;text-align:center}
+  .step:first-child{width:520px}
+  li{white-space:nowrap}
+  .icon{height:340px;display:flex;align-items:center;justify-content:center}
+  .badge{display:inline-flex;align-items:center;gap:12px;background:var(--ink);color:#fff;border-radius:40px;padding:12px 30px;font-size:34px;font-weight:700;margin-top:10px}
+  .badge .n{background:var(--orange);color:var(--ink2);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}
+  ul{list-style:none;margin-top:26px;text-align:left;display:inline-block}
+  li{font-size:27px;line-height:1.6;color:var(--text);padding-left:26px;position:relative}
+  li:before{content:"";position:absolute;left:0;top:18px;width:11px;height:11px;background:var(--orange);border-radius:2px}
+  li .ar{color:var(--orange2);font-weight:900;margin:0 8px}
+  .arrow{margin-top:150px}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>여러 출처의 용어를 <b>Elasticsearch</b> 동의어 사전으로<span class="dot"></span></h1>
+  </div>
+
+  <div class="flow">
+    <!-- 1 용어 수집 -->
+    <div class="step">
+      <div class="icon">
+        <svg width="360" height="300" viewBox="0 0 360 300">
+          <g transform="rotate(-8 120 90)">
+            <rect x="30" y="30" width="180" height="125" rx="12" fill="#232F3E"/>
+            <rect x="42" y="42" width="156" height="101" rx="6" fill="#fff"/>
+            <rect x="58" y="62" width="44" height="44" rx="6" fill="#FF9900"/>
+            <rect x="114" y="64" width="70" height="8" rx="4" fill="#D5DBDB"/><rect x="114" y="82" width="60" height="8" rx="4" fill="#D5DBDB"/><rect x="114" y="100" width="66" height="8" rx="4" fill="#D5DBDB"/>
+          </g>
+          <g transform="rotate(6 250 110)">
+            <rect x="170" y="50" width="170" height="120" rx="12" fill="#146EB4"/>
+            <rect x="182" y="62" width="146" height="96" rx="6" fill="#fff"/>
+            <path d="M205 120 a18 18 0 0 1 8-34 a24 24 0 0 1 44 6 a16 16 0 0 1 4 28z" fill="#146EB4"/>
+            <rect x="270" y="90" width="44" height="8" rx="4" fill="#D5DBDB"/><rect x="270" y="108" width="36" height="8" rx="4" fill="#D5DBDB"/>
+          </g>
+          <g transform="rotate(-4 110 210)">
+            <rect x="20" y="160" width="170" height="120" rx="12" fill="#FF9900"/>
+            <rect x="32" y="172" width="146" height="96" rx="6" fill="#fff"/>
+            <rect x="52" y="230" width="16" height="24" fill="#232F3E"/><rect x="76" y="214" width="16" height="40" fill="#232F3E"/><rect x="100" y="196" width="16" height="58" fill="#FF9900"/>
+            <rect x="128" y="200" width="36" height="8" rx="4" fill="#D5DBDB"/><rect x="128" y="218" width="30" height="8" rx="4" fill="#D5DBDB"/>
+          </g>
+          <g transform="rotate(7 260 225)">
+            <rect x="190" y="170" width="150" height="110" rx="12" fill="#00A1C9"/>
+            <rect x="202" y="182" width="126" height="86" rx="6" fill="#fff"/>
+            <circle cx="245" cy="225" r="26" fill="#232F3E"/>
+            <path d="M245 225 L245 199 A26 26 0 0 1 270 232 Z" fill="#FF9900"/>
+            <rect x="280" y="212" width="36" height="8" rx="4" fill="#D5DBDB"/><rect x="280" y="230" width="28" height="8" rx="4" fill="#D5DBDB"/>
+          </g>
+        </svg>
+      </div>
+      <div class="badge"><span class="n">1</span>용어 수집</div><br>
+      <ul>
+        <li>Python 한국 커뮤니티 용어집</li>
+        <li>MDN 웹 용어집 · Kubernetes 용어집</li>
+        <li>Google 머신러닝 용어집 · 자체 검수</li>
+      </ul>
+    </div>
+
+    <svg class="arrow" width="90" height="60" viewBox="0 0 90 60"><path d="M0 22h55V4l35 26-35 26V38H0z" fill="#FF9900"/></svg>
+
+    <!-- 2 선별·검수 -->
+    <div class="step">
+      <div class="icon">
+        <svg width="320" height="300" viewBox="0 0 320 300">
+          <ellipse cx="150" cy="95" rx="125" ry="32" fill="#232F3E"/>
+          <ellipse cx="150" cy="92" rx="110" ry="24" fill="#37475A"/>
+          <path d="M25 95 Q150 140 275 95 L180 210 L180 260 Q150 275 120 260 L120 210 Z" fill="#232F3E"/>
+          <path d="M60 110 Q150 140 240 110 L175 190 L125 190 Z" fill="#37475A"/>
+          <circle cx="135" cy="70" r="48" fill="#fff" stroke="#FF9900" stroke-width="14"/>
+          <circle cx="135" cy="70" r="30" fill="#E8F4FB"/>
+          <rect x="166" y="104" width="20" height="62" rx="10" transform="rotate(-40 176 135)" fill="#FF9900"/>
+          <circle cx="245" cy="55" r="36" fill="#FF9900"/>
+          <path d="M228 56l12 12 22-24" stroke="#232F3E" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="badge"><span class="n">2</span>선별·검수</div><br>
+      <ul>
+        <li>같은 개념의 표기 연결</li>
+      </ul>
+    </div>
+
+    <svg class="arrow" width="90" height="60" viewBox="0 0 90 60"><path d="M0 22h55V4l35 26-35 26V38H0z" fill="#FF9900"/></svg>
+
+    <!-- 3 ES 등록 -->
+    <div class="step">
+      <div class="icon">
+        <svg width="320" height="320" viewBox="0 0 320 320">
+          <g>
+            <path d="M40 250v-30h240v30a120 30 0 0 1-240 0z" fill="#131A22"/>
+            <ellipse cx="160" cy="220" rx="120" ry="30" fill="#232F3E"/>
+            <path d="M40 210v-34h240v34a120 30 0 0 1-240 0z" fill="#146EB4"/>
+            <ellipse cx="160" cy="176" rx="120" ry="30" fill="#1F80C8"/>
+            <path d="M40 168v-34h240v34a120 30 0 0 1-240 0z" fill="#00A1C9"/>
+            <ellipse cx="160" cy="134" rx="120" ry="30" fill="#2BB5DA"/>
+            <path d="M40 126v-34h240v34a120 30 0 0 1-240 0z" fill="#EC7211"/>
+            <ellipse cx="160" cy="92" rx="120" ry="30" fill="#FF9900"/>
+            <circle cx="150" cy="88" r="17" fill="none" stroke="#232F3E" stroke-width="7"/>
+            <rect x="162" y="96" width="9" height="22" rx="4" transform="rotate(-55 166 107)" fill="#232F3E"/>
+          </g>
+        </svg>
+      </div>
+      <div class="badge"><span class="n">3</span>동의어 사전 등록</div><br>
+      <ul>
+        <li>깃 <span class="ar">↔</span> Git</li>
+        <li>파이썬 <span class="ar">↔</span> Python</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

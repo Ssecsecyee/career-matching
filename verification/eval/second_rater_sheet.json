@@ -1,0 +1,281 @@
+{
+ "seed": 20261119,
+ "postings": [
+  "jumpit-55377873",
+  "jumpit-55379247",
+  "jumpit-55236275",
+  "jumpit-55136449",
+  "jumpit-55299141"
+ ],
+ "lines": [
+  {
+   "n": 1,
+   "job_id": "jumpit-55377873",
+   "key": "0c2029d18ba1b0aece16b307690428947924172aa506b8825751bd97b75f27a5"
+  },
+  {
+   "n": 2,
+   "job_id": "jumpit-55377873",
+   "key": "c0a3651cc1d9f0708fd1c67a34f24e781771fb0d9d73edfd6a65795832681762"
+  },
+  {
+   "n": 3,
+   "job_id": "jumpit-55377873",
+   "key": "30ce548051cd5b9ebe353221aa92997e678f0467980c14267fc329b74a1f1158"
+  },
+  {
+   "n": 4,
+   "job_id": "jumpit-55377873",
+   "key": "83f4084f104bf4dd865a3c40abbcca036d7cc2e5fc9b060fb724e537816ced23"
+  },
+  {
+   "n": 5,
+   "job_id": "jumpit-55377873",
+   "key": "b3932f05ba1b5487742d96b5dc53cf91d3db3c9fa0f59f3f5f66a5a4fb0169af"
+  },
+  {
+   "n": 6,
+   "job_id": "jumpit-55377873",
+   "key": "63d62dae9c0a8159f675568e219a0439423b10444d65c4d6c55b97f8e5f970d0"
+  },
+  {
+   "n": 7,
+   "job_id": "jumpit-55377873",
+   "key": "ec09bc6d14d1d63360f3ca57e7284b01df39adaf701129528694db4adeeac281"
+  },
+  {
+   "n": 8,
+   "job_id": "jumpit-55377873",
+   "key": "06a6037aaac7597a9fc3c878fcd08a0ea5730b34200c631dd63b8a02919e9e34"
+  },
+  {
+   "n": 9,
+   "job_id": "jumpit-55377873",
+   "key": "d0648912b7e989de891dcf8ebf8fd6c53b59199757cf9922c2a41866673bfde8"
+  },
+  {
+   "n": 10,
+   "job_id": "jumpit-55377873",
+   "key": "5092077cd4ea9918345bd651688e6ee95847a881f4b006ff44f7bda68b8f3653"
+  },
+  {
+   "n": 11,
+   "job_id": "jumpit-55377873",
+   "key": "ccf47a8f7a5e7e149f6916d9e4f1f2e554568f8a314e1bc7ff340ee3c0b99f53"
+  },
+  {
+   "n": 12,
+   "job_id": "jumpit-55377873",
+   "key": "0a58933a80b47aef3b630961633266fd5ad2e19681f9f021e097b2d3a8f31538"
+  },
+  {
+   "n": 13,
+   "job_id": "jumpit-55377873",
+   "key": "8e4ac6ed4415a6e5ffc9ba9da4770edf5813e2947e8bfc359e07e76c0c0db2af"
+  },
+  {
+   "n": 14,
+   "job_id": "jumpit-55377873",
+   "key": "ae96cacaeb0817d2766471b2165f31a37b1dfbd746c2b24b005ff16a1f865a45"
+  },
+  {
+   "n": 15,
+   "job_id": "jumpit-55379247",
+   "key": "11fa2291f66564233050c9ea536b72107615282191f8555d2796618eecab8281"
+  },
+  {
+   "n": 16,
+   "job_id": "jumpit-55379247",
+   "key": "fc381b829055d59f6d267541497d81c17ee92777c8867a495d0db4381908e597"
+  },
+  {
+   "n": 17,
+   "job_id": "jumpit-55379247",
+   "key": "3cf03c85e0b0e08edf73b9cbb8a541ce25eadad657ab150508bed79a364d6184"
+  },
+  {
+   "n": 18,
+   "job_id": "jumpit-55379247",
+   "key": "9796ba904cf3d9e7d8fe28e5e636547a90a5d86bb12060f8cebf04ab8a8df760"
+  },
+  {
+   "n": 19,
+   "job_id": "jumpit-55379247",
+   "key": "4716523553f73f6f0049b3b344f518230a02ebc98c03d046c761e6cbfe4e0a7c"
+  },
+  {
+   "n": 20,
+   "job_id": "jumpit-55379247",
+   "key": "f6908fe99c3beb1f2612acfa528a5bdfc6fe17aa0ebeffaf1f04cf0db2ae3f62"
+  },
+  {
+   "n": 21,
+   "job_id": "jumpit-55379247",
+   "key": "7f8ba1795b1f2b81ce7ea62bdcc2dcd74fc541e8395f36339887a9a7387c4758"
+  },
+  {
+   "n": 22,
+   "job_id": "jumpit-55379247",
+   "key": "d980ed29769bb59b0e66fd2d09aaf6a7f77ae51a9a4373e75fe2e897cd0ef0a0"
+  },
+  {
+   "n": 23,
+   "job_id": "jumpit-55379247",
+   "key": "78726931184aea28ad63a1a360c93d202548f3a1d8fc25fd0afa62953d97c059"
+  },
+  {
+   "n": 24,
+   "job_id": "jumpit-55379247",
+   "key": "f5b5a0f914b4ed9a3514fc0b6163ad94f2d337dedeb33e9e0d361f49e9dbbc8b"
+  },
+  {
+   "n": 25,
+   "job_id": "jumpit-55379247",
+   "key": "9876cea7bae64f7988de8b6dc7dcc37f9f6d051a4634fae7801bd186ade4e437"
+  },
+  {
+   "n": 26,
+   "job_id": "jumpit-55379247",
+   "key": "4e5e6658cf7be0dcdd44b2608ec745fe315f7060af9ee1e10596ab270050db1e"
+  },
+  {
+   "n": 27,
+   "job_id": "jumpit-55379247",
+   "key": "c20fa7a4ff503de9c4b1eab8e20df40510be55cc84bbdd3744c9cac3d8d9e2d0"
+  },
+  {
+   "n": 28,
+   "job_id": "jumpit-55379247",
+   "key": "eb053962554d275c945a26bee5c871f4cda6902afe2c7e4a1cb8cf16cf1f66eb"
+  },
+  {
+   "n": 29,
+   "job_id": "jumpit-55379247",
+   "key": "01f9a2f2756f0c59f1561c30a18b64acddb88155c9df0602a8eb4a3b97f7b9c8"
+  },
+  {
+   "n": 30,
+   "job_id": "jumpit-55236275",
+   "key": "474c2350cb24fbd8dd891b67459b8f6a185f2338dcf77efb41f69769fb8694d6"
+  },
+  {
+   "n": 31,
+   "job_id": "jumpit-55236275",
+   "key": "b2b16f95c2c2e38a51f6de7b08d5a1d4e7c87dfc8ec8a5644bd9da2d35c74756"
+  },
+  {
+   "n": 32,
+   "job_id": "jumpit-55136449",
+   "key": "627a2a260d32c25a59888f6f8906c7a39613d7898a1894a198f295a8b005141a"
+  },
+  {
+   "n": 33,
+   "job_id": "jumpit-55136449",
+   "key": "a1a0a1ba0570420516ffa8e91a54562634faa4e57df66647f3d2c8b4c7e92133"
+  },
+  {
+   "n": 34,
+   "job_id": "jumpit-55136449",
+   "key": "f428af6600c9441f986a6f657cc6234f51e034b5e964e0410ef4e1ec68023c32"
+  },
+  {
+   "n": 35,
+   "job_id": "jumpit-55136449",
+   "key": "547370feb8172c2f987834f0f6dee5f4a22ee0cf5689f6892e43721955acedf6"
+  },
+  {
+   "n": 36,
+   "job_id": "jumpit-55136449",
+   "key": "f2d72ba43d5afb31b06abae2225803a187cf81edf7ae03a30a8e59778ee940cb"
+  },
+  {
+   "n": 37,
+   "job_id": "jumpit-55136449",
+   "key": "8766d1b874b157d443762fa06276eb60e8f6dfe209092fdf2738792aee682825"
+  },
+  {
+   "n": 38,
+   "job_id": "jumpit-55136449",
+   "key": "71c24ad6d54b2da46ab00c3ec0a942b94c0979843defedf3891283bd9425bdb7"
+  },
+  {
+   "n": 39,
+   "job_id": "jumpit-55136449",
+   "key": "834d9beb9caa0c511c28ab8de90410bd0865fececee3827ede4082f975790976"
+  },
+  {
+   "n": 40,
+   "job_id": "jumpit-55136449",
+   "key": "ee090d49e01ecc79fdef65852034565aef7fa1af9a10da8556e47bdbaef9f389"
+  },
+  {
+   "n": 41,
+   "job_id": "jumpit-55136449",
+   "key": "df1e104ab5f08605e1af2195ded540eeeafc8f598183e402bc5d879806b17ac1"
+  },
+  {
+   "n": 42,
+   "job_id": "jumpit-55299141",
+   "key": "206bf7b77af3e24053dee3115c9578754536df062e38ced42de9c222e1f6d1f0"
+  },
+  {
+   "n": 43,
+   "job_id": "jumpit-55299141",
+   "key": "6d85c5ff63bdf2be6f8403585cc6b5931897586646c313065d211605fc13aa08"
+  },
+  {
+   "n": 44,
+   "job_id": "jumpit-55299141",
+   "key": "74a54ef3cfea91c8da57a774d3cf52eb96b0d7f12da82c4f6a73db8c56a7ab5f"
+  },
+  {
+   "n": 45,
+   "job_id": "jumpit-55299141",
+   "key": "cc66f32fffa153851b7462d340ef85df35f400aaf8792c98ab490756f20fd055"
+  },
+  {
+   "n": 46,
+   "job_id": "jumpit-55299141",
+   "key": "ccaa715232c35756dff944e8307dc098c9b5ae8ee9b388b4ad5485193a0d2f8b"
+  },
+  {
+   "n": 47,
+   "job_id": "jumpit-55299141",
+   "key": "4dcbb8da205418704eddf4ecc33cb855f24fea2bfaf1fb55c0bbf4e39eae39b7"
+  },
+  {
+   "n": 48,
+   "job_id": "jumpit-55299141",
+   "key": "31d26d0894d3eacddf3a11c87e3e14b0239975956f63203321bb4126623e3023"
+  },
+  {
+   "n": 49,
+   "job_id": "jumpit-55299141",
+   "key": "bfe915753574522ac4534446148b41524b9cc16732b64cdc85eb967c1001ea24"
+  },
+  {
+   "n": 50,
+   "job_id": "jumpit-55299141",
+   "key": "150f70d666abdb243bb68dffd8360f67698d67c22d80b3ef363cccb5b6de97aa"
+  },
+  {
+   "n": 51,
+   "job_id": "jumpit-55299141",
+   "key": "1471f2689e618a702180bf4b7bbcb475501ced869e6ce9ff5d26dd2c8c581423"
+  },
+  {
+   "n": 52,
+   "job_id": "jumpit-55299141",
+   "key": "2276985b040c92211d24af45fc305da02c61b01d65ee27ffb287c212d40e9416"
+  }
+ ],
+ "choices": [
+  "기술",
+  "경력",
+  "학력",
+  "자격증",
+  "성향",
+  "기타",
+  "조건 아님"
+ ]
+}

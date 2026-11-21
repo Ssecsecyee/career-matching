@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>추출 규칙 개선</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--blue:#146EB4;--line:#D5DBDB;--sub:#545B64;--soft:#F2F3F3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000;word-break:keep-all}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .top p{margin-top:18px;font-size:30px;color:var(--sub)}
+  .row{display:flex;gap:40px;padding:40px 40px 0}
+  .card{flex:1;border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#fff;height:570px;display:flex;flex-direction:column}
+  .card .hd{background:var(--ink);color:#fff;font-size:26px;font-weight:900;padding:14px 24px;display:flex;align-items:center;gap:12px}
+  .card .hd .n{background:var(--orange);color:var(--ink2);border-radius:16px;padding:0 12px;font-size:22px}
+  .split{display:flex;gap:12px;padding:0 24px}
+  .split div{flex:1;border-radius:12px;padding:10px 14px;font-size:20px;font-weight:700;color:var(--ink2);background:var(--soft)}
+  .split div b{display:block;font-size:16px;color:var(--sub)}
+  .split div.it{background:#FFF8EC;border:2px solid var(--orange)}
+  .ex{margin:14px 24px 22px;padding:12px 16px;border:2px solid var(--line);border-radius:12px;font-size:18px;line-height:1.6;color:var(--ink2)}
+  .ex .k{display:inline-block;width:52px;font-weight:900;color:var(--sub)}
+  .ex em{font-style:normal;font-weight:900;color:var(--orange2)}
+  .foot{margin:auto 24px 22px;padding:12px 18px;border-radius:12px;background:var(--soft);font-size:18px;font-weight:700;color:var(--ink2)}
+  .foot em{font-style:normal;color:var(--orange2)}
+  text{font-family:"Noto Sans KR",sans-serif;font-weight:700}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>Bedrock 기술명 추출 규칙 개선 결과<span class="dot"></span></h1>
+    <p>같은 정답지 공고 20건 · 같은 Sonnet 4.6 · 같은 검사 코드</p>
+  </div>
+  <div class="row">
+    <!-- 왼쪽 -->
+    <div class="card">
+      <div class="hd"><span class="n">1</span>섹션별 핵심 기술만 추출</div>
+      <svg width="640" height="210" viewBox="0 0 640 210" style="margin:14px auto 6px;display:block">
+        <!-- 원문 -->
+        <rect x="20" y="30" width="130" height="150" rx="12" fill="#fff" stroke="#232F3E" stroke-width="5"/>
+        <rect x="38" y="52" width="94" height="9" rx="4" fill="#232F3E"/><rect x="38" y="74" width="80" height="8" rx="4" fill="#D5DBDB"/><rect x="38" y="94" width="90" height="8" rx="4" fill="#FF9900"/><rect x="38" y="114" width="70" height="8" rx="4" fill="#D5DBDB"/><rect x="38" y="134" width="84" height="8" rx="4" fill="#FF9900"/><rect x="38" y="154" width="60" height="8" rx="4" fill="#D5DBDB"/>
+        <text x="85" y="204" text-anchor="middle" font-size="16" fill="#545B64">공고 원문</text>
+        <path d="M160 105 h40" stroke="#FF9900" stroke-width="6"/><path d="M194 95 l12 10 -12 10" fill="none" stroke="#FF9900" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Bedrock -->
+        <g transform="translate(222 30)">
+          <rect width="150" height="150" rx="24" fill="#232F3E"/>
+          <path d="M66 36c-14 0-22 10-22 20-8 3-12 10-12 18s4 15 12 18c0 10 8 20 22 20z" fill="none" stroke="#FF9900" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M66 36v76" stroke="#FF9900" stroke-width="7"/>
+          <path d="M66 52h22l10-10M66 74h40M66 96h22l10 10" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="104" cy="38" r="7" fill="#fff"/><circle cx="114" cy="74" r="7" fill="#fff"/><circle cx="104" cy="110" r="7" fill="#fff"/>
+        </g>
+        <text x="297" y="204" text-anchor="middle" font-size="16" fill="#545B64">Bedrock + 개선 규칙</text>
+        <!-- 분기 -->
+        <path d="M380 105 h30 M410 60 v90 M410 60 h30 M410 150 h30" fill="none" stroke="#FF9900" stroke-width="6" stroke-linejoin="round"/>
+        <rect x="448" y="22" width="170" height="70" rx="12" fill="#FF9900"/>
+        <text x="533" y="54" text-anchor="middle" font-size="20" font-weight="900" fill="#131A22">&lt;/&gt; IT 기술</text>
+        <text x="533" y="80" text-anchor="middle" font-size="15" fill="#131A22">검색·집계에 사용</text>
+        <rect x="448" y="116" width="170" height="70" rx="12" fill="#F2F3F3" stroke="#879596" stroke-width="3"/>
+        <text x="533" y="148" text-anchor="middle" font-size="20" font-weight="900" fill="#545B64">일반 역량</text>
+        <text x="533" y="174" text-anchor="middle" font-size="15" fill="#545B64">따로 분리</text>
+      </svg>
+      <div class="split">
+        <div class="it"><b>IT 기술</b>Spring Boot · SQL</div>
+        <div><b>일반 역량</b>커뮤니케이션 · 소통</div>
+      </div>
+      <div class="ex">
+        <div><span class="k">원문</span>가상 네트워킹 개발·운영 경험 (SR-IOV, Open vSwitch, Linux Bridge 등)</div>
+        <div><span class="k">추출</span><em>SR-IOV · Open vSwitch · Linux Bridge</em></div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 막대 -->
+    <div class="card">
+      <div class="hd"><span class="n">2</span>원래 검사 코드 통과율</div>
+      <svg width="700" height="400" viewBox="0 0 700 400" style="margin:12px auto 0;display:block">
+        <!-- base 330, 100% at 50 => 2.8px per % -->
+        <g stroke="#E3E6E6" stroke-width="1.5">
+          <line x1="90" y1="330" x2="680" y2="330" stroke="#879596" stroke-width="2.5"/>
+          <line x1="90" y1="260" x2="680" y2="260"/><line x1="90" y1="190" x2="680" y2="190"/><line x1="90" y1="120" x2="680" y2="120"/><line x1="90" y1="50" x2="680" y2="50"/>
+        </g>
+        <g font-size="16" fill="#545B64" text-anchor="end"><text x="78" y="335">0%</text><text x="78" y="265">25%</text><text x="78" y="195">50%</text><text x="78" y="125">75%</text><text x="78" y="55">100%</text></g>
+        <!-- 35% => h 98 ; 85% => h 238 -->
+        <rect x="170" y="232" width="160" height="98" rx="4" fill="#879596"/>
+        <rect x="440" y="92" width="160" height="238" rx="4" fill="#FF9900"/>
+        <text x="250" y="200" text-anchor="middle" font-size="44" font-weight="900" fill="#131A22">35%</text>
+        <text x="250" y="222" text-anchor="middle" font-size="17" fill="#545B64">7 / 20건</text>
+        <text x="520" y="60" text-anchor="middle" font-size="44" font-weight="900" fill="#EC7211">85%</text>
+        <text x="520" y="82" text-anchor="middle" font-size="17" fill="#545B64">17 / 20건</text>
+        <!-- 증가 화살표 -->
+        <path d="M335 225 C380 190 400 120 432 104" fill="none" stroke="#EC7211" stroke-width="4" stroke-dasharray="9 7"/>
+        <path d="M420 98 l14 4 -8 12" fill="none" stroke="#EC7211" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="336" y="136" width="84" height="38" rx="19" fill="#EC7211"/><text x="378" y="162" text-anchor="middle" font-size="20" font-weight="900" fill="#fff">+50%p</text>
+        <text x="250" y="364" text-anchor="middle" font-size="22" fill="#131A22">기존 프롬프트</text>
+        <text x="520" y="364" text-anchor="middle" font-size="22" fill="#131A22">개선 규칙 적용</text>
+      </svg>
+      <div class="foot">기술명이 하나라도 원문 문구와 다르면 탈락 → <em>원문 그대로 뽑은 공고 비율</em></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

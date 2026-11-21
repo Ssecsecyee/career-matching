@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>채용·교육 갭</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--blue:#146EB4;--line:#D5DBDB;--sub:#545B64;--soft:#F2F3F3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .top p{margin-top:18px;font-size:30px;color:var(--sub)}
+  .row{display:flex;align-items:stretch;justify-content:space-between;padding:44px 50px 0}
+  .card{width:440px;border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .card .hd{background:var(--ink);color:#fff;font-size:30px;font-weight:900;padding:14px 0;text-align:center}
+  .card.warn .hd{background:var(--orange);color:var(--ink2)}
+  .card .sum{font-size:22px;white-space:nowrap;font-weight:700;text-align:center;padding:16px 10px;color:var(--ink2);border-bottom:2px solid var(--line);background:var(--soft)}
+  .card .art{flex:1;display:flex;align-items:center;justify-content:center;padding:10px}
+  .arrow{align-self:center;margin-top:40px}
+  .bar{position:absolute;left:50px;right:50px;bottom:48px;height:84px;border:3px solid var(--orange);border-radius:14px;display:flex;align-items:center;gap:26px;padding:0 26px;background:#FFF8EC}
+  .bar .tag{background:var(--ink);color:#fff;border-radius:30px;padding:6px 26px;font-size:26px;font-weight:900}
+  .bar .txt{font-size:28px;font-weight:700;color:var(--ink2)}
+  .bar .txt b{color:var(--orange2)}
+  text{font-family:"Noto Sans KR",sans-serif;font-weight:700}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>채용공고와 교육공고 사이의 갭<span class="dot"></span></h1>
+    <p>채용 요구역량이 교육 데이터와 얼마나 일치하는가</p>
+  </div>
+
+  <div class="row">
+    <!-- 1 원래 계획 -->
+    <div class="card">
+      <div class="hd">원래 계획</div>
+      <div class="sum">고용24 채용공고 + 교육공고 동시 수집</div>
+      <div class="art">
+        <svg width="360" height="300" viewBox="0 0 360 300">
+          <!-- 채용 -->
+          <rect x="20" y="20" width="200" height="100" rx="14" fill="#fff" stroke="#232F3E" stroke-width="5"/>
+          <rect x="40" y="44" width="52" height="38" rx="6" fill="#232F3E"/><rect x="55" y="36" width="22" height="12" rx="3" fill="none" stroke="#232F3E" stroke-width="5"/>
+          <rect x="106" y="48" width="96" height="10" rx="5" fill="#D5DBDB"/><rect x="106" y="68" width="76" height="10" rx="5" fill="#D5DBDB"/>
+          <rect x="40" y="94" width="160" height="0"/>
+          <rect x="34" y="88" width="120" height="24" rx="12" fill="#232F3E"/><text x="94" y="106" text-anchor="middle" font-size="15" fill="#fff">채용공고 데이터</text>
+          <!-- 교육 -->
+          <rect x="20" y="170" width="200" height="100" rx="14" fill="#fff" stroke="#146EB4" stroke-width="5"/>
+          <path d="M66 196 l30 -12 30 12 -30 12z" fill="#146EB4"/><path d="M78 202v14c10 6 26 6 36 0v-14" fill="#146EB4"/>
+          <rect x="140" y="194" width="62" height="10" rx="5" fill="#D5DBDB"/><rect x="140" y="214" width="50" height="10" rx="5" fill="#D5DBDB"/>
+          <rect x="34" y="238" width="120" height="24" rx="12" fill="#146EB4"/><text x="94" y="256" text-anchor="middle" font-size="15" fill="#fff">교육공고 데이터</text>
+          <!-- 합치기 -->
+          <path d="M220 70 H290 V220 H220" fill="none" stroke="#FF9900" stroke-width="7" stroke-linejoin="round"/>
+          <circle cx="290" cy="145" r="30" fill="#FF9900"/>
+          <path d="M290 130v30M275 145h30" stroke="#232F3E" stroke-width="7" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <svg class="arrow" width="60" height="44" viewBox="0 0 60 44"><path d="M0 14h36V0l24 22-24 22V30H0z" fill="#FF9900"/></svg>
+
+    <!-- 2 API 권한 제약 -->
+    <div class="card warn">
+      <div class="hd">API 권한 제약</div>
+      <div class="sum">교육공고만 수집 가능</div>
+      <div class="art">
+        <svg width="360" height="300" viewBox="0 0 360 300">
+          <rect x="20" y="30" width="130" height="80" rx="12" fill="#F2F3F3" stroke="#879596" stroke-width="5"/>
+          <rect x="38" y="52" width="40" height="30" rx="5" fill="#879596"/>
+          <text x="85" y="100" text-anchor="middle" font-size="16" fill="#545B64">채용공고</text>
+          <rect x="20" y="180" width="130" height="80" rx="12" fill="#fff" stroke="#146EB4" stroke-width="5"/>
+          <path d="M46 210 l24 -10 24 10 -24 10z" fill="#146EB4"/>
+          <text x="85" y="250" text-anchor="middle" font-size="16" fill="#146EB4">교육공고</text>
+          <!-- 막힘 -->
+          <path d="M150 70 H200" stroke="#879596" stroke-width="6" stroke-dasharray="8 6"/>
+          <circle cx="182" cy="70" r="18" fill="#fff" stroke="#EC7211" stroke-width="5"/>
+          <path d="M174 62l16 16M190 62l-16 16" stroke="#EC7211" stroke-width="5" stroke-linecap="round"/>
+          <!-- 통과 -->
+          <path d="M150 220 H210" stroke="#146EB4" stroke-width="6"/>
+          <circle cx="182" cy="220" r="18" fill="#146EB4"/>
+          <path d="M174 220l6 6 11-12" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- 방패 -->
+          <path d="M280 60 l60 22 v52 c0 48 -30 76 -60 92 c-30 -16 -60 -44 -60 -92 v-52z" fill="#232F3E"/>
+          <circle cx="268" cy="142" r="16" fill="none" stroke="#FF9900" stroke-width="7"/>
+          <path d="M282 142h34M304 142v14M314 142v10" stroke="#FF9900" stroke-width="7" stroke-linecap="round"/>
+          <text x="280" y="196" text-anchor="middle" font-size="24" font-weight="900" fill="#fff">API</text>
+          <path d="M318 32 l26 46 h-52z" fill="#FF9900"/>
+          <rect x="315" y="48" width="6" height="16" rx="3" fill="#232F3E"/><circle cx="318" cy="70" r="3.5" fill="#232F3E"/>
+        </svg>
+      </div>
+    </div>
+
+    <svg class="arrow" width="60" height="44" viewBox="0 0 60 44"><path d="M0 14h36V0l24 22-24 22V30H0z" fill="#FF9900"/></svg>
+
+    <!-- 3 현재 과제 -->
+    <div class="card">
+      <div class="hd">현재 과제</div>
+      <div class="sum">채용 요구역량 ↔ 교육 데이터 일치도 분석</div>
+      <div class="art">
+        <svg width="360" height="300" viewBox="0 0 360 300">
+          <rect x="14" y="20" width="120" height="120" rx="14" fill="#fff" stroke="#232F3E" stroke-width="5"/>
+          <path d="M34 54l8 8 14-14M34 84l8 8 14-14M34 114l8 8 14-14" stroke="#FF9900" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="66" y="52" width="52" height="9" rx="4" fill="#D5DBDB"/><rect x="66" y="82" width="46" height="9" rx="4" fill="#D5DBDB"/><rect x="66" y="112" width="50" height="9" rx="4" fill="#D5DBDB"/>
+          <text x="74" y="166" text-anchor="middle" font-size="18" fill="#232F3E">채용 요구역량</text>
+          <rect x="226" y="20" width="120" height="120" rx="14" fill="#fff" stroke="#146EB4" stroke-width="5"/>
+          <path d="M256 52 l30 -12 30 12 -30 12z" fill="#146EB4"/><path d="M268 58v14c10 6 26 6 36 0v-14" fill="#146EB4"/>
+          <rect x="246" y="96" width="80" height="9" rx="4" fill="#D5DBDB"/><rect x="246" y="116" width="64" height="9" rx="4" fill="#D5DBDB"/>
+          <text x="286" y="166" text-anchor="middle" font-size="18" fill="#146EB4">교육 과정 데이터</text>
+          <!-- 갭 -->
+          <path d="M140 80h80" stroke="#FF9900" stroke-width="6"/>
+          <path d="M150 70l-12 10 12 10M210 70l12 10-12 10" stroke="#FF9900" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="152" y="40" width="56" height="30" rx="15" fill="#EC7211"/><text x="180" y="61" text-anchor="middle" font-size="17" fill="#fff">갭</text>
+          <!-- 분석 -->
+          <path d="M74 176v40h50M286 176v40h-50" fill="none" stroke="#879596" stroke-width="5"/>
+          <rect x="124" y="196" width="112" height="76" rx="10" fill="#232F3E"/>
+          <rect x="140" y="246" width="14" height="14" fill="#FF9900"/><rect x="160" y="232" width="14" height="28" fill="#FF9900"/><rect x="180" y="218" width="14" height="42" fill="#fff"/>
+          <circle cx="212" cy="234" r="11" fill="none" stroke="#fff" stroke-width="4"/><path d="M220 242l8 8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <span class="tag">초기안</span>
+    <span class="txt">NCS 직무코드와 연결해 분류 → <b>실제 플랫폼 운영 비용 문제로 대안 필요</b></span>
+  </div>
+</div>
+</body>
+</html>

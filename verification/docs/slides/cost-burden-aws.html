@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>매핑 비용 부담</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--blue:#146EB4;--line:#D5DBDB;--sub:#545B64;--soft:#F2F3F3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000;word-break:keep-all}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .grid{display:grid;grid-template-columns:500px 1fr 440px;gap:22px;padding:40px 40px 0;height:740px}
+  .col{display:flex;flex-direction:column;gap:22px}
+  .card{border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .card .hd{background:var(--ink);color:#fff;font-size:24px;font-weight:900;padding:12px 20px;display:flex;align-items:center;gap:12px}
+  .card .hd .n{background:var(--orange);color:var(--ink2);border-radius:16px;padding:0 12px;font-size:20px}
+  .flow{display:flex;align-items:center;justify-content:space-between;padding:22px 20px}
+  .node{text-align:center;width:120px}
+  .node .lb{margin-top:8px;font-size:17px;font-weight:900;color:var(--ink2);line-height:1.3}
+  .node .lb small{display:block;font-size:14px;color:var(--sub);font-weight:700}
+  .stats{display:flex;gap:12px;padding:18px 16px}
+  .stat{flex:1;background:var(--soft);border-radius:12px;text-align:center;padding:14px 4px}
+  .stat b{display:block;font-size:34px;font-weight:900;color:var(--ink2);line-height:1.2}
+  .stat b.o{color:var(--orange2)}
+  .stat small{font-size:15px;font-weight:700;color:var(--sub)}
+  .big{display:flex;align-items:center;gap:16px;margin:14px 18px 0;padding:10px 18px;border:3px solid var(--orange);border-radius:14px;background:#FFF8EC}
+  .big .k{font-size:18px;font-weight:700;color:var(--sub)}
+  .big .v{font-size:40px;font-weight:900;color:var(--orange2);line-height:1.1}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:6px 22px 0;font-size:15px;font-weight:700;color:var(--ink2)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+  .note{padding:0 22px 12px;font-size:13px;color:var(--sub)}
+  .item{flex:1;display:flex;gap:16px;align-items:center;padding:16px 18px}
+  .item + .item{border-top:2px solid var(--line)}
+  .item .ic{flex:none;width:70px;height:70px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center}
+  .item h3{font-size:22px;font-weight:900;color:var(--ink2)}
+  .item p{margin-top:6px;font-size:17px;color:var(--sub);line-height:1.45}
+  .redo{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 16px 14px;padding:18px;border:3px dashed var(--orange);border-radius:14px}
+  .redo .chips{display:flex;flex-direction:column;gap:8px}
+  .redo .chips span{background:var(--ink);color:#fff;border-radius:16px;padding:3px 18px;font-size:17px;font-weight:900;text-align:center}
+  .redo .again{background:var(--orange);color:var(--ink2);border-radius:14px;padding:16px 20px;font-size:22px;font-weight:900}
+  text{font-family:"Noto Sans KR",sans-serif;font-weight:700}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top"><h1>공고-역량 매핑의 비용 및 운영 부담<span class="dot"></span></h1></div>
+  <div class="grid">
+    <!-- 왼쪽 -->
+    <div class="col">
+      <div class="card">
+        <div class="hd"><span class="n">1</span>매핑 방식</div>
+        <div class="flow">
+          <div class="node">
+            <svg width="90" height="90" viewBox="0 0 90 90"><rect x="8" y="4" width="74" height="82" rx="10" fill="#fff" stroke="#232F3E" stroke-width="5"/><rect x="18" y="14" width="54" height="24" rx="5" fill="#232F3E"/><text x="45" y="32" text-anchor="middle" font-size="14" fill="#FF9900">JOB</text><rect x="18" y="50" width="54" height="6" rx="3" fill="#D5DBDB"/><rect x="18" y="64" width="40" height="6" rx="3" fill="#D5DBDB"/></svg>
+            <div class="lb">채용공고<small>필수역량 섹션</small></div>
+          </div>
+          <svg width="30" height="26" viewBox="0 0 40 40"><path d="M0 13h22V0l18 20-18 20V27H0z" fill="#FF9900"/></svg>
+          <div class="node">
+            <svg width="90" height="90" viewBox="0 0 90 90"><rect x="5" y="5" width="80" height="80" rx="18" fill="#FF9900"/><path d="M40 24c-10 0-16 7-16 14-6 2-9 7-9 12s3 10 9 12c0 7 6 14 16 14z" fill="none" stroke="#232F3E" stroke-width="5" stroke-linejoin="round"/><path d="M40 24v52M40 38h14l7-7M40 50h20M40 62h14l7 7" fill="none" stroke="#232F3E" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="lb">LLM<small>키워드 추출</small></div>
+          </div>
+          <svg width="30" height="26" viewBox="0 0 40 40"><path d="M0 13h22V0l18 20-18 20V27H0z" fill="#FF9900"/></svg>
+          <div class="node">
+            <svg width="90" height="90" viewBox="0 0 90 90"><ellipse cx="45" cy="22" rx="32" ry="11" fill="#146EB4"/><path d="M13 22v44c0 6 14 11 32 11s32-5 32-11V22" fill="#146EB4"/><path d="M13 38c0 6 14 11 32 11s32-5 32-11M13 54c0 6 14 11 32 11s32-5 32-11" fill="none" stroke="#fff" stroke-width="3"/></svg>
+            <div class="lb">NCS 직무코드<small>매핑</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="hd"><span class="n">2</span>데이터 및 호출 방식</div>
+        <div class="stats">
+          <div class="stat"><b>1,381건</b><small>수집 공고 수</small></div>
+          <div class="stat"><b>1회</b><small>공고당 모델 호출</small></div>
+          <div class="stat"><b class="o">약 $30</b><small>1회 매핑 총 비용</small></div>
+        </div>
+        <div class="redo">
+          <div class="chips"><span>신규</span><span>수정</span><span>마감</span></div>
+          <svg width="40" height="30" viewBox="0 0 40 40"><path d="M0 13h22V0l18 20-18 20V27H0z" fill="#FF9900"/></svg>
+          <div class="again">매번 AI 재호출</div>
+        </div>
+        <div class="note" style="font-size:15px;color:#131A22;font-weight:700;text-align:center">바뀐 공고마다 모델 호출이 다시 필요</div>
+      </div>
+    </div>
+
+    <!-- 가운데: 비용 구조 -->
+    <div class="card">
+      <div class="hd"><span class="n">3</span>예상 비용 구조 (월)</div>
+      <div class="big"><div><div class="k">NCS 매핑을 반복하면 월 추가 비용</div><div class="v">약 +$110</div></div></div>
+      <svg width="530" height="400" viewBox="0 0 530 400" style="margin:4px auto 0;display:block">
+        <g stroke="#E3E6E6" stroke-width="1.5">
+          <line x1="60" y1="320" x2="510" y2="320" stroke="#879596" stroke-width="2.5"/>
+          <line x1="60" y1="260" x2="510" y2="260"/><line x1="60" y1="200" x2="510" y2="200"/><line x1="60" y1="140" x2="510" y2="140"/><line x1="60" y1="80" x2="510" y2="80"/>
+        </g>
+        <g font-size="14" fill="#545B64" text-anchor="end"><text x="50" y="325">$0</text><text x="50" y="265">$45</text><text x="50" y="205">$90</text><text x="50" y="145">$135</text><text x="50" y="85">$180</text></g>
+        <!-- scale: 1$ = 1.3333px, base 320 -->
+        <!-- bar A -->
+        <rect x="100" y="266.7" width="140" height="53.3" fill="#232F3E"/>
+        <rect x="100" y="256" width="140" height="10.7" fill="#879596"/>
+        <rect x="100" y="231.5" width="140" height="24.5" rx="4" fill="#146EB4"/>
+        <text x="170" y="298" text-anchor="middle" font-size="16" fill="#fff">$40~48</text>
+        <text x="170" y="249" text-anchor="middle" font-size="15" fill="#fff">$18.34</text>
+        <text x="170" y="220" text-anchor="middle" font-size="20" font-weight="900" fill="#131A22">약 $58~66</text>
+        <!-- bar B -->
+        <rect x="320" y="266.7" width="140" height="53.3" fill="#232F3E"/>
+        <rect x="320" y="256" width="140" height="10.7" fill="#879596"/>
+        <rect x="320" y="231.5" width="140" height="24.5" fill="#146EB4"/>
+        <rect x="320" y="84.7" width="140" height="146.8" rx="4" fill="#FF9900"/>
+        <text x="390" y="298" text-anchor="middle" font-size="16" fill="#fff">$40~48</text>
+        <text x="390" y="249" text-anchor="middle" font-size="15" fill="#fff">$18.34</text>
+        <text x="390" y="165" text-anchor="middle" font-size="22" font-weight="900" fill="#131A22">$110.11</text>
+        <text x="390" y="73" text-anchor="middle" font-size="20" font-weight="900" fill="#131A22">약 $168~176</text>
+        <!-- x labels -->
+        <text x="170" y="348" text-anchor="middle" font-size="17" fill="#131A22">NCS 매핑 반복 없음</text>
+        <text x="390" y="348" text-anchor="middle" font-size="17" fill="#131A22">NCS 매핑 반복</text>
+        <text x="390" y="370" text-anchor="middle" font-size="13" fill="#545B64">(현재 시험량 기준)</text>
+      </svg>
+      <div class="legend">
+        <span><i style="background:#232F3E"></i>EC2·저장소·호스팅</span>
+        <span><i style="background:#879596"></i>고정비 변동폭</span>
+        <span><i style="background:#146EB4"></i>일반 서비스 Bedrock</span>
+        <span><i style="background:#FF9900"></i>NCS 매핑 호출</span>
+      </div>
+      <div class="note" style="padding-top:6px">* 최근 7일 사용량이 한 달간 이어진다고 가정한 추정치</div>
+    </div>
+
+    <!-- 오른쪽 -->
+    <div class="card">
+      <div class="hd"><span class="n">4</span>운영 부담 요인</div>
+      <div class="item">
+        <div class="ic"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="4" y="8" width="32" height="28" rx="4" fill="none" stroke="#FF9900" stroke-width="4"/><path d="M4 16h32M12 4v8M28 4v8" stroke="#FF9900" stroke-width="4" stroke-linecap="round"/><rect x="11" y="21" width="6" height="5" fill="#fff"/><rect x="23" y="21" width="6" height="5" fill="#fff"/></svg></div>
+        <div><h3>공고 실시간성 관리 어려움</h3><p>신규·수정·마감에 따라<br>계속 다시 매핑해야 함</p></div>
+      </div>
+      <div class="item">
+        <div class="ic"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="8" y="8" width="24" height="24" rx="4" fill="#FF9900"/><text x="20" y="26" text-anchor="middle" font-size="13" font-weight="900" fill="#232F3E">AI</text><path d="M14 2v6M20 2v6M26 2v6M14 32v6M20 32v6M26 32v6M2 14h6M2 26h6M32 14h6M32 26h6" stroke="#FF9900" stroke-width="3" stroke-linecap="round"/></svg></div>
+        <div><h3>AI 매번 호출 부담</h3><p>공고마다 모델을 호출해<br>비용과 처리 시간이 늘어남</p></div>
+      </div>
+      <div class="item">
+        <div class="ic"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="9" rx="3" fill="#FF9900"/><rect x="5" y="16" width="30" height="9" rx="3" fill="#FF9900"/><rect x="5" y="27" width="30" height="9" rx="3" fill="#FF9900"/><circle cx="29" cy="9.5" r="2" fill="#232F3E"/><circle cx="29" cy="20.5" r="2" fill="#232F3E"/><circle cx="29" cy="31.5" r="2" fill="#232F3E"/></svg></div>
+        <div><h3>플랫폼 운영 비용 증가</h3><p>고정비를 빼고도<br>월 약 $110 추가 지출</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

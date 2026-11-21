@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>검증 한눈에 보기</title>
+<style>
+:root{
+  --bg:#f7f6f3;--card:#ffffff;--soft:#f0efea;--line:rgba(20,20,20,.10);
+  --ink:#191917;--ink2:#55544f;--ink3:#8a8983;
+  --before:#b8b6ad;--after:#1d9e75;--problem:#d85a30;
+  --ok-bg:#e1f5ee;--ok-ink:#0f6e56;--warn-bg:#faeee0;--warn-ink:#8a4f12;--gray-bg:#efeee9;--gray-ink:#5f5e5a;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#171716;--card:#1f1f1d;--soft:#2a2a28;--line:rgba(255,255,255,.10);
+  --ink:#f0efec;--ink2:#c3c2b7;--ink3:#8f8e88;
+  --before:#6b6a65;--after:#2fb488;--problem:#e2703f;
+  --ok-bg:#0d3b2f;--ok-ink:#9fe1cb;--warn-bg:#3d2a12;--warn-ink:#f5c98a;--gray-bg:#2c2c2a;--gray-ink:#c3c2b7;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;line-height:1.6}
+main{max-width:980px;margin:0 auto;padding:40px 24px 56px}
+h1{font-size:28px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--ink2);margin:0 0 28px;font-size:15px}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:28px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.k .l{font-size:13px;color:var(--ink2)}
+.k .n{font-size:28px;font-weight:600;margin:4px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.k .n .a{color:var(--after)}.k .n .p{color:var(--problem)}
+.k .s{font-size:12.5px;color:var(--ink3)}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin:0 0 10px;position:relative}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;right:-22px;top:50%;width:16px;height:2px;background:var(--ink3)}
+.step:not(:last-child)::before{content:"";position:absolute;right:-23px;top:calc(50% - 4px);border:5px solid transparent;border-left:6px solid var(--ink3);border-right:0}
+.step .no{font-size:12px;color:var(--ink3)}
+.step .nm{font-weight:600;font-size:15px}
+.step .vv{font-size:12.5px;color:var(--ink2)}
+.step.ok{border-color:var(--after)}.step.warn{border-color:var(--problem)}
+.method{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0 26px;font-size:13.5px;color:var(--ink2)}
+.chip{background:var(--soft);border-radius:999px;padding:4px 12px;color:var(--ink)}
+.arrow{color:var(--ink3)}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--ink2);margin:0 0 6px}
+.legend span{display:flex;align-items:center;gap:6px}.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px}
+.dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px}
+.hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.hd b{font-size:17px;font-weight:600}
+.tag{font-size:12.5px;padding:2px 10px;border-radius:999px}
+.t-gray{background:var(--gray-bg);color:var(--gray-ink)}.t-ok{background:var(--ok-bg);color:var(--ok-ink)}.t-warn{background:var(--warn-bg);color:var(--warn-ink)}
+.how{font-size:14px;color:var(--ink2);margin:4px 0 10px}
+.m{display:grid;grid-template-columns:150px minmax(0,1fr) 150px;gap:14px;align-items:center;font-size:14px;margin:7px 0}
+.tr{background:var(--soft);height:10px;border-radius:0 5px 5px 0}.tr div{height:10px;border-radius:0 5px 5px 0}
+.tr+.tr{margin-top:4px}
+.v{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+.note{font-size:13px;color:var(--ink2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.next{border-style:dashed;background:transparent}
+footer{margin-top:22px;font-size:13px;color:var(--ink2);line-height:1.8}
+footer strong{color:var(--ink);font-weight:600}
+@media (max-width:760px){
+  main{padding:24px 16px 40px}
+  .kpi,.flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow{gap:12px}.step::after,.step::before{display:none}
+  .m{grid-template-columns:96px minmax(0,1fr) 104px;gap:8px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>친구 챗봇 워크플로에 검증을 붙인 결과</h1>
+  <p class="sub">EDUCARE(career-matching) · 친구 코드는 수정 없이 읽기 전용으로 호출 · 2026-11-18 기준</p>
+
+  <section class="kpi" aria-label="핵심 수치">
+    <div class="k"><div class="l">실시간 범주 정답률</div><div class="n">46.5 → <span class="a">62.0%</span></div><div class="s">+15.5%p · 공고 20건 중 14건 개선</div></div>
+    <div class="k"><div class="l">배치 형식 검사 통과</div><div class="n">7 → <span class="a">17건</span></div><div class="s">공고 20건 중 (무효 13 → 3건)</div></div>
+    <div class="k"><div class="l">중복 공고 발견</div><div class="n"><span class="p">22.4%</span></div><div class="s">1,154건 중 재게시 259건</div></div>
+    <div class="k"><div class="l">친구 코드 수정</div><div class="n">0줄</div><div class="s">개선은 패치로 전달 · Bedrock 약 23달러</div></div>
+  </section>
+
+  <section class="flow" aria-label="워크플로 순서">
+    <div class="step warn"><div class="no">1 · V1</div><div class="nm">데이터 적재</div><div class="vv">중복 공고 찾기</div></div>
+    <div class="step ok"><div class="no">2 · V3·V4</div><div class="nm">조건 추출 (배치)</div><div class="vv">형식 검사 통과</div></div>
+    <div class="step ok"><div class="no">3 · V3</div><div class="nm">조건 분류 (실시간)</div><div class="vv">범주 정답률</div></div>
+    <div class="step"><div class="no">4 · V7</div><div class="nm">상담 답변</div><div class="vv">문제없음 확인</div></div>
+  </section>
+
+  <div class="method">
+    <span>검증 방식</span>
+    <span class="chip">AI가 제안</span><span class="arrow">→</span>
+    <span class="chip">코드가 검증</span><span class="arrow">→</span>
+    <span class="chip">사람이 승인</span>
+    <span style="margin-left:6px">· 봉인 정답 20건·228줄 · 같은 모델(Sonnet 4.6) · 친구 그대로 vs 규칙 적용 · 95% 구간</span>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw" style="background:var(--before)"></i>친구 그대로</span>
+    <span><i class="sw" style="background:var(--after)"></i>내 규칙·검증 적용</span>
+    <span><i class="sw" style="background:var(--problem)"></i>찾아낸 문제</span>
+  </div>
+
+  <article class="card">
+    <div class="dot t-warn">1</div>
+    <div>
+      <div class="hd"><b>데이터 적재</b><span class="tag t-gray">V1 중복 공고</span><span class="tag t-warn">문제 발견 · 해결 제안</span></div>
+      <div class="how">코드가 같은 회사·같은 본문의 공고를 묶고 → 사람이 코드 판단을 가린 카드로 확인</div>
+      <div class="m"><span>재게시 사본</span><div class="tr"><div style="width:22.4%;background:var(--problem)"></div></div><span class="v">22.4% (259건)</span></div>
+      <div class="m"><span>코드 = 사람 판단</span><div class="tr"><div style="width:95.9%;background:var(--after)"></div></div><span class="v">47 / 49</span></div>
+      <div class="note">친구 DB는 공고 번호 중복만 막고 있어서, 새 번호로 다시 올린 공고가 따로 세어진다. 제안: 적재할 때 묶음 id를 저장하고, 검색은 한 칸으로 접고, 통계는 묶음당 한 번만 센다.</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="dot t-ok">2</div>
+    <div>
+      <div class="hd"><b>조건 추출 (배치)</b><span class="tag t-gray">V3·V4 · condition-review-v2</span><span class="tag t-ok">개선 측정</span></div>
+      <div class="how">봉인 정답으로 친구 프롬프트 그대로와 규칙("원문 그대로", "무엇이 기술인가") 추가를 비교</div>
+      <div class="m"><span>형식 검사 통과</span><div><div class="tr"><div style="width:35%;background:var(--before)"></div></div><div class="tr"><div style="width:85%;background:var(--after)"></div></div></div><span class="v">7 → 17 / 20</span></div>
+      <div class="m"><span>기술 이름 F1</span><div><div class="tr"><div style="width:11.4%;background:var(--before)"></div></div><div class="tr"><div style="width:48.7%;background:var(--after)"></div></div></div><span class="v">0.11 → 0.49</span></div>
+      <div class="m"><span>모두 / 하나만</span><div><div class="tr"><div style="width:39.5%;background:var(--before)"></div></div><div class="tr"><div style="width:49.3%;background:var(--after)"></div></div></div><span class="v">0.40 → 0.49</span></div>
+      <div class="note">형식 검사는 친구 코드가 직접 판정해서 내 기준이 섞이지 않는다. 원인은 기술 이름 대신 "~ 문제 해결 경험" 같은 줄인 구절을 적은 것. 모두/하나만은 오답도 23 → 34개로 늘어 아직 약하다.</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="dot t-ok">3</div>
+    <div>
+      <div class="hd"><b>공고 선택 후 조건 분류 (실시간)</b><span class="tag t-gray">V3 · selected-question</span><span class="tag t-ok">개선 측정 · 패치 준비</span></div>
+      <div class="how">친구 서비스와 같은 방식(공고 한 번에 보내기, 15초 클라이언트)으로 친구 그대로와 패치를 번갈아 3회씩</div>
+      <div class="m"><span>범주 정답률</span><div><div class="tr"><div style="width:46.5%;background:var(--before)"></div></div><div class="tr"><div style="width:62%;background:var(--after)"></div></div></div><span class="v">46.5 → 62.0%</span></div>
+      <div class="m"><span>3번 다 같은 답</span><div><div class="tr"><div style="width:86.8%;background:var(--before)"></div></div><div class="tr"><div style="width:92.1%;background:var(--after)"></div></div></div><span class="v">86.8 → 92.1%</span></div>
+      <div class="m"><span>가장 긴 응답</span><div><div class="tr"><div style="width:83.6%;background:var(--before)"></div></div><div class="tr"><div style="width:64.7%;background:var(--after)"></div></div></div><span class="v">12.5 → 9.7초</span></div>
+      <div class="note">공고별 +11.1%p (95% +3.8 ~ +18.6) · 형식 실패 0 → 0 · 서비스는 응답을 15초에 끊는다. 처음 규칙에서 생긴 형식 실패는 원인(모델이 64자 번호를 잘못 베낌)을 찾아 짧은 번호로 해결했고, 캐시 키가 v1로 고정된 버그도 찾았다. 셋을 패치 하나로 묶었고 친구 테스트 499개가 통과한다.</div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="dot t-gray">4</div>
+    <div>
+      <div class="hd"><b>상담 답변</b><span class="tag t-gray">V7 · 실제 질문 3종</span><span class="tag t-gray">문제없음 확인</span></div>
+      <div class="how">공고 20건 × "필수 기술 / 우대 / 경력 몇 년" 질문 · 규칙을 넣어도 차이가 없어서 넣지 않음</div>
+      <div class="m"><span>필수 기술</span><div class="tr"><div style="width:96%;background:var(--before)"></div></div><span class="v">96% (135/140)</span></div>
+      <div class="m"><span>우대 조건</span><div class="tr"><div style="width:80%;background:var(--before)"></div></div><span class="v">80%</span></div>
+      <div class="m"><span>경력 연차</span><div class="tr"><div style="width:100%;background:var(--before)"></div></div><span class="v">15 / 15</span></div>
+      <div class="note">"답변 AI가 공고 조건을 못 받아 틀릴 것"이라는 처음 가설은 틀렸다. 검증으로 손댈 필요가 없는 곳을 확인했다.</div>
+    </div>
+  </article>
+
+  <article class="card next">
+    <div class="dot t-gray">+</div>
+    <div>
+      <div class="hd"><b style="color:var(--ink2)">다음 단계</b><span class="tag t-gray">아직 안 함</span></div>
+      <div class="how" style="margin-bottom:0">V4b 의도 분류 · V5 동의어 사전 · V6 교육 추천 · V8 프롬프트 버전을 바꿀 때마다 같은 정답으로 재채점</div>
+    </div>
+  </article>
+
+  <footer>
+    <strong>읽을 때 주의</strong><br>
+    · 모든 수치는 친구 코드를 읽기 전용으로 불러 잰 값이다. 친구 서비스에는 아직 반영 전이고, 패치를 전달하는 단계다.<br>
+    · 2·3단계 범주 정답은 내 기준("무엇이 기술인가")으로 만들었다. 2단계 형식 검사는 친구 코드가 직접 판정했다.<br>
+    · 공고 20건, 점핏 한 출처, 백엔드 직무만 봤다. 판단마다 결정자를 판단 기록부에 남기고 하네스 검사로 확인했다.
+  </footer>
+</main>
+</body>
+</html>

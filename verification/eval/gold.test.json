@@ -1,0 +1,74 @@
+{
+  "_comment": "시험용(blind) 정답셋. 사용자가 AI 초안 없이 원문만 보고 단다. 규칙·프롬프트 조정에 쓰지 않고 최종 보고에만 쓴다(D-010).",
+  "jobs": "data/real/jumpit/backend.json",
+  "status": "blank",
+  "labeled_by": "pending (human, blind)",
+  "guideline": "docs/eval/labeling-guide.md",
+  "sample": {
+    "seed": 20261108,
+    "size": 10,
+    "pool": "jumpit backend after cleaning"
+  },
+  "labels": {
+    "jumpit-55142755": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55162353": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55222327": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55223777": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55239073": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55271984": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55297157": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55310255": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55354317": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "jumpit-55356259": {
+      "required": [],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "_comment": "V1 중복 공고 사람 확인 (docs/eval/v1-reposts.md). 공고 id와 판단만 저장.",
+  "labels": {
+    "group:jumpit-55191301:jumpit-55502056": {
+      "label": "career",
+      "note": "같은데 기술 스택만 살짝 다르네"
+    },
+    "group:jumpit-55131687:jumpit-55131761:jumpit-55417954:jumpit-55417960": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55150227:jumpit-55150270": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55149732:jumpit-55149745:jumpit-55416018:jumpit-55416027": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55238682:jumpit-55238845": {
+      "label": "different",
+      "note": "분석 설계쪽에 주요업무가 더 많이 들어가있어 엄연히 다른 직무야."
+    },
+    "group:jumpit-55325801:jumpit-55325838": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55207365:jumpit-55207378:jumpit-55491439:jumpit-55491469": {
+      "label": "location",
+      "note": "",
+      "history": [
+        {
+          "label": "career",
+          "note": "",
+          "replaced_at": "2026-11-14T15:16:39"
+        }
+      ]
+    },
+    "group:jumpit-55184667:jumpit-55184679:jumpit-55184688:jumpit-55455287:jumpit-55455301:jumpit-55455314": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55162726:jumpit-55162736:jumpit-55387903:jumpit-55387919": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55361641:jumpit-55406282": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55146536:jumpit-55148403:jumpit-55424501:jumpit-55424525": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55164138:jumpit-55290059": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55324454:jumpit-55362192": {
+      "label": "location",
+      "note": "기술 스택만 살짝 다름.",
+      "history": [
+        {
+          "label": "career",
+          "note": "기술 스택만 살짝 다름.",
+          "replaced_at": "2026-11-14T15:16:52"
+        }
+      ]
+    },
+    "group:jumpit-55212894:jumpit-55212932": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55224335:jumpit-55414732:jumpit-55496271": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55372083:jumpit-55372086:jumpit-55372088:jumpit-55372091:jumpit-55372095:jumpit-55372102": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55208482:jumpit-55208519:jumpit-55208555:jumpit-55453585:jumpit-55453605:jumpit-55453655": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55184950:jumpit-55184970:jumpit-55495555:jumpit-55495561": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55340260:jumpit-55340274:jumpit-55340304:jumpit-55340316:jumpit-55340331:jumpit-55340343:jumpit-55340356:jumpit-55340370:jumpit-55340379:jumpit-55340419": {
+      "label": "career",
+      "note": ""
+    },
+    "group:jumpit-55332074:jumpit-55332082": {
+      "label": "career",
+      "note": ""
+    }
+  }
+}

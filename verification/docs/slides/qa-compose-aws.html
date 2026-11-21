@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>원문 조건별 문답</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--line:#D5DBDB;--sub:#545B64}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .top p{margin-top:18px;font-size:30px;color:var(--sub)}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:56px 60px 0}
+  .col{width:520px}
+  .label{display:inline-flex;align-items:center;gap:10px;font-size:26px;font-weight:700;color:var(--orange2);margin-bottom:18px}
+  .label:before{content:"";width:12px;height:12px;background:var(--orange);border-radius:2px}
+  .card{border:3px solid var(--ink);border-radius:16px;overflow:hidden;height:380px;background:#fff}
+  .card .hd{background:var(--ink);color:#fff;font-size:24px;font-weight:700;padding:14px 26px}
+  .card .bd{padding:44px 30px;font-size:36px;font-weight:700;line-height:1.9;color:var(--ink2)}
+  .card .bd q{quotes:none}
+  .card.out .bd{font-size:32px;line-height:2.1}
+  .card.out .bd div:before{content:"Q";display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--orange);color:var(--ink2);font-size:22px;font-weight:900;margin-right:16px;vertical-align:4px}
+  .mid{display:flex;align-items:center;gap:22px;margin-top:56px}
+  .engine{text-align:center;width:200px}
+  .engine .name{margin-top:16px;font-size:34px;font-weight:900;color:var(--ink2)}
+  .engine .does{margin-top:10px;font-size:26px;font-weight:700;color:var(--orange2);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>발견한 문제점<span class="dot"></span></h1>
+    <p>AI 활용의 최적화: 원문을 조건별 문답으로 구성</p>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="label">공고 원문</div>
+      <div class="card">
+        <div class="hd">원문 요건</div>
+        <div class="bd">경력 3년, React 개발,<br>Git 협업 경험이 있는 분</div>
+      </div>
+    </div>
+
+    <div class="mid">
+      <svg width="70" height="24" viewBox="0 0 70 24"><path d="M0 9h50V0l20 12-20 12v-9H0z" fill="#FF9900"/></svg>
+      <div class="engine">
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <rect width="150" height="150" rx="24" fill="#232F3E"/>
+          <path d="M66 36c-14 0-22 10-22 20-8 3-12 10-12 18s4 15 12 18c0 10 8 20 22 20z" fill="none" stroke="#FF9900" stroke-width="7" stroke-linejoin="round"/>
+          <path d="M66 36v76" stroke="#FF9900" stroke-width="7"/>
+          <path d="M66 52h22l10-10M66 74h40M66 96h22l10 10" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="104" cy="38" r="7" fill="#fff"/><circle cx="114" cy="74" r="7" fill="#fff"/><circle cx="104" cy="110" r="7" fill="#fff"/>
+        </svg>
+        <div class="name">Bedrock</div>
+        <div class="does">문맥 해석<br>질문 재구성</div>
+      </div>
+      <svg width="70" height="24" viewBox="0 0 70 24"><path d="M0 9h50V0l20 12-20 12v-9H0z" fill="#FF9900"/></svg>
+    </div>
+
+    <div class="col">
+      <div class="label">표시용 문답 구성</div>
+      <div class="card out">
+        <div class="hd">원문 연결 조건별 질문</div>
+        <div class="bd">
+          <div>경력 조건을 충족하나요?</div>
+          <div>React 개발 경험이 있나요?</div>
+          <div>Git 협업 경험이 있나요?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

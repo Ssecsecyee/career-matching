@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>ES 벡터DB</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#232F3E;--ink2:#131A22;--orange:#FF9900;--orange2:#EC7211;--blue:#146EB4;--teal:#00A1C9;--line:#D5DBDB;--sub:#545B64;--soft:#F2F3F3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff;font-family:"Noto Sans KR",sans-serif;color:#000;word-break:keep-all}
+  .slide{width:1600px;height:900px;position:relative;overflow:hidden;background:#fff}
+  .top{padding:56px 40px 0}
+  .top h1{font-size:56px;font-weight:700;letter-spacing:1px}
+  .top h1 .dot{display:inline-block;width:20px;height:20px;background:var(--orange);margin-left:8px;vertical-align:-4px}
+  .top p{margin-top:18px;font-size:30px;color:var(--sub)}
+  .row{display:flex;gap:40px;padding:40px 40px 0}
+  .card{flex:1;border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#fff;height:570px;display:flex;flex-direction:column}
+  .card .hd{background:var(--ink);color:#fff;font-size:26px;font-weight:900;padding:14px 24px;display:flex;align-items:center;gap:12px}
+  .card .hd .n{background:var(--orange);color:var(--ink2);border-radius:16px;padding:0 12px;font-size:22px}
+  .foot{margin:auto 24px 22px;padding:14px 18px;border-radius:12px;background:var(--soft);font-size:24px;font-weight:700;color:var(--ink2)}
+  .foot em{font-style:normal;color:var(--orange2)}
+  text{font-family:"Noto Sans KR",sans-serif;font-weight:700}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="top">
+    <h1>Elasticsearch의 벡터DB 관리 기능<span class="dot"></span></h1>
+    <p>기존 검색 엔진에서 섹션 벡터를 저장·관리하고 유사 후보를 탐색</p>
+  </div>
+  <div class="row">
+    <!-- 왼쪽: 차트 -->
+    <div class="card">
+      <div class="hd"><span class="n">1</span>동의어 효과: 이전 개발 평가</div>
+      <svg width="700" height="390" viewBox="0 0 700 390" style="margin:16px auto 0;display:block">
+        <!-- base y 330, top 80/80 at y 70 => 260px for 80 -->
+        <g stroke="#E3E6E6" stroke-width="1.5">
+          <line x1="90" y1="330" x2="680" y2="330" stroke="#879596" stroke-width="2.5"/>
+          <line x1="90" y1="265" x2="680" y2="265"/><line x1="90" y1="200" x2="680" y2="200"/><line x1="90" y1="135" x2="680" y2="135"/><line x1="90" y1="70" x2="680" y2="70"/>
+        </g>
+        <g font-size="16" fill="#545B64" text-anchor="end"><text x="78" y="335">0</text><text x="78" y="270">20</text><text x="78" y="205">40</text><text x="78" y="140">60</text><text x="78" y="75">80</text></g>
+        <!-- 72 => h 234, y 96 -->
+        <rect x="130" y="96" width="130" height="234" rx="4" fill="#879596"/>
+        <rect x="320" y="96" width="130" height="234" rx="4" fill="#232F3E"/>
+        <rect x="510" y="70" width="130" height="260" rx="4" fill="#FF9900"/>
+        <text x="195" y="84" text-anchor="middle" font-size="30" font-weight="900" fill="#131A22">72 / 80</text>
+        <text x="385" y="84" text-anchor="middle" font-size="30" font-weight="900" fill="#131A22">72 / 80</text>
+        <text x="575" y="58" text-anchor="middle" font-size="30" font-weight="900" fill="#EC7211">80 / 80</text>
+        <text x="195" y="364" text-anchor="middle" font-size="22" fill="#131A22">SQL 기본</text>
+        <text x="385" y="364" text-anchor="middle" font-size="22" fill="#131A22">ES 기본</text>
+        <text x="575" y="364" text-anchor="middle" font-size="22" fill="#131A22">ES + 동의어 사전</text>
+      </svg>
+      <div class="foot">동일 데이터·정답 기준에서 비교 → <em>동의어 사전 적용 시 80/80</em></div>
+    </div>
+
+    <!-- 오른쪽: 구조 -->
+    <div class="card">
+      <div class="hd"><span class="n">2</span>벡터와 원문 식별자를 함께 색인</div>
+      <svg width="700" height="340" viewBox="0 0 700 340" style="margin:24px auto 0;display:block">
+        <!-- 문서들 -->
+        <g>
+          <rect x="20" y="30" width="90" height="110" rx="10" fill="#fff" stroke="#232F3E" stroke-width="4"/>
+          <rect x="20" y="30" width="90" height="22" rx="10" fill="#232F3E"/><text x="65" y="47" text-anchor="middle" font-size="13" fill="#FF9900">자격요건</text>
+          <rect x="34" y="66" width="62" height="7" rx="3" fill="#D5DBDB"/><rect x="34" y="82" width="52" height="7" rx="3" fill="#D5DBDB"/><rect x="34" y="98" width="58" height="7" rx="3" fill="#D5DBDB"/><rect x="34" y="114" width="44" height="7" rx="3" fill="#D5DBDB"/>
+          <rect x="125" y="30" width="90" height="110" rx="10" fill="#fff" stroke="#146EB4" stroke-width="4"/>
+          <rect x="125" y="30" width="90" height="22" rx="10" fill="#146EB4"/><text x="170" y="47" text-anchor="middle" font-size="13" fill="#fff">우대요건</text>
+          <rect x="139" y="66" width="62" height="7" rx="3" fill="#D5DBDB"/><rect x="139" y="82" width="52" height="7" rx="3" fill="#D5DBDB"/><rect x="139" y="98" width="58" height="7" rx="3" fill="#D5DBDB"/><rect x="139" y="114" width="44" height="7" rx="3" fill="#D5DBDB"/>
+          <rect x="70" y="190" width="100" height="110" rx="10" fill="#fff" stroke="#879596" stroke-width="4"/>
+          <circle cx="98" cy="222" r="11" fill="#232F3E"/><path d="M82 246 a16 13 0 0 1 32 0z" fill="#232F3E"/>
+          <rect x="122" y="216" width="36" height="7" rx="3" fill="#D5DBDB"/><rect x="122" y="232" width="30" height="7" rx="3" fill="#D5DBDB"/>
+          <rect x="84" y="262" width="72" height="7" rx="3" fill="#D5DBDB"/><rect x="84" y="278" width="58" height="7" rx="3" fill="#D5DBDB"/>
+          <text x="120" y="324" text-anchor="middle" font-size="14" fill="#545B64">원문 식별자</text>
+        </g>
+        <!-- 연결선 -->
+        <path d="M65 140 v28 h205 M170 140 v28 M170 245 h60 v-77" fill="none" stroke="#FF9900" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M262 160 l12 8 -12 8" fill="none" stroke="#FF9900" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- 벡터 DB -->
+        <g transform="translate(285 40)">
+          <path d="M0 30v200c0 18 50 30 110 30s110-12 110-30V30" fill="#232F3E"/>
+          <ellipse cx="110" cy="30" rx="110" ry="28" fill="#37475A"/>
+          <path d="M0 105c0 18 50 30 110 30s110-12 110-30M0 175c0 18 50 30 110 30s110-12 110-30" fill="none" stroke="#FF9900" stroke-width="5"/>
+          <g stroke="#879596" stroke-width="2">
+            <line x1="40" y1="80" x2="90" y2="65"/><line x1="90" y1="65" x2="150" y2="85"/><line x1="150" y1="85" x2="185" y2="70"/><line x1="90" y1="65" x2="110" y2="115"/>
+            <line x1="45" y1="150" x2="100" y2="160"/><line x1="100" y1="160" x2="160" y2="145"/><line x1="160" y1="145" x2="180" y2="190"/><line x1="100" y1="160" x2="70" y2="215"/><line x1="70" y1="215" x2="140" y2="225"/>
+          </g>
+          <g fill="#FF9900"><circle cx="40" cy="80" r="6"/><circle cx="90" cy="65" r="6"/><circle cx="150" cy="85" r="6"/><circle cx="185" cy="70" r="6"/><circle cx="110" cy="115" r="6"/><circle cx="45" cy="150" r="6"/><circle cx="100" cy="160" r="6"/><circle cx="160" cy="145" r="6"/><circle cx="180" cy="190" r="6"/><circle cx="70" cy="215" r="6"/><circle cx="140" cy="225" r="6"/></g>
+          <text x="110" y="36" text-anchor="middle" font-size="16" fill="#fff">Elasticsearch</text>
+        </g>
+        <!-- 검색 -->
+        <path d="M512 170 h22" stroke="#FF9900" stroke-width="5"/><path d="M528 162 l10 8 -10 8" fill="none" stroke="#FF9900" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="568" cy="160" r="24" fill="#fff" stroke="#146EB4" stroke-width="8"/>
+        <path d="M585 177 l16 16" stroke="#146EB4" stroke-width="9" stroke-linecap="round"/>
+        <!-- 결과 -->
+        <path d="M600 160 h16 M616 80 v170 M616 80 h14 M616 165 h14 M616 250 h14" fill="none" stroke="#146EB4" stroke-width="4"/>
+        <g>
+          <rect x="632" y="50" width="56" height="62" rx="8" fill="#fff" stroke="#232F3E" stroke-width="3.5"/><rect x="642" y="66" width="36" height="5" rx="2" fill="#879596"/><rect x="642" y="78" width="30" height="5" rx="2" fill="#879596"/><rect x="642" y="90" width="34" height="5" rx="2" fill="#879596"/>
+          <rect x="632" y="134" width="56" height="62" rx="8" fill="#fff" stroke="#232F3E" stroke-width="3.5"/><rect x="642" y="150" width="36" height="5" rx="2" fill="#879596"/><rect x="642" y="162" width="30" height="5" rx="2" fill="#879596"/><rect x="642" y="174" width="34" height="5" rx="2" fill="#879596"/>
+          <rect x="632" y="218" width="56" height="62" rx="8" fill="#fff" stroke="#232F3E" stroke-width="3.5"/><rect x="642" y="234" width="36" height="5" rx="2" fill="#879596"/><rect x="642" y="246" width="30" height="5" rx="2" fill="#879596"/><rect x="642" y="258" width="34" height="5" rx="2" fill="#879596"/>
+          <text x="660" y="304" text-anchor="middle" font-size="14" fill="#545B64">유사 후보</text>
+        </g>
+      </svg>
+      <div class="foot" style="margin-top:auto">자격요건·우대요건별 벡터 저장<br><span style="font-size:20px;color:#545B64">지원조건 충족 여부는 <em>원문 문답</em>으로 확인</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

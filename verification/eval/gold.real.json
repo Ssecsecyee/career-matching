@@ -1,0 +1,201 @@
+{
+  "_comment": "실제 공고 정답셋. AI(Claude)가 원문만 읽고 쓴 초안이며 사용자가 공고별로 검토해 2026-11-08 승인했다(연습용 dev set: 규칙·프롬프트를 이 22건으로 다듬었으므로 최종 성능 보고에는 쓰지 않는다). 기준은 docs/eval/labeling-guide.md. 키가 _로 시작하는 항목은 비고라 평가에 쓰지 않는다. 사전에 없는 기술도 원문대로 적는다(파이프라인은 못 찾으므로 재현율에 반영).",
+  "jobs": "data/real/jobs.json",
+  "status": "approved",
+  "labeled_by": "AI draft 2026-11-07, reviewed posting by posting and approved by 황승현 2026-11-08",
+  "guideline": "docs/eval/labeling-guide.md",
+  "labels": {
+    "techmap-663b7cd15f92": {
+      "_about": "자이트솔루션 · 트레이딩 플랫폼 백엔드 (jobkorea, has_sections)",
+      "_note": "'2. 필수스킬' 줄이 필수, '3. 주요기술 (우대)' 아래 3줄과 '4. 우대사항'이 우대. 'API'는 일반어라 제외. 'LGTM Stack(Loki, Tempo, Mimir)'의 G = Grafana도 우대(사용자 결정)",
+      "required": ["Java", "Spring", "MySQL", "Git"],
+      "preferred": ["AWS", "Amazon EKS", "ArgoCD", "CI/CD", "Kotlin", "RDBMS", "MongoDB", "Redis", "OpenSearch", "Kafka", "Loki", "Grafana", "Tempo", "Mimir", "CloudWatch", "WebSocket", "SSE"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-da39a3ee5e6b": {
+      "_about": "당근마켓 · Software Engineer, Backend (greenhouse, has_sections)",
+      "_note": "자격요건은 CS 기본기·AI 도구 등 일반 역량뿐이라 필수 0. '참고해 주세요'의 언어 목록은 '특정 언어 경험을 요구하지 않음' → 필수 아님을 밝힌 팀 스택이라 우대(결정 2026-11-07). 자격요건에 기술 요구가 없음(일반 역량만) → '기술 조건이 유한 공고'로 따로 안내(사용자 2026-11-08, D-011)",
+      "required": [],
+      "preferred": ["MSA", "REST API", "gRPC", "Kafka", "LLM", "Kotlin", "Java", "Go", "Node.js", "Python"],
+      "responsibility": [],
+      "mention": [],
+      "_flags": ["open_requirements"]
+    },
+    "techmap-9f32a351d255": {
+      "_about": "마린소프트 · 백엔드(JSP/JAVA기반) (saramin, has_sections)",
+      "_note": "우대의 Spring Batch/Security는 Spring(이미 필수). 제목 '백엔드(JSP/JAVA기반)'의 JSP는 필수(제목 기술 = 최우선, 사용자 결정 2026-11-07). 'MSSQL, MySQL 등 관계형 데이터베이스'는 예시 나열(OR)",
+      "_or_groups": [["MS SQL Server", "MySQL"]],
+      "required": ["Java", "Spring", "REST API", "MS SQL Server", "MySQL", "RDBMS", "SQL", "JPA", "Git", "JSP"],
+      "preferred": ["Python", "Linux"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-8e9dbc98ebd2": {
+      "_about": "코데이터솔루션 · GIVC 백엔드 (saramin, has_sections)",
+      "_note": "'Node.js(Express)'는 Node.js + Express.js. 'SQL Injection 방어'는 보안 개념이라 SQL로 따로 세지 않음(SQL은 이미 필수). 'MariaDB·MySQL 복잡 SQL 작성'은 사실상 같은 제품 둘이라 택 1",
+      "_or_groups": [["MariaDB", "MySQL"]],
+      "required": ["Node.js", "Express.js", "MariaDB", "MySQL", "SQL"],
+      "preferred": ["D3.js", "Plotly", "Linux"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-ba0a2fdcf95f": {
+      "_about": "럭스로보 · 백엔드 개발자 경력직 (saramin, has_sections; 잡코리아 중복 합침)",
+      "_note": "업무의 'RDS/SQS/Redis'에서 Redis는 우대로 올라감. 우대의 'On-premise K8s'는 Kubernetes(이미 필수). 'RDBMS(MySQL/PostgreSQL)'는 OR",
+      "_or_groups": [["MySQL", "PostgreSQL"], ["SQS", "Kafka", "RabbitMQ"]],
+      "required": ["Go", "AWS", "Docker", "Amazon EKS", "Kubernetes", "RDBMS", "MySQL", "PostgreSQL", "GraphQL", "RDS", "MSA", "CI/CD"],
+      "preferred": ["SQS", "Kafka", "RabbitMQ", "Redis", "OpenSearch", "Prometheus", "Grafana"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-1eb2bedfe903": {
+      "_about": "테트레이션랩 · 반도체 공정 시스템 JAVA 백엔드 (saramin, has_sections)",
+      "_note": "'RDB 설계 및 SQL'→RDBMS, SQL. '클라우드 K8S환경'→Kubernetes 우대. 복지의 'Windows 10 Pro'는 지급 장비라 제외",
+      "required": ["Java", "RDBMS", "SQL", "REST API"],
+      "preferred": ["Spring", "Git", "Kubernetes"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-f877d77f5e4d": {
+      "_about": "보나네트웍스 · ERP개발팀 프론트/백엔드 팀장 (saramin, no_sections)",
+      "_note": "제목이 줄 끝에 붙어 있지만 담당업무→지원자격→우대사항 블록을 읽을 수 있음. 'GitHUB, GitLab'→Git. 'Apache / Tomcat'은 Apache(httpd), Tomcat. 'My-SQL'은 업무 블록에만 있어 업무",
+      "required": ["Xplatform", "Nexacro", "JavaScript", "Java", "Oracle DB", "PL/SQL", "SQL", "Git", "Jenkins", "CI/CD", "Jira", "Slack", "MySQL"],
+      "preferred": ["PowerBuilder", "FSP", "UbiReport", "Linux", "Apache", "Tomcat"],
+      "responsibility": [],
+      "mention": [],
+      "_or_groups": [["Jira", "Slack"]]
+    },
+    "techmap-e8de7089db5c": {
+      "_about": "네비웍스 · AI 서비스 백엔드 (saramin, has_sections)",
+      "_note": "'NestJS 또는 Express'→둘 다 필수(OR). 'React/Vue'→둘 다 필수(OR). '사용 기술' 줄(Linux Python PyTorch TensorFlow DeepLearning)은 기술 태그 줄이라 필수(2026-11-07 결정 1). 'AI/인공지능'은 제외. 'Azure 클라우드 서비스'→Azure는 업무",
+      "_or_groups": [["React", "Vue"], ["NestJS", "Express.js"]],
+      "required": ["Python", "Linux", "React", "Vue", "NestJS", "Express.js", "REST API", "TensorFlow", "PyTorch", "딥러닝", "Azure", "LLM"],
+      "preferred": ["MSA", "Docker"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-874a0f4e2630": {
+      "_about": "헤리트 · 백엔드 개발자 (Java/Kotlin) (saramin, no_sections)",
+      "_note": "'필요역량' 블록이 자격요건. 'MCP(Model Context Protocol) 서버·클라이언트 구현'은 우대. '기술 스택' 블록(PostgreSQL, MariaDB, Redis, Kafka, Docker)은 팀 스택 소개라 우대(결정 2026-11-07). 'Modbus, MQTT, TCP/IP 소켓 통신 등 통신 프로토콜': Modbus·MQTT는 택 1, TCP/IP는 둘의 바탕(선후 관계)이라 묶지 않음(AI 판단, 확인 대기 2026-11-08)",
+      "required": ["Java", "Kotlin", "Spring", "RDBMS"],
+      "preferred": ["OAuth", "REST API", "OpenAPI", "Modbus", "MQTT", "TCP/IP", "MCP", "PostgreSQL", "MariaDB", "Redis", "Kafka", "Docker"],
+      "responsibility": [],
+      "mention": [],
+      "_or_groups": [["Modbus", "MQTT"]]
+    },
+    "techmap-ead30126cd3e": {
+      "_about": "루트빛 · 백엔드 중급 프리랜서 (jobkorea, has_sections)",
+      "_note": "'필수 : 자바, 파이썬 소스 코드 이해 가능'→Java, Python 필수. 우대의 '그라파나, 프로메테우스, 하둡파일시스템'→Grafana, Prometheus, Hadoop. 핵심역량(성향)은 제외. 필수 기술 2개, '소스 코드 이해 가능 / 난이도 하 / 배우면서 업무 가능' → 기술 조건이 유한 공고(D-011, 사용자 기준 '필수 2개 이하' 2026-11-08)",
+      "required": ["Java", "Python"],
+      "preferred": ["Grafana", "Prometheus", "Hadoop"],
+      "responsibility": [],
+      "mention": [],
+      "_flags": ["open_requirements"]
+    },
+    "techmap-fd8b5c10eeb1": {
+      "_about": "에이아이소프트테크 · 공공기관 상주 백엔드 서버 (jobkorea, has_sections)",
+      "_note": "'스킬' 줄(JAVA, RDBMS, WAS, Linux, Jboss)은 필수(결정 1). 'RDBMS(MySQL·MariaDB·Oracle 등)'→넷 다 필수(예시 나열, OR). 'JSON'은 제외 목록",
+      "_or_groups": [["MySQL", "MariaDB", "Oracle DB"]],
+      "required": ["Java", "Spring", "REST API", "RDBMS", "MySQL", "MariaDB", "Oracle DB", "SQL", "Linux", "WAS", "JBoss"],
+      "preferred": ["Android"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-3f28bdd376d5": {
+      "_about": "현대오토에버 · Backend Developer - Robot/Smart Factory (jobkorea, has_sections)",
+      "_note": "'Java, Kotlin, Golang 등 서버 언어 중 1개 이상'→셋 다 필수(OR, 결정 3). 'REST API 또는 gRPC'→둘 다 필수(OR). 'Docker, Kubernetes 등 컨테이너 기술'→둘 다 필수, 선후 관계(Docker→Kubernetes)라 택 1로 묶지 않음(사용자 결정 2026-11-07). 업무의 'RDB/NoSQL'은 업무",
+      "_or_groups": [["Java", "Kotlin", "Go"], ["REST API", "gRPC"], ["MySQL", "PostgreSQL"]],
+      "required": ["Java", "Kotlin", "Go", "SQL", "MySQL", "PostgreSQL", "REST API", "gRPC", "Docker", "Kubernetes", "RDBMS", "NoSQL"],
+      "preferred": ["Redis", "Kafka", "MQTT"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-3e13f0804d95": {
+      "_about": "제이투이 · [JAVA SM 서울역] 웹서비스 백엔드 (jobkorea, has_sections)",
+      "_note": "'필요스킬:' 블록이 자격요건. 'Git/GitLab'→Git. 회사 소개의 'AWS, ITO사업'의 AWS는 언급",
+      "required": ["Java", "HTML", "JavaScript", "RDBMS", "SQL", "Git", "CI/CD"],
+      "preferred": ["Spring", "React"],
+      "responsibility": [],
+      "mention": ["AWS"]
+    },
+    "techmap-36ba5468aec7": {
+      "_about": "제이투이 · [JAVA/VUE SI 을지로] 은행 프론트/백엔드 (jobkorea, no_sections)",
+      "_note": "'필요기술 :' 블록이 자격요건. 프론트 줄의 VUE도 필수. 회사 소개의 AWS는 언급. 프론트·백엔드 두 자리 공고: Vue는 프론트 자리 필수, Java는 두 자리 모두 필수(사용자 2026-11-08)",
+      "required": ["Java", "Vue"],
+      "preferred": [],
+      "responsibility": [],
+      "mention": ["AWS"],
+      "_role_scope": {"Vue": ["frontend"]}
+    },
+    "techmap-31c08a253257": {
+      "_about": "인투씨엔에스 · B2C 백엔드 (Java/Spring Boot) (jobkorea, has_sections)",
+      "_note": "'스킬' 줄(Hadoop, Kafka, Kotlin, MariaDB, MongoDB, PostgreSQL, Redis, Spring Boot, apache spark, Java 11)은 필수(결정 1). 'RDBMS(MariaDB, MySQL 등)'은 예시 나열(OR)",
+      "_or_groups": [["MariaDB", "MySQL"]],
+      "required": ["Java", "Spring", "RDBMS", "MariaDB", "MySQL", "NoSQL", "REST API", "Git", "Linux", "Docker", "Hadoop", "Kafka", "Kotlin", "MongoDB", "PostgreSQL", "Redis", "Spark"],
+      "preferred": ["MSA"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-65d80f93219a": {
+      "_about": "솔앤드 · 풀스택 개발자 (jobkorea, has_sections)",
+      "_note": "자격요건이 Frontend/Backend/Infra로 나뉨. 'AWS EC2, RDS'→AWS, EC2, RDS 필수. 우대의 MUI, React Hook Form, PM2, Nginx, JSP는 사전에 없음. 풀스택 한 자리라 Frontend/Backend/Infra 영역을 나누지 않고 모두 필수(사용자 2026-11-08)",
+      "required": ["React", "Next.js", "TypeScript", "Java", "Spring", "JPA", "QueryDSL", "MSA", "AWS", "EC2", "RDS"],
+      "preferred": ["MUI", "React Hook Form", "JSP", "MyBatis", "PM2", "Nginx"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-c74f34785742": {
+      "_about": "바이오리서치에이아이 · Backend Engineer (Kotlin/Spring) (jobkorea, no_sections)",
+      "_or_groups": [["Java", "Kotlin"]],
+      "_note": "'Java 또는 Kotlin'→둘 다 필수(OR). '기술스택' 블록(JPA, QueryDSL, MariaDB, ECS, Jenkins, Jira, Confluence, CI/CD)은 팀 스택 소개라 우대(결정 2026-11-07). 'OpenFeign'은 업무. 채용 페이지 링크의 '(Notion)'은 기술 요구가 아니라 적지 않음",
+      "required": ["Java", "Kotlin", "Spring", "REST API", "RDBMS", "SQL", "Git", "OpenFeign"],
+      "preferred": ["Redis", "AWS", "Docker", "JPA", "QueryDSL", "MariaDB", "ECS", "Jenkins", "Jira", "Confluence", "CI/CD", "MSA", "Kafka"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-c3435ce8a34b": {
+      "_about": "adstrong · Senior Backend Software Engineer, Rust (linkedin, en, no_sections)",
+      "_or_groups": [["Rust", "C", "C++"], ["Kafka", ["AWS", "SQS", "SNS"]]],
+      "_note": "'Your Profile'이 자격요건. 'Rust experience, or … C or C++ experience is a strong alternative'→Rust, C, C++ 필수(OR). 'e.g. Kafka, AWS SQS/SNS'는 예시지만 자격요건 수준. 'Our stack: Rust (plus some Python) … TypeScript / Next.js … a plus but not required'→팀 스택이라 우대(결정 2026-11-07). Python은 'Your Role'(업무)과 스택에 나와 우대. 'AWS SQS/SNS'는 AWS도 필수로 적음(회사명이 붙은 제품은 그 회사 플랫폼도 요구로 봄). 이벤트 기반 묶음은 'Kafka 또는 AWS(SQS/SNS)' 두 갈래(사용자 2026-11-08)",
+      "required": ["Rust", "C", "C++", "Kafka", "AWS", "SQS", "SNS"],
+      "preferred": ["TypeScript", "Next.js", "Python"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-87ae827252e9": {
+      "_about": "에스씨솔루션글로벌 · 클라우드 및 백엔드(PHP) (jobkorea, has_sections)",
+      "_note": "섹션 제목 '우대사항 및 필요기술' → '필요기술'이 들어 있으면 필수(결정 2). 'NCP'는 네이버 클라우드",
+      "required": ["PHP", "MySQL", "Vue", "NCP", "AWS", "Linux"],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-117023288f0b": {
+      "_about": "사랑모아금융서비스 · IT팀 백엔드 개발자 (jobkorea, no_sections, 요약형)",
+      "_note": "'우대조건:' 줄의 JavaScript, MYSQL, java, oracle만 기술. '스킬: 네트워크관리, 웹개발, 그룹웨어'는 일반어. 자격요건 없이 우대조건에만 기술이 있는 요약형 공고 → 우대 기술을 필수로(사용자 2026-11-08, 라벨링 기준 9)",
+      "required": ["JavaScript", "MySQL", "Java", "Oracle DB"],
+      "preferred": [],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-7d7bd2f5c45b": {
+      "_about": "청림인베스트 · 개발팀 백엔드 (jobkorea, no_sections)",
+      "_note": "담당업무 문단의 Spring Boot, REST API, JPA, JOOQ, JWT, OAuth2는 업무. '인프라 경험 AWS, Docker'는 자격요건 블록. 우대의 '복잡한 쿼리 최적화'는 SQL을 명시하지 않아 제외",
+      "required": ["Java", "AWS", "Docker", "Spring", "REST API", "JPA", "jOOQ", "JWT", "OAuth"],
+      "preferred": ["TDD", "CI/CD", "Notion"],
+      "responsibility": [],
+      "mention": []
+    },
+    "techmap-08af94b5cb48": {
+      "_about": "폴리큐브 · 웹/앱 프런트 및 백엔드 (jobkorea, has_sections)",
+      "_note": "자격요건·우대에 기술이 없고 '스킬' 줄만 있음 → 스킬 줄은 필수(결정 1). 'React Naitve'는 React Native 오타. 제목은 '프런트 및 백엔드', 모집 2명 → 자리 둘. 스킬 줄은 거의 백엔드 기술이라 프론트 자리의 요구는 알 수 없음 → 백엔드 자리만 통계에 쓰고 프론트 자리는 통계에서 뺌(사용자 2026-11-08)",
+      "required": ["Java", "Kotlin", "React", "React Native", "MS SQL Server", "MyBatis", "MySQL", "Spring", "Linux"],
+      "preferred": [],
+      "responsibility": [],
+      "mention": [],
+      "_role_scope": {"React": ["frontend"], "React Native": ["frontend"]},
+      "_excluded_roles": ["frontend"]
+    }
+  }
+}
